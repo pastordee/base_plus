@@ -25,11 +25,11 @@ import 'package:flutter/material.dart'
         MaterialType,
         RectCallback,
         TabBar,
-        TabBarTheme,
         Theme,
         ThemeData;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/tab_bar_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/cupertino.dart'
@@ -1063,7 +1063,7 @@ class _PersistentNavigationBar extends StatelessWidget {
         cupertinoOverrideTheme: CupertinoTheme.of(context),
       );
       if (bottom is TabBar) {
-        final TabBarTheme tabBarTheme = theme.tabBarTheme;
+        final TabBarThemeData tabBarTheme = theme.tabBarTheme;
         theme = theme.copyWith(
           tabBarTheme: tabBarTheme.copyWith(labelColor: navTitleTextStyle.color),
         );
