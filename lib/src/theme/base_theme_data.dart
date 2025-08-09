@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoApp, CupertinoThemeData;
 import 'package:flutter/foundation.dart' show Diagnosticable, immutable;
-import 'package:flutter/material.dart' show Brightness, Color, MaterialApp, ThemeData;
+import 'package:flutter/material.dart' show Brightness, Color, Colors, ColorScheme, MaterialApp, ThemeData;
 
 import '../app/base_app.dart';
 import '../appbar/base_app_bar.dart';
@@ -23,6 +23,7 @@ class BaseThemeData with Diagnosticable {
     ThemeData? materialHighContrastTheme,
     ThemeData? materialHighContrastDarkTheme,
     CupertinoThemeData? cupertinoTheme,
+    bool useMaterial3 = true,
     bool routeFullscreenGackGesture = false,
     Color? sectionDividerColor,
     Color? tileBackgroundColor,
@@ -32,6 +33,28 @@ class BaseThemeData with Diagnosticable {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
+    
+    // Create default Material 3 themes if not provided and useMaterial3 is true
+    if (useMaterial3 && materialTheme == null) {
+      materialTheme = ThemeData(
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ),
+      );
+    }
+    
+    if (useMaterial3 && materialDarkTheme == null) {
+      materialDarkTheme = ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+      );
+    }
+    
     return BaseThemeData.raw(
       brightness: brightness,
       appBarHeight: appBarHeight,
@@ -42,6 +65,7 @@ class BaseThemeData with Diagnosticable {
       materialHighContrastTheme: materialHighContrastTheme,
       materialHighContrastDarkTheme: materialHighContrastDarkTheme,
       cupertinoTheme: cupertinoTheme,
+      useMaterial3: useMaterial3,
       routeFullscreenGackGesture: routeFullscreenGackGesture,
       sectionDividerColor: sectionDividerColor ?? (isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000)),
       tileBackgroundColor: tileBackgroundColor,
@@ -60,6 +84,7 @@ class BaseThemeData with Diagnosticable {
     this.materialHighContrastTheme,
     this.materialHighContrastDarkTheme,
     this.cupertinoTheme,
+    this.useMaterial3 = true,
     this.routeFullscreenGackGesture = false,
     this.sectionDividerColor,
     this.tileBackgroundColor,
@@ -116,6 +141,10 @@ class BaseThemeData with Diagnosticable {
   ///
   /// Cupertino模式下为null
   final CupertinoThemeData? cupertinoTheme;
+
+  /// Enable Material 3 design system
+  /// 启用 Material 3 设计系统
+  final bool useMaterial3;
 
   /// BaseSection's divider's color
   /// BaseSection 的diviver的颜色

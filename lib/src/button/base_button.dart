@@ -10,13 +10,13 @@ import '../base_stateless_widget.dart';
 
 /// BaseButton
 /// use CupertinoButton or CupertinoButton.filled by cupertino
-/// *** use cupertino = { forceUseMaterial: true } force use MaterialButton or textButtonButton or OutlineButton or elevatedButtonButton on cuperitno.
-/// use MaterialButton or TextButton or outlinedButtonButton or ElevatedButton by material
+/// *** use cupertino = { forceUseMaterial: true } force use Material buttons (FilledButton, TextButton, OutlinedButton, ElevatedButton) on cupertino.
+/// use FilledButton, TextButton, OutlinedButton, ElevatedButton (Material 3) by material
 /// *** use material = { forceUseCupertino: true } force use CupertinoButton or CupertinoButton.filled on material.
 ///
-/// CupertinoButton: 2021.01.14
-/// MaterialButton: 2020.11.03
-/// modify 2021.06.25 by flutter 2.2.2
+/// CupertinoButton: Updated for iOS 16+ design patterns
+/// Material Buttons: Updated for Material 3 (Material You)
+/// Updated: 2025.08.09 for Flutter 3.10+ and modern design systems
 class BaseButton extends BaseStatelessWidget {
   const BaseButton({
     Key? key,
@@ -63,6 +63,7 @@ class BaseButton extends BaseStatelessWidget {
     this.textButton = false,
     this.outlinedButton = false,
     this.elevatedButton = false,
+    this.filledTonalButton = false,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -93,6 +94,7 @@ class BaseButton extends BaseStatelessWidget {
     Widget icon,
     Widget label,
     bool filledButton,
+    bool filledTonalButton,
     bool textButton,
     bool outlinedButton,
     bool elevatedButton,
@@ -145,6 +147,10 @@ class BaseButton extends BaseStatelessWidget {
   /// [CupertinoButton.filled]
   /// use CupertinoButton.filled, will ignore the color, use primary color.
   final bool filledButton;
+
+  /// Material 3 FilledButton.tonal variant
+  /// use FilledButton.tonal for Material 3 design
+  final bool filledTonalButton;
 
   /// *** cupertino properties ened ***
 
@@ -294,12 +300,12 @@ class BaseButton extends BaseStatelessWidget {
 
   /// 最终的构建方法，为了兼容BaseButton.icon
   Widget buildByMaterialWithChild(Widget child) {
+    // Ensure only one button type is selected at a time
+    final List<bool> buttonTypes = [textButton, outlinedButton, elevatedButton, filledButton, filledTonalButton];
+    final int selectedTypes = buttonTypes.where((type) => type).length;
     assert(
-      (!textButton && !outlinedButton && !elevatedButton) ||
-          (textButton && !outlinedButton && !elevatedButton) ||
-          (!textButton && outlinedButton && !elevatedButton) ||
-          (!textButton && !outlinedButton && elevatedButton),
-      'textButton and outline can not be true at the same time.',
+      selectedTypes <= 1,
+      'Only one button type can be true at a time: textButton, outlinedButton, elevatedButton, filledButton, or filledTonalButton.',
     );
     assert(child != null, 'child can\'t be null.');
     final VoidCallback? _onPressed = valueOf('onPressed', onPressed);
@@ -330,6 +336,26 @@ class BaseButton extends BaseStatelessWidget {
       );
     } else if (elevatedButton) {
       return ElevatedButton(
+        onPressed: _onPressed,
+        onLongPress: _onLongPress,
+        style: _style,
+        focusNode: _focusNode,
+        autofocus: _autofocus,
+        clipBehavior: _clipBehavior,
+        child: child,
+      );
+    } else if (filledButton) {
+      return FilledButton(
+        onPressed: _onPressed,
+        onLongPress: _onLongPress,
+        style: _style,
+        focusNode: _focusNode,
+        autofocus: _autofocus,
+        clipBehavior: _clipBehavior,
+        child: child,
+      );
+    } else if (filledTonalButton) {
+      return FilledButton.tonal(
         onPressed: _onPressed,
         onLongPress: _onLongPress,
         style: _style,
@@ -395,6 +421,7 @@ class _BaseButtonWithIcon extends BaseButton {
     this.icon,
     this.label,
     bool filledButton = false,
+    bool filledTonalButton = false,
     bool textButton = false,
     bool outlinedButton = false,
     bool elevatedButton = false,
@@ -416,6 +443,7 @@ class _BaseButtonWithIcon extends BaseButton {
           alignment: alignment,
           textButton: textButton,
           filledButton: filledButton,
+          filledTonalButton: filledTonalButton,
           outlinedButton: outlinedButton,
           elevatedButton: elevatedButton,
           baseParam: baseParam,

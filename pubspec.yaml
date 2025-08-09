@@ -1,17 +1,18 @@
 name: base
-description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia.
-version: 2.2.2+3
+description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
+version: 3.0.0+1
 # author: Nil <2073582423@qq.com>
 homepage: https://github.com/nillnil/flutter_base
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
-  flutter: '>=2.2.2'
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
 
 dependencies:
   flutter:
     sdk: flutter
   vector_math: ^2.0.8
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
