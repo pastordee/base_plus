@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 自定义SplashFactory的Material组件
+/// Custom SplashFactory Material component
 class BaseMaterialWidget extends StatelessWidget {
   BaseMaterialWidget({
     Key? key,
@@ -22,9 +22,9 @@ class BaseMaterialWidget extends StatelessWidget {
             : child,
         super(key: key);
 
-  /// 没有水波纹的自定义material组件
-  /// 适用于cupertino模式中使用material组件
-  /// 会有200延迟高亮
+  /// Custom material component without ripple effects
+  /// Suitable for using material components in cupertino mode
+  /// Will have 200ms delay highlighting
   BaseMaterialWidget.withoutSplash({
     Key? key,
     required Widget child,
