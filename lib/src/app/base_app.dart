@@ -218,7 +218,7 @@ class BaseApp extends BaseStatelessWidget {
   ///
   /// forbidden ripple effect on cupertino mode
   ///
-  /// 在cupertino模式下是否禁用水波纹效果
+  /// Whether to disable ripple effects in cupertino mode
   final bool withoutSplashOnCupertino;
 
   /// *** cupertino properties end ***
@@ -281,12 +281,12 @@ class BaseApp extends BaseStatelessWidget {
 
   @override
   void beforeBuild(BuildContext context) {
-    /// 设置是否禁用水波纹
+    /// Set whether to disable ripple effects
     if (baseTheme != null) {
       config.withoutSplashOnCupertino = baseTheme!.withoutSplashOnCupertino;
     }
 
-    /// 设置平台模式
+    /// Set platform mode
     setBasePlatformMode(
       basePlatformMode: baseTheme?.platformMode ?? const BasePlatformMode(),
     );
@@ -295,6 +295,17 @@ class BaseApp extends BaseStatelessWidget {
   @override
   Widget buildByCupertino(BuildContext context) {
     final BaseThemeData _baseTheme = valueOf('baseTheme', baseTheme) ?? BaseThemeData();
+    final bool _useGetX = valueOf('useGetX', useGetX);
+    
+    // If GetX is enabled, use GetMaterialApp even on iOS
+    if (_useGetX) {
+      return BaseTheme(
+        data: _baseTheme,
+        child: _buildGetMaterialApp(_baseTheme),
+      );
+    }
+    
+    // Otherwise use traditional CupertinoApp
     return BaseTheme(
       data: _baseTheme,
       child: CupertinoApp(
@@ -462,7 +473,26 @@ class BaseApp extends BaseStatelessWidget {
       ),
       routingCallback: valueOf('routingCallback', routingCallback),
       defaultTransition: valueOf('defaultTransition', defaultTransition),
-      builder: valueOf('builder', builder),
+      builder: (context, widget) {
+        // Ensure proper text styling to prevent yellow underlines
+        final defaultTextStyle = DefaultTextStyle.of(context);
+        final customWidget = valueOf('builder', builder)?.call(context, widget) ?? widget;
+        
+        // If the default text style has decoration (yellow underline), wrap with proper styling
+        if (defaultTextStyle.style.decoration != null && 
+            defaultTextStyle.style.decoration != TextDecoration.none) {
+          return DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyMedium ?? 
+                   const TextStyle(
+                     decoration: TextDecoration.none,
+                     color: Colors.black87,
+                   ),
+            child: customWidget,
+          );
+        }
+        
+        return customWidget;
+      },
       title: valueOf('title', title),
       onGenerateTitle: valueOf('onGenerateTitle', onGenerateTitle),
       color: valueOf('color', color),

@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 
 import 'base_mixin.dart';
 
-/// 基础无状态组件
-/// cupertino使用buildByCupertino方法构建，material使用buildByMaterial方法构建
-/// *** 参数
-/// 1、cupertino模式：从cupertino里取对应的值，取不到则取公共参数
-/// 2、material模式：从material里取对应的值，取不到则取公共参数
-/// 3、cupertino模式下可以使用 cupertino = { forceUseMaterial: true } 强制使用material模式构建
-///   使用 cupertino = { disabled: true } 禁止构建
-/// 4、material模式下可以使用 material = { forceUseCupertino: true } 强制使用cupertino模式构建
-///   使用 material = { disabled: true } 禁止构建
+/// Base stateless widget
+/// Cupertino mode uses buildByCupertino method, Material mode uses buildByMaterial method
+/// *** Parameters
+/// 1. Cupertino mode: Gets corresponding value from cupertino, falls back to common parameters if not found
+/// 2. Material mode: Gets corresponding value from material, falls back to common parameters if not found
+/// 3. In cupertino mode, you can use cupertino = { forceUseMaterial: true } to force material mode build
+///   Use cupertino = { disabled: true } to disable build
+/// 4. In material mode, you can use material = { forceUseCupertino: true } to force cupertino mode build
+///   Use material = { disabled: true } to disable build
 /// ***
-/// *** Flutter禁用运行时反射，所以取值由子组件各自获取，
-/// *** cupertino模式使用 valueFromCupertino(key, value) 获取，
-/// *** material模式使用 valueOf(key, value) 获取
+/// *** Flutter disables runtime reflection, so value retrieval is handled by each child component,
+/// *** Cupertino mode uses valueFromCupertino(key, value) to get values,
+/// *** Material mode uses valueOf(key, value) to get values
 /// ***
 abstract class BaseStatelessWidget extends StatelessWidget with BaseMixin {
   const BaseStatelessWidget({
@@ -23,7 +23,7 @@ abstract class BaseStatelessWidget extends StatelessWidget with BaseMixin {
     this.baseParam,
   }) : super(key: key);
 
-  /// 个性化参数，先取平台的参数，再取模式的参数
+  /// Personalization parameters, gets platform parameters first, then mode parameters
   final BaseParam? baseParam;
 
   @override

@@ -1,31 +1,41 @@
 # GetX Integration with Flutter Base
 
-Flutter Base now supports **GetX** state management and routing through the `useGetX` parameter in `BaseApp`.
+Flutter Base v3.0.0+1 now supports **GetX** state management and routing through the `useGetX` parameter in `BaseApp`. This integration provides reactive state management while maintaining the library's core strength: adaptive, platform-appropriate UI.
 
 ## 🚀 Quick Setup
 
-### 1. Add GetX Dependency
+### 1. Add Dependencies
 ```yaml
 dependencies:
+  base:
+    git:
+      url: git://github.com/pastordee/flutter_base
+      ref: v3.0.0+1
   get: ^4.6.6
-  base: ^3.0.0
 ```
 
 ### 2. Enable GetX in BaseApp
 ```dart
+import 'package:base/base.dart';
+import 'package:get/get.dart';
+
 BaseApp(
   title: 'My GetX App',
-  useGetX: true,  // Enable GetMaterialApp instead of MaterialApp
+  
+  // Enable GetX functionality
+  useGetX: true,  // This switches to GetMaterialApp
   
   // GetX routing
   getPages: [
     GetPage(name: '/', page: () => HomePage()),
     GetPage(name: '/settings', page: () => SettingsPage()),
+    GetPage(name: '/profile', page: () => ProfilePage()),
   ],
   
   // GetX configuration
   initialRoute: '/',
   defaultTransition: Transition.cupertino,
+  initialBinding: AppBindings(),
   
   // Standard BaseApp features still work
   baseTheme: BaseThemeData(
@@ -39,30 +49,86 @@ BaseApp(
 
 ## 🎯 Features Available
 
-### GetX State Management
+### Enhanced State Management with Loading States
 ```dart
 class CounterController extends GetxController {
   var count = 0.obs;
+  var isLoading = false.obs;
+  
   void increment() => count++;
+  void decrement() => count--;
+  
+  // Async operation with loading state
+  Future<void> asyncIncrement() async {
+    isLoading(true);
+    await Future.delayed(Duration(seconds: 1));
+    count++;
+    isLoading(false);
+  }
+  
+  // Computed property
+  String get countText => count > 10 ? 'High: ${count}' : 'Count: ${count}';
+  
+  @override
+  void onInit() {
+    super.onInit();
+    
+    // GetX Worker - reacts to count changes
+    ever(count, (value) {
+      if (value > 5) {
+        Get.snackbar(
+          'Achievement!', 
+          'You reached $value clicks!',
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    });
+  }
 }
 
-// In your widget
+// In your widget - Advanced reactive UI
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(CounterController());
     
     return BaseScaffold(
+      appBar: BaseAppBar(title: Text('GetX Counter')),
       body: Column(
         children: [
-          // Reactive UI
-          Obx(() => Text('Count: ${controller.count}')),
+          // Reactive computed property
+          Obx(() => Text(
+            controller.countText,
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+              color: controller.count > 10 ? Colors.red : null,
+            ),
+          )),
           
-          // Material 3 button with GetX
-          BaseButton(
-            child: Text('Increment'),
-            filledButton: true,
-            onPressed: controller.increment,
+          // Material 3 buttons with GetX state
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              BaseButton(
+                child: Icon(Icons.remove),
+                filledTonalButton: true,
+                onPressed: controller.decrement,
+              ),
+              
+              // Async button with loading state
+              Obx(() => BaseButton(
+                child: controller.isLoading.value 
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(Icons.add),
+                filledButton: true,
+                onPressed: controller.isLoading.value 
+                  ? null 
+                  : controller.asyncIncrement,
+              )),
+            ],
           ),
         ],
       ),
@@ -178,80 +244,63 @@ BaseApp(
 - Reactive state management with GetX
 - Material 3 design system
 
-### 2. **Unified Routing**
-- GetX navigation across platforms
-- Maintains platform-specific animations
-- Type-safe route definitions
-
 ### 3. **Performance**
 - GetX's lightweight reactivity
 - Flutter Base's efficient platform detection
 - Smart memory management
 
-## 🎯 Best Practices
-
-### 1. **Controller Organization**
-```dart
-// Feature-based controllers
-class HomeController extends GetxController { }
-class SettingsController extends GetxController { }
-class UserController extends GetxController { }
-```
-
-### 2. **Route Structure**
-```dart
-// Organized route definitions
-class AppPages {
-  static const HOME = '/';
-  static const SETTINGS = '/settings';
-  static const PROFILE = '/profile';
-  
-  static final pages = [
-    GetPage(name: HOME, page: () => HomePage()),
-    GetPage(name: SETTINGS, page: () => SettingsPage()),
-    GetPage(name: PROFILE, page: () => ProfilePage()),
-  ];
-}
-```
-
-### 3. **Platform-Aware GetX Usage**
-```dart
-// Use BaseParam for platform-specific GetX behavior
-BaseButton(
-  child: Text('Action'),
-  filledButton: true,
-  onPressed: () {
-    controller.performAction();
-    
-    // Platform-aware feedback
-    if (Platform.isIOS) {
-      // iOS-style feedback
-    } else {
-      Get.snackbar('Done', 'Action completed');
-    }
-  },
-  baseParam: BaseParam(
-    // GetX respects platform overrides
-    cupertino: {'forceUseMaterial': false},
-  ),
-)
-```
+### 4. **Automatic Fixes**
+- **Yellow Underline Fix**: v3.0.0+1 automatically prevents yellow underlines that can occur when using GetX on iOS
+- **Text Styling**: Proper Material theme styling applied automatically
+- **Platform Detection**: Works seamlessly with BaseApp's platform override system
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+### Common Issues & Solutions
 
-1. **GetX not working**: Ensure `useGetX: true` is set
-2. **Routes not found**: Check `getPages` configuration
-3. **Controllers not found**: Verify dependency injection setup
-4. **Platform styling issues**: GetX works with existing BaseParam overrides
+1. **GetX not working**: Ensure `useGetX: true` is set in BaseApp
+2. **Routes not found**: Check `getPages` configuration matches route names
+3. **Controllers not found**: Verify dependency injection in `initialBinding`
+4. **Platform styling issues**: GetX respects existing `BaseParam` overrides
+
+### Yellow Underline Fix (Automatic)
+Flutter Base v3.0.0+1 automatically fixes yellow underlines that can occur when using GetX:
+- **Problem**: When using GetX on iOS, Text widgets without explicit styling could show yellow underlines
+- **Solution**: BaseApp now automatically provides proper Material theme styling
+- **Result**: All Text widgets work correctly without manual styling
 
 ### Performance Tips
 
 1. Use `Get.lazyPut()` for heavy services
-2. Implement proper controller disposal
+2. Implement proper controller disposal with `onClose()`
 3. Use `smartManagement` appropriately
 4. Keep reactive variables minimal
+
+## 📊 Feature Comparison
+
+| Feature | Standard BaseApp | GetX BaseApp |
+|---------|------------------|--------------|
+| Adaptive UI | ✅ | ✅ |
+| Material 3 Support | ✅ | ✅ |
+| Platform Overrides | ✅ | ✅ |
+| Traditional Navigation | ✅ | ✅ |
+| Reactive State | ❌ | ✅ |
+| Type-safe Routing | ❌ | ✅ |
+| Dependency Injection | ❌ | ✅ |
+| Performance | Good | Excellent |
+| Yellow Underline Fix | ✅ | ✅ |
+
+## 🎉 Real-World Example
+
+Check out the complete GetX integration example in the repository:
+- **File**: `example/lib/getx_example.dart`
+- **Features**: Counter app with reactive state, navigation, services, workers
+- **Demonstrates**: All GetX patterns working with adaptive UI
+
+```bash
+cd example
+flutter run
+```
 
 ---
 

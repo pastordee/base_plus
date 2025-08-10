@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoApp, CupertinoThemeData;
 import 'package:flutter/foundation.dart' show Diagnosticable, immutable;
-import 'package:flutter/material.dart' show Brightness, Color, Colors, ColorScheme, MaterialApp, ThemeData;
+import 'package:flutter/material.dart' show Brightness, Color, Colors, ColorScheme, MaterialApp, TextDecoration, ThemeData;
 
 import '../app/base_app.dart';
 import '../appbar/base_app_bar.dart';
@@ -10,7 +10,7 @@ import '../route/base_route.dart';
 
 /// BaseThemeData
 /// Special properties values global setting
-/// 参考 [ThemeData]
+/// Reference [ThemeData]
 @immutable
 class BaseThemeData with Diagnosticable {
   factory BaseThemeData({
@@ -42,6 +42,8 @@ class BaseThemeData with Diagnosticable {
           seedColor: Colors.blue,
           brightness: Brightness.light,
         ),
+        // Ensure proper default text styling to prevent yellow underlines
+        textTheme: ThemeData.light().textTheme,
       );
     }
     
@@ -52,7 +54,28 @@ class BaseThemeData with Diagnosticable {
           seedColor: Colors.blue,
           brightness: Brightness.dark,
         ),
+        // Ensure proper default text styling to prevent yellow underlines
+        textTheme: ThemeData.dark().textTheme,
       );
+    }
+    
+    // Ensure any provided themes have proper text styling
+    if (materialTheme != null) {
+      // Only modify if the theme doesn't already have a complete textTheme
+      if (materialTheme.textTheme.bodyMedium?.decoration != TextDecoration.none) {
+        materialTheme = materialTheme.copyWith(
+          textTheme: ThemeData.light().textTheme,
+        );
+      }
+    }
+    
+    if (materialDarkTheme != null) {
+      // Only modify if the theme doesn't already have a complete textTheme
+      if (materialDarkTheme.textTheme.bodyMedium?.decoration != TextDecoration.none) {
+        materialDarkTheme = materialDarkTheme.copyWith(
+          textTheme: ThemeData.dark().textTheme,
+        );
+      }
     }
     
     return BaseThemeData.raw(
@@ -108,58 +131,58 @@ class BaseThemeData with Diagnosticable {
   final bool routeFullscreenGackGesture;
 
   /// [MaterialApp.theme]
-  /// 在Cupertino模式下使用Material组件时，
-  /// 可以使用 Theme.of(context) 获取到[BaseApp.materialTheme]
+  /// When using Material components in Cupertino mode,
+  /// you can use Theme.of(context) to get [BaseApp.materialTheme]
   ///
-  /// Material模式下为null
+  /// null in Material mode
   final ThemeData? materialTheme;
 
   /// [MaterialApp.materialDarkTheme]
-  /// 在Cupertino模式下使用Material组件时，
-  /// 可以使用 Theme.of(context) 获取到[BaseApp.materialDarkTheme]
+  /// When using Material components in Cupertino mode,
+  /// you can use Theme.of(context) to get [BaseApp.materialDarkTheme]
   ///
-  /// Material模式下为null
+  /// null in Material mode
   final ThemeData? materialDarkTheme;
 
   /// [MaterialApp.highContrastTheme]
-  /// 在Cupertino模式下使用Material组件时，
-  /// 可以使用 Theme.of(context) 获取到[BaseApp.highContrastTheme]
+  /// When using Material components in Cupertino mode,
+  /// you can use Theme.of(context) to get [BaseApp.highContrastTheme]
   ///
-  /// Material模式下为null
+  /// null in Material mode
   final ThemeData? materialHighContrastTheme;
 
   /// [MaterialApp.highContrastDarkTheme]
-  /// 在Cupertino模式下使用Material组件时，
-  /// 可以使用 Theme.of(context) 获取到[BaseApp.highContrastDarkTheme]
+  /// When using Material components in Cupertino mode,
+  /// you can use Theme.of(context) to get [BaseApp.highContrastDarkTheme]
   ///
-  /// Material模式下为null
+  /// null in Material mode
   final ThemeData? materialHighContrastDarkTheme;
 
   /// [CupertinoApp.theme]
-  /// 在Material模式下使用Mupertino组件时,
-  /// 可以使用 CupertinoTheme.of(context) 获取到[BaseApp.cupertinoTheme]
+  /// When using Cupertino components in Material mode,
+  /// you can use CupertinoTheme.of(context) to get [BaseApp.cupertinoTheme]
   ///
-  /// Cupertino模式下为null
+  /// null in Cupertino mode
   final CupertinoThemeData? cupertinoTheme;
 
   /// Enable Material 3 design system
-  /// 启用 Material 3 设计系统
+  /// Enable Material 3 design system
   final bool useMaterial3;
 
   /// BaseSection's divider's color
-  /// BaseSection 的diviver的颜色
+  /// BaseSection's divider color
   final Color? sectionDividerColor;
 
   /// BaseTile's BackgroundColor
-  /// BaseTile 的背景颜色
-  /// 建议适应BaseColor().build(context), 构建2种颜色
+  /// BaseTile's background color
+  /// Recommended to use BaseColor().build(context) to build 2 colors
   final Color? tileBackgroundColor;
 
-  /// 平台模式
-  /// baseplatform mode
+  /// Platform mode
+  /// base platform mode
   final BasePlatformMode? platformMode;
 
-  /// Cupertino 模式下用Material组件是否去除水波纹
+  /// Whether to remove ripple effects when using Material components in Cupertino mode
   /// Use Material Widget without splash on Cupertino's mode
   final bool withoutSplashOnCupertino;
 

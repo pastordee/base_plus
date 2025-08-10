@@ -55,7 +55,7 @@ class BaseScaffold extends BaseStatelessWidget {
   /// [Scaffold.appBar]
   /// If this properties is null, then [navBar] is use.
   ///
-  /// 该参数为null，则会使用[navBar]
+  /// If this parameter is null, then [navBar] will be used
   final BaseAppBar? appBar;
 
   /// [CupertinoPageScaffold.navigationBar]
@@ -64,7 +64,7 @@ class BaseScaffold extends BaseStatelessWidget {
   ///
   /// If this properties is null, then [appBar] is use.
   ///
-  /// 该参数为null，则会使用[appBar]
+  /// If this parameter is null, then [appBar] will be used
   final BaseAppBar? navBar;
 
   /// [CupertinoPageScaffold.backgroundColor]
@@ -87,13 +87,13 @@ class BaseScaffold extends BaseStatelessWidget {
   /// *** cupertino properties start ***
 
   /// [SafeArea.top], default is false
-  /// 相当于SafeArea的top，默认false
-  /// 当导航栏背景色为透明的，设置为true可以使页面起点在导航栏下方
+  /// Equivalent to SafeArea's top, defaults to false
+  /// When the navigation bar background is transparent, set to true to make the page start below the navigation bar
   final bool safeAreaTop;
 
   /// [SafeArea.bottom], default is false
-  /// 相当于SafeArea的bottom，默认false
-  /// 设置为true可以避免页面被iphone下方的Home Indicator遮住
+  /// Equivalent to SafeArea's bottom, defaults to false
+  /// Set to true to prevent the page from being covered by the iPhone's Home Indicator at the bottom
   final bool safeAreaBottom;
 
   /// *** cupertino properties end ***

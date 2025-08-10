@@ -1,3 +1,48 @@
+# v3.0.0+1 - 2025.08.10 🚀 Major Modernization Release
+
+## 🎯 **New Features**
+
+### Material 3 (Material You) Support
+- ✅ **New Button Types**: Added `FilledButton` and `FilledButton.tonal` support to BaseButton
+- ✅ **Dynamic Theming**: Integrated `ColorScheme.fromSeed` for automatic theme generation  
+- ✅ **useMaterial3 Parameter**: Added to BaseThemeData for easy Material 3 enablement
+- ✅ **Default Themes**: Automatic Material 3 theme creation when enabled
+
+### GetX State Management Integration
+- ✅ **GetMaterialApp Support**: Added `useGetX` parameter to BaseApp
+- ✅ **Reactive State Management**: Full GetX controller and observable support
+- ✅ **GetX Navigation**: Complete routing system with named routes and transitions
+- ✅ **Dependency Injection**: Bindings and service management
+- ✅ **GetX Workers**: Support for ever, debounce, and other reactive patterns
+- ✅ **Platform Compatibility**: GetX works seamlessly with adaptive design
+
+### Modern iOS Design
+- ✅ **iOS 16+ Patterns**: Updated CupertinoButton styling to match modern iOS
+- ✅ **Preserved Interactions**: Maintained native iOS feel and animations
+- ✅ **Adaptive Behavior**: Automatic platform detection unchanged
+
+## 🔧 **Technical Improvements**
+
+### SDK Modernization
+- ✅ **Flutter 3.10+**: Updated minimum Flutter version
+- ✅ **Dart 3.0+**: Updated minimum Dart SDK version
+- ✅ **Dependencies**: Updated all package dependencies to latest versions
+
+### Bug Fixes
+- ✅ **Yellow Underline Fix**: Automatic text styling to prevent debug styling issues with GetX
+- ✅ **Platform Routing**: GetX navigation works correctly on both iOS and Android
+- ✅ **Theme Context**: Proper Material theme context for GetX apps
+
+## ⚠️ **Breaking Changes**
+- **Flutter 3.10+**: Projects must update to Flutter 3.10 or higher
+- **Dart 3.0+**: Projects must update to Dart 3.0 or higher
+- **API Changes**: None - 100% backward compatible for existing APIs
+
+## 📦 **New Dependencies**
+- `get: ^4.6.6` - GetX state management (optional, only if useGetX is enabled)
+
+---
+
 # 2.2.2+3 - 2021.07.25
 
 - add: 添加BaseParam类，用于在模式与平台中个性化参数

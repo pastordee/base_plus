@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// 当前的运行模式
+/// Current runtime mode
 BaseMode? _currentBaseMode;
 
 BaseMode get currentBaseMode {
@@ -10,10 +10,10 @@ BaseMode get currentBaseMode {
   return _currentBaseMode!;
 }
 
-/// 默认的运行模式
+/// Default runtime mode
 BaseMode? defaultBaseMode;
 
-/// 平台构建模式
+/// Platform build mode
 enum BaseMode {
   /// use cupertino's widgets
   cupertino,
@@ -22,21 +22,21 @@ enum BaseMode {
   material,
 }
 
-/// 组件实际的构建模式
+/// Widget actual build mode
 enum WidgetBuildMode {
-  /// Cupertino模式
+  /// Cupertino mode
   cupertino,
 
-  /// Material模式
+  /// Material mode
   material,
 
-  /// 强制使用Cupertino模式
+  /// Force use Cupertino mode
   forceUseCupertino,
 
-  /// 强制使用Material模式
+  /// Force use Material mode
   forceUseMaterial,
 
-  /// 静止构建，使用Container()代替
+  /// Disabled build, use Container() instead
   disabled,
 }
 
@@ -73,7 +73,7 @@ class BasePlatformMode {
   /// [TargetPlatform.windows]
   final BaseMode windows;
 
-  /// web, 默认跟随系统
+  /// web, defaults to follow system
   final BaseMode? web;
 
   /// others
@@ -101,7 +101,7 @@ class BasePlatformMode {
     );
   }
 
-  /// 改变某平台的构建模式，不包括web
+  /// Change build mode for a specific platform, excluding web
   BasePlatformMode changePlatformMode({
     BaseMode? mode,
   }) {
@@ -138,7 +138,7 @@ class BasePlatformMode {
   }
 }
 
-/// build baseApp 之前必须调用该方法
+/// Must call this method before building baseApp
 /// set the platform
 void setBasePlatformMode({
   BasePlatformMode? basePlatformMode = const BasePlatformMode(),

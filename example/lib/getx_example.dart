@@ -201,7 +201,7 @@ class InfoPage extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class SettingsPage extends StatelessWidget {
       appBar: BaseAppBar(
         title: Text('Settings'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,4 +1,5 @@
 import 'package:example/app.dart';
+import 'package:example/getx_example.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
@@ -17,7 +18,8 @@ void main() {
         value: AppProvider(
           brightness: WidgetsBinding.instance.window.platformBrightness,
         ),
-        child: const App(),
+        // child: const App(),
+        child: const GetXApp(),
       ),
     );
   });

@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'base_theme_data.dart';
 
 /// Reference Theme
-/// 参考自Theme
+/// Reference from Theme
 class BaseTheme extends StatelessWidget {
   const BaseTheme({
     Key? key,
