@@ -58,16 +58,16 @@ class BaseRoute<T> extends BaseClass {
   final String? title;
 
   /// default is [CupertinoPageRoute._kBackGestureWidth] = 20.0.
-  /// 向右滑返回时离屏幕边缘的宽度
+  /// Width from screen edge when swiping right to go back
   final double backGestureWidth;
 
   /// if is true, [backGestureWidth] = MediaQuery.of(context).size.width.
   /// if is null, default is [BaseThemeData.routeFullscreenGackGesture]
   /// ** Please pay attention to gesture conflict when using
   ///
-  /// 是否启用全屏右滑返回, [backGestureWidth]参数会失效
-  /// 默认是 [BaseThemeData.routeFullscreenGackGesture]
-  /// ** 使用时请注意手势冲突
+  /// Whether to enable fullscreen right swipe to go back, [backGestureWidth] parameter will be disabled
+  /// Default is [BaseThemeData.routeFullscreenGackGesture]
+  /// ** Please pay attention to gesture conflict when using
   final bool? fullscreenGackGesture;
 
   /// *** cupertino properties end ***

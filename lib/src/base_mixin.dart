@@ -7,7 +7,7 @@ import 'config/base_config.dart';
 import 'mode/base_mode.dart';
 import 'theme/base_theme.dart';
 
-/// 通用方法
+/// Common methods
 mixin BaseMixin {
   /// build之前调用
   void beforeBuild(BuildContext context) {}

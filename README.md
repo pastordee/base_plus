@@ -76,6 +76,66 @@ BaseApp(
 )
 ```
 
+### 🆕 直接主题配置 (新功能)
+
+现在可以直接在 BaseApp 中设置明暗主题，类似标准 MaterialApp：
+
+```dart
+BaseApp(
+  title: 'My Themed App',
+  
+  // 直接设置明暗主题 - 新功能！
+  lightTheme: AppTheme.lightTheme,
+  darkTheme: AppTheme.darkTheme,
+  themeMode: ThemeMode.system,  // 跟随系统
+  
+  home: MyHomePage(),
+)
+
+// 主题定义
+class AppTheme {
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue,
+        brightness: Brightness.light,
+      ),
+    );
+  }
+  
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue,
+        brightness: Brightness.dark,
+      ),
+    );
+  }
+}
+```
+
+### 传统主题配置 (依然支持)
+
+继续使用 BaseThemeData 进行更高级的主题配置：
+
+```dart
+BaseApp(
+  title: 'My App',
+  
+  baseTheme: BaseThemeData(
+    useMaterial3: true,
+    materialTheme: AppTheme.lightTheme,
+    materialDarkTheme: AppTheme.darkTheme,
+    // 更多高级配置...
+  ),
+  
+  themeMode: ThemeMode.system,
+  home: MyHomePage(),
+)
+```
+
 ## 🎨 现代按钮系统
 
 ### Material 3 按钮层次结构

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 const Duration _expansionTransitionDuration = Duration(milliseconds: 300);
 
-/// 伸缩面板，目前还很不完善
-/// 可以指定位置画滑出
+/// Expansion panel, currently still incomplete
+/// Can specify position for slide out
 class BaseExpansion extends StatefulWidget {
   const BaseExpansion({
     Key? key,

@@ -53,6 +53,8 @@ class BaseApp extends BaseStatelessWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.baseTheme,
+    this.lightTheme,
+    this.darkTheme,
     this.shortcuts,
     this.actions,
     this.withoutSplashOnCupertino = true,
@@ -190,6 +192,14 @@ class BaseApp extends BaseStatelessWidget {
   /// [BaseThemeData]
   final BaseThemeData? baseTheme;
 
+  /// [MaterialApp.theme] - Light theme for Material Design
+  /// Can be used as an alternative to baseTheme.materialTheme
+  final ThemeData? lightTheme;
+
+  /// [MaterialApp.darkTheme] - Dark theme for Material Design  
+  /// Can be used as an alternative to baseTheme.materialDarkTheme
+  final ThemeData? darkTheme;
+
   /// [CupertinoApp.shortcuts]
   /// or
   /// [MaterialApp.shortcuts]
@@ -292,9 +302,26 @@ class BaseApp extends BaseStatelessWidget {
     );
   }
 
+  /// Resolves the effective BaseThemeData by merging direct theme parameters with baseTheme
+  BaseThemeData _resolveBaseTheme() {
+    final BaseThemeData _baseTheme = valueOf('baseTheme', baseTheme) ?? BaseThemeData();
+    final ThemeData? _lightTheme = valueOf('lightTheme', lightTheme);
+    final ThemeData? _darkTheme = valueOf('darkTheme', darkTheme);
+    
+    // If direct theme parameters are provided, merge them with baseTheme
+    if (_lightTheme != null || _darkTheme != null) {
+      return _baseTheme.copyWith(
+        materialTheme: _lightTheme ?? _baseTheme.materialTheme,
+        materialDarkTheme: _darkTheme ?? _baseTheme.materialDarkTheme,
+      );
+    }
+    
+    return _baseTheme;
+  }
+
   @override
   Widget buildByCupertino(BuildContext context) {
-    final BaseThemeData _baseTheme = valueOf('baseTheme', baseTheme) ?? BaseThemeData();
+    final BaseThemeData _baseTheme = _resolveBaseTheme();
     final bool _useGetX = valueOf('useGetX', useGetX);
     
     // If GetX is enabled, use GetMaterialApp even on iOS
@@ -371,9 +398,8 @@ class BaseApp extends BaseStatelessWidget {
   }
 
   @override
-  @override
   Widget buildByMaterial(BuildContext context) {
-    final BaseThemeData _baseTheme = valueOf('baseTheme', baseTheme) ?? BaseThemeData();
+    final BaseThemeData _baseTheme = _resolveBaseTheme();
     final bool _useGetX = valueOf('useGetX', useGetX);
     
     return BaseTheme(

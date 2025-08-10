@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 
 import 'mode/base_mode.dart';
 
-/// Base组件专属的个性化参数
+/// Personalization parameters specific to Base components
 class BaseParam {
   BaseParam({
     this.cupertino,

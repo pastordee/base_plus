@@ -14,8 +14,8 @@ const double _minFlingVelocity = 1.0;
 /// alose see [Drawer._kWidth]
 const double _defaultDrawerSize = 304;
 
-/// 自定义drawer
-/// 不可指定起点位置跟终点位置
+/// Custom drawer
+/// Cannot specify start and end positions
 /// default is 304 width or height
 class BaseDrawer extends StatefulWidget {
   const BaseDrawer({
@@ -52,7 +52,7 @@ class BaseDrawer extends StatefulWidget {
         assert(child != null),
         super(key: key);
 
-  /// 指定百分比
+  /// Specify percentage
   const BaseDrawer.percent({
     Key? key,
     this.duration = _drawerTransitionDuration,
@@ -70,7 +70,7 @@ class BaseDrawer extends StatefulWidget {
         assert(child != null),
         super(key: key);
 
-  /// 指定宽度
+  /// Specify width
   /// axisDirection 只能为 AxisDirection.left or AxisDirection.right
   BaseDrawer.width({
     Key? key,

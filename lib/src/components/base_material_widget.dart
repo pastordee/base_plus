@@ -51,7 +51,7 @@ class BaseMaterialWidget extends StatelessWidget {
   }
 }
 
-/// 去除水波纹效果，但还是有200毫秒的延迟高亮
+/// Remove ripple effects, but still has 200ms delay highlighting
 class WithoutSplashFactory extends InteractiveInkFeatureFactory {
   WithoutSplashFactory();
 

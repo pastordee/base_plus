@@ -40,10 +40,10 @@ enum WidgetBuildMode {
   disabled,
 }
 
-/// 运行的平台模式
-/// 默认iOS, macOS使用cupertino模式，其余使用material模式
+/// Runtime platform mode
+/// By default iOS, macOS use cupertino mode, others use material mode
 class BasePlatformMode {
-  /// 运行的平台模式
+  /// Runtime platform mode
   const BasePlatformMode({
     this.android = BaseMode.material,
     this.fuchsia = BaseMode.material,

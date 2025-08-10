@@ -363,14 +363,15 @@ class GetXApp extends StatelessWidget {
       enableLog: true,
       
       // Standard BaseApp configuration with Material 3
-      baseTheme: BaseThemeData(
-        useMaterial3: true,
-        materialTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-          ),
-        ),
-      ),
+      // baseTheme: BaseThemeData(
+      //   useMaterial3: true,
+      //   materialTheme: ThemeData(
+      //     colorScheme: ColorScheme.fromSeed(
+      //       seedColor: Colors.deepPurple,
+      //     ),
+      //   ),
+      // ),
+      
       
       // Initial route
       initialRoute: '/',
