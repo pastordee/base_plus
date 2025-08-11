@@ -20,6 +20,7 @@ class _iOS26LiquidGlassDemoState extends State<iOS26LiquidGlassDemo> {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
+      // No need for extendBodyBehindAppBar - automatically handled by BaseScaffold
       appBar: BaseAppBar(
         title: const Text('iOS 26 Liquid Glass'),
         backgroundColor: _backgroundColor,
@@ -47,6 +48,7 @@ class _iOS26LiquidGlassDemoState extends State<iOS26LiquidGlassDemo> {
             ],
           ),
         ),
+        // No need for manual SafeArea - automatically handled by BaseScaffold
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [

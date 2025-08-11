@@ -37,7 +37,8 @@ class BaseScaffold extends BaseStatelessWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
-    this.extendBodyBehindAppBar = false,
+    this.extendBodyBehindAppBar,
+    this.autoSafeArea = true,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
@@ -140,7 +141,12 @@ class BaseScaffold extends BaseStatelessWidget {
   final bool extendBody;
 
   /// [Scaffold.extendBodyBehindAppBar]
-  final bool extendBodyBehindAppBar;
+  /// When null, automatically determined based on app bar transparency
+  final bool? extendBodyBehindAppBar;
+
+  /// Automatically wrap body with SafeArea when app bar is transparent
+  /// Default is true for intelligent spacing management
+  final bool autoSafeArea;
 
   /// [Scaffold.drawerScrimColor]
   final Color? drawerScrimColor;
@@ -159,6 +165,51 @@ class BaseScaffold extends BaseStatelessWidget {
 
   /// *** material properties end ***
 
+  /// Determines if the app bar has transparency or custom colors that require special handling
+  bool _shouldExtendBodyBehindAppBar(BaseAppBar? appBar) {
+    if (appBar == null) {
+      return false;
+    }
+    
+    // Check if backgroundColor is transparent or has opacity < 1.0
+    final Color? bgColor = appBar.backgroundColor;
+    if (bgColor != null) {
+      // If background color is explicitly transparent or has opacity
+      if (bgColor == Colors.transparent || bgColor.alpha < 255) {
+        return true;
+      }
+    }
+    
+    // Check for iOS 26 Liquid Glass properties
+    if (appBar.liquidGlassBlurIntensity != null || 
+        appBar.liquidGlassGradientOpacity != null ||
+        appBar.liquidGlassDynamicBlur == true) {
+      return true;
+    }
+    
+    // Default to false for solid app bars
+    return false;
+  }
+
+  /// Intelligently wraps body with SafeArea when needed
+  Widget _wrapBodyWithSafeArea(Widget body, BaseAppBar? appBar) {
+    if (!autoSafeArea) {
+      return body;
+    }
+    
+    final bool needsSafeArea = _shouldExtendBodyBehindAppBar(appBar) || safeAreaTop || safeAreaBottom;
+    
+    if (!needsSafeArea) {
+      return body;
+    }
+    
+    return SafeArea(
+      top: _shouldExtendBodyBehindAppBar(appBar) || safeAreaTop,
+      bottom: safeAreaBottom,
+      child: body,
+    );
+  }
+
   @override
   Widget buildByCupertino(BuildContext context) {
     final Widget body = valueOf('body', this.body);
@@ -172,16 +223,10 @@ class BaseScaffold extends BaseStatelessWidget {
     } else {
       navigationBar = appBar;
     }
-    Widget _child;
-    if (!safeAreaTop && !safeAreaBottom) {
-      _child = body;
-    } else {
-      _child = SafeArea(
-        top: safeAreaTop,
-        bottom: safeAreaBottom,
-        child: body,
-      );
-    }
+    
+    // Intelligent body wrapping with SafeArea
+    final Widget _child = _wrapBodyWithSafeArea(body, appBar);
+    
     return CupertinoPageScaffold(
       navigationBar: navigationBar != null ? navigationBar as ObstructingPreferredSizeWidget : null,
       backgroundColor: backgroundColor,
@@ -200,9 +245,17 @@ class BaseScaffold extends BaseStatelessWidget {
     } else {
       _appBar = appBar;
     }
+    
+    // Determine if body should extend behind app bar
+    final bool shouldExtendBehindAppBar = extendBodyBehindAppBar ?? _shouldExtendBodyBehindAppBar(appBar);
+    
+    // Intelligent body wrapping with SafeArea
+    final Widget? bodyWidget = valueOf('body', body);
+    final Widget? wrappedBody = bodyWidget != null ? _wrapBodyWithSafeArea(bodyWidget, appBar) : null;
+    
     return Scaffold(
       appBar: _appBar != null ? _appBar as PreferredSizeWidget : null,
-      body: valueOf('body', body),
+      body: wrappedBody,
       floatingActionButton: valueOf('floatingActionButton', floatingActionButton),
       floatingActionButtonLocation: valueOf('floatingActionButtonLocation', floatingActionButtonLocation),
       floatingActionButtonAnimator: valueOf('floatingActionButtonAnimator', floatingActionButtonAnimator),
@@ -218,7 +271,7 @@ class BaseScaffold extends BaseStatelessWidget {
       primary: valueOf('primary', primary),
       drawerDragStartBehavior: valueOf('drawerDragStartBehavior', drawerDragStartBehavior),
       extendBody: valueOf('extendBody', extendBody),
-      extendBodyBehindAppBar: valueOf('extendBodyBehindAppBar', extendBodyBehindAppBar),
+      extendBodyBehindAppBar: shouldExtendBehindAppBar,
       drawerScrimColor: valueOf('drawerScrimColor', drawerScrimColor),
       drawerEdgeDragWidth: valueOf('drawerEdgeDragWidth', drawerEdgeDragWidth),
       drawerEnableOpenDragGesture: valueOf('drawerEnableOpenDragGesture', drawerEnableOpenDragGesture),
