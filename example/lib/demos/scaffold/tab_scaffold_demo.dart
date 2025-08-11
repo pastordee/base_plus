@@ -45,8 +45,8 @@ class _Demo extends StatelessWidget {
       const _TabPage(title: '发现'),
       const _TabPage(title: '我'),
     ];
-    return WillPopScope(
-      onWillPop: () => Future<bool>.value(false),
+    return PopScope(
+      canPop: false,
       child: BaseTabScaffold(
         tabBar: const BaseTabBar(
           type: BottomNavigationBarType.fixed,

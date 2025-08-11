@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'demos/base_tab_scaffold_demo.dart';
+import 'demos/bottom_navigation_demo.dart';
 import 'demos/demos.dart';
 import 'demos/scaffold/scaffold_demos.dart';
 import 'iconfont/iconfont.dart';
@@ -33,6 +35,24 @@ final List<Widget> _children = <Widget>[
       style: TextStyle(color: Colors.blueAccent),
     ),
     page: ScaffoldDemos(),
+    fullscreenGackGesture: false,
+  ),
+  const _Item(
+    icon: BaseIcon(icon: Icons.navigation, size: 40, color: Colors.teal),
+    title: Text(
+      'Bottom Navigation',
+      style: TextStyle(color: Colors.teal),
+    ),
+    page: BottomNavigationDemo(),
+    fullscreenGackGesture: false,
+  ),
+  const _Item(
+    icon: BaseIcon(icon: Icons.tab, size: 40, color: Colors.purple),
+    title: Text(
+      'Cross-Platform Tabs',
+      style: TextStyle(color: Colors.purple),
+    ),
+    page: BaseCrossPlatformTabScaffoldDemo(),
     fullscreenGackGesture: false,
   ),
   const _Item(

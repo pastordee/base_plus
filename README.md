@@ -136,6 +136,65 @@ BaseApp(
 )
 ```
 
+### 🆕 底部导航栏支持 (新功能)
+
+现在可以直接在 BaseApp 中设置底部导航栏：
+
+```dart
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int _currentIndex = 0;
+  final List<Widget> _pages = [HomePage(), FavoritesPage(), ProfilePage()];
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseApp(
+      title: 'My App with Bottom Navigation',
+      
+      // 主题配置
+      lightTheme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      
+      // 页面内容
+      home: _pages[_currentIndex],
+      
+      // 底部导航栏 - 新功能！
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '收藏'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
+        ],
+      ),
+    );
+  }
+}
+```
+
+#### 与 GetX 结合使用
+
+```dart
+BaseApp(
+  title: 'GetX + Bottom Navigation',
+  
+  // 启用 GetX
+  useGetX: true,
+  
+  // 主题和导航栏
+  lightTheme: AppTheme.lightTheme,
+  bottomNavigationBar: MyBottomNavigationBar(),
+  
+  home: HomePage(),
+)
+```
+
 ## 🎨 现代按钮系统
 
 ### Material 3 按钮层次结构

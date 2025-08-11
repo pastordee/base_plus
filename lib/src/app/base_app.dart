@@ -475,7 +475,7 @@ class BaseApp extends BaseStatelessWidget {
       ),
       shortcuts: valueOf('shortcuts', shortcuts),
       actions: valueOf('actions', actions),
-      restorationScopeId: valueOf('actions', restorationScopeId),
+      restorationScopeId: valueOf('restorationScopeId', restorationScopeId),
       scrollBehavior: valueOf('scrollBehavior', scrollBehavior),
     );
   }
@@ -499,26 +499,7 @@ class BaseApp extends BaseStatelessWidget {
       ),
       routingCallback: valueOf('routingCallback', routingCallback),
       defaultTransition: valueOf('defaultTransition', defaultTransition),
-      builder: (context, widget) {
-        // Ensure proper text styling to prevent yellow underlines
-        final defaultTextStyle = DefaultTextStyle.of(context);
-        final customWidget = valueOf('builder', builder)?.call(context, widget) ?? widget;
-        
-        // If the default text style has decoration (yellow underline), wrap with proper styling
-        if (defaultTextStyle.style.decoration != null && 
-            defaultTextStyle.style.decoration != TextDecoration.none) {
-          return DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyMedium ?? 
-                   const TextStyle(
-                     decoration: TextDecoration.none,
-                     color: Colors.black87,
-                   ),
-            child: customWidget,
-          );
-        }
-        
-        return customWidget;
-      },
+      builder: valueOf('builder', builder),
       title: valueOf('title', title),
       onGenerateTitle: valueOf('onGenerateTitle', onGenerateTitle),
       color: valueOf('color', color),

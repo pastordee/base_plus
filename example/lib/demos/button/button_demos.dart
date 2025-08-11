@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_demo.dart';
 import 'icon_button_demo.dart';
+import 'ios26_liquid_glass_button_demo.dart';
 
 class ButtonDemos extends StatefulWidget {
   const ButtonDemos({
@@ -20,7 +21,7 @@ class _ButtonDemosState extends State<ButtonDemos> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    tabController = TabController(vsync: this, length: 2);
+    tabController = TabController(vsync: this, length: 3);
   }
 
   @override
@@ -35,6 +36,9 @@ class _ButtonDemosState extends State<ButtonDemos> with SingleTickerProviderStat
             ),
             Tab(
               text: 'IconButton',
+            ),
+            Tab(
+              text: 'iOS 26',
             ),
           ],
           indicator: UnderlineTabIndicator(
@@ -62,9 +66,10 @@ class _ButtonDemosState extends State<ButtonDemos> with SingleTickerProviderStat
       ),
       body: TabBarView(
         controller: tabController,
-        children: const <Widget>[
-          ButtonDemo(),
-          IconButtonDemo(),
+        children: <Widget>[
+          const ButtonDemo(),
+          const IconButtonDemo(),
+          iOS26LiquidGlassButtonDemo(),
         ],
       ),
     );

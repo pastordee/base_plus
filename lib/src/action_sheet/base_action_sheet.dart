@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -6,14 +7,14 @@ import '../base_stateless_widget.dart';
 import '../mode/base_mode.dart';
 
 /// BaseActionSheet
-/// use CupertinoActionSheet by cupertino
-/// *** use cupertino = { forceUseMaterial: true } force use custom BottomSheet on cuperitno.
-/// use custom BottomSheet by material
+/// use CupertinoActionSheet by cupertino with iOS 16+ liquid glass effects
+/// *** use cupertino = { forceUseMaterial: true } force use Material 3 BottomSheet on cupertino.
+/// use Material 3 BottomSheet by material with modern design patterns
 /// *** use material = { forceUseCupertino: true } force use CupertinoActionSheet on material.
 ///
-/// CupertinoActionSheet: 2021.04.03
-/// BottomSheet: 2021.03.31
-/// modify 2021.06.25 by flutter 2.2.2
+/// iOS 16+ CupertinoActionSheet with liquid glass effects: 2025.08.11
+/// Material 3 BottomSheet with modern design: 2025.08.11
+/// Enhanced accessibility and semantic support: 2025.08.11
 class BaseActionSheet extends BaseStatelessWidget {
   const BaseActionSheet({
     Key? key,
@@ -90,46 +91,110 @@ class BaseActionSheet extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    return CupertinoActionSheet(
-      title: valueOf('title', title),
-      message: valueOf('message', message),
-      actions: valueOf('actions', actions),
-      messageScrollController: valueOf(
-        'messageScrollController',
-        messageScrollController,
+    final bool isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    
+    // iOS 16+ liquid glass effect wrapper
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)), // iOS 16+ rounded corners
+        // Liquid glass gradient overlay
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            (isDarkMode ? CupertinoColors.systemGrey6.darkColor : CupertinoColors.systemGrey6.color).withOpacity(0.95),
+            (isDarkMode ? CupertinoColors.systemGrey5.darkColor : CupertinoColors.systemGrey5.color).withOpacity(0.98),
+          ],
+        ),
+        // Enhanced shadow system for depth
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.black.withOpacity(0.15),
+            blurRadius: 30,
+            offset: const Offset(0, -5),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: CupertinoColors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, -2),
+            spreadRadius: 0,
+          ),
+        ],
       ),
-      actionScrollController: valueOf(
-        'actionScrollController',
-        actionScrollController,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 40, sigmaY: 40), // Liquid glass blur effect
+          child: CupertinoActionSheet(
+            title: valueOf('title', title),
+            message: valueOf('message', message),
+            actions: valueOf('actions', actions),
+            messageScrollController: valueOf(
+              'messageScrollController',
+              messageScrollController,
+            ),
+            actionScrollController: valueOf(
+              'actionScrollController',
+              actionScrollController,
+            ),
+            cancelButton: valueOf('cancelButton', cancelButton),
+          ),
+        ),
       ),
-      cancelButton: valueOf('cancelButton', cancelButton),
     );
   }
 
   @override
   Widget buildByMaterial(BuildContext context) {
-    final VoidCallback? _onClosing = valueOf('onClosing', onClosing);
+    final VoidCallback? onClosingCallback = valueOf('onClosing', onClosing);
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    
     return BottomSheet(
       animationController: valueOf('animationController', animationController),
       onClosing: () {
-        if (_onClosing != null) {
-          _onClosing();
+        if (onClosingCallback != null) {
+          onClosingCallback();
         }
       },
       builder: (BuildContext context) {
-        final List<Widget> children = <Widget>[
-          _buildContent(),
-          _buildActions(),
-        ];
-        return SafeArea(
-          child: Semantics(
-            namesRoute: true,
-            scopesRoute: true,
-            explicitChildNodes: true,
-            child: Column(
-              children: children,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)), // Material 3 rounded corners
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withOpacity(0.15),
+                blurRadius: 24,
+                offset: const Offset(0, -4),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Semantics(
+              namesRoute: true,
+              scopesRoute: true,
+              explicitChildNodes: true,
+              child: Column(
+                children: [
+                  // Material 3 drag handle
+                  Container(
+                    width: 32,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  _buildModernContent(context),
+                  _buildModernActions(context),
+                ],
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+              ),
             ),
           ),
         );
@@ -137,9 +202,12 @@ class BaseActionSheet extends BaseStatelessWidget {
       enableDrag: valueOf('enableDrag', enableDrag),
       onDragStart: valueOf('onDragStart', onDragStart),
       onDragEnd: valueOf('onDragEnd', onDragEnd),
-      elevation: valueOf('elevation', elevation),
-      shape: valueOf('shape', shape),
-      clipBehavior: valueOf('clipBehavior', clipBehavior),
+      elevation: 0, // Using custom shadow instead
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      clipBehavior: valueOf('clipBehavior', clipBehavior) ?? Clip.hardEdge,
+      backgroundColor: Colors.transparent, // Using container decoration instead
     );
   }
 
@@ -230,140 +298,132 @@ class BaseActionSheet extends BaseStatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildModernContent(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textTheme = theme.textTheme;
+    
     final List<Widget> content = <Widget>[];
     if (title != null || message != null) {
-      final Widget titleSection = _MaterialAlertContentSection(
+      final Widget titleSection = _ModernMaterialContentSection(
         title: title,
         message: message,
         scrollController: messageScrollController,
+        colorScheme: colorScheme,
+        textTheme: textTheme,
       );
       content.add(Flexible(child: titleSection));
     }
 
-    return Container(
-      color: _kBackgroundColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: content,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: content,
     );
   }
 
-  Widget _buildActions() {
-    return Container(
-      color: _kBackgroundColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _MaterialActionSection(
-            actions: valueOf('actions', actions),
-            cancelButton: valueOf('cancelButton', cancelButton),
-            scrollController: valueOf(
-              'actionScrollController',
-              actionScrollController,
-            ),
-          )
-        ],
-      ),
+  Widget _buildModernActions(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    
+    return _ModernMaterialActionSection(
+      actions: valueOf('actions', actions),
+      cancelButton: valueOf('cancelButton', cancelButton),
+      scrollController: valueOf('actionScrollController', actionScrollController),
+      colorScheme: colorScheme,
     );
   }
 }
 
-const Color _kContentTextColor = Color(0xFF8F8F8F);
-const Color _kBackgroundColor = Color(0xD1F8F8F8);
-const double _kContentHorizontalPadding = 40.0;
-const double _kContentVerticalPadding = 14.0;
+// Modern Material 3 constants
+const double _kModernContentHorizontalPadding = 24.0;
+const double _kModernContentVerticalPadding = 20.0;
 
-class _MaterialAlertContentSection extends StatelessWidget {
-  const _MaterialAlertContentSection({
+class _ModernMaterialContentSection extends StatelessWidget {
+  const _ModernMaterialContentSection({
     Key? key,
     this.title,
     this.message,
     this.scrollController,
+    required this.colorScheme,
+    required this.textTheme,
   }) : super(key: key);
 
   final Widget? title;
   final Widget? message;
   final ScrollController? scrollController;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> titleContentGroup = <Widget>[];
-    final TextStyle _contentStyle = (Theme.of(context).textTheme.headlineSmall ?? const TextStyle()).copyWith(
-      inherit: false,
-      fontSize: 13.0,
-      fontWeight: FontWeight.w400,
-      color: _kContentTextColor,
-      textBaseline: TextBaseline.alphabetic,
-    );
+    
     if (title != null) {
-      titleContentGroup.add(
-        Padding(
-          padding: const EdgeInsets.only(
-            left: _kContentHorizontalPadding,
-            right: _kContentHorizontalPadding,
-            bottom: _kContentVerticalPadding,
-            top: _kContentVerticalPadding,
-          ),
-          child: DefaultTextStyle(
-            style: message == null
-                ? _contentStyle
-                : _contentStyle.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            textAlign: TextAlign.center,
-            child: title!,
-          ),
+      final Widget titleWidget = DefaultTextStyle(
+        style: textTheme.headlineSmall?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ) ?? TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+        textAlign: TextAlign.center,
+        child: Semantics(
+          namesRoute: true,
+          container: true,
+          child: title!,
         ),
       );
+      titleContentGroup.add(Padding(
+        padding: const EdgeInsets.fromLTRB(
+          _kModernContentHorizontalPadding,
+          _kModernContentVerticalPadding,
+          _kModernContentHorizontalPadding,
+          0,
+        ),
+        child: titleWidget,
+      ));
     }
 
     if (message != null) {
-      titleContentGroup.add(
-        Padding(
-          padding: EdgeInsets.only(
-            left: _kContentHorizontalPadding,
-            right: _kContentHorizontalPadding,
-            bottom: title == null ? _kContentVerticalPadding : 22.0,
-            top: title == null ? _kContentVerticalPadding : 0.0,
-          ),
-          child: DefaultTextStyle(
-            style: title == null
-                ? _contentStyle.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )
-                : _contentStyle,
-            textAlign: TextAlign.center,
-            child: message!,
-          ),
+      final Widget messageWidget = DefaultTextStyle(
+        style: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          height: 1.4,
+        ) ?? TextStyle(
+          fontSize: 14,
+          color: colorScheme.onSurfaceVariant,
+          height: 1.4,
+        ),
+        textAlign: TextAlign.center,
+        child: Semantics(
+          container: true,
+          child: message!,
         ),
       );
+      titleContentGroup.add(Padding(
+        padding: EdgeInsets.fromLTRB(
+          _kModernContentHorizontalPadding,
+          title != null ? 8.0 : _kModernContentVerticalPadding,
+          _kModernContentHorizontalPadding,
+          _kModernContentVerticalPadding,
+        ),
+        child: messageWidget,
+      ));
     }
 
     if (titleContentGroup.isEmpty) {
-      return SingleChildScrollView(
-        controller: scrollController,
-        child: const SizedBox(
-          width: 0.0,
-          height: 0.0,
-        ),
-      );
-    }
-    if (titleContentGroup.length > 1) {
-      titleContentGroup.insert(
-        1,
-        const Padding(padding: EdgeInsets.only(top: 8.0)),
-      );
+      return const SizedBox(width: 0.0, height: 0.0);
     }
 
     return Scrollbar(
+      controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: titleContentGroup,
         ),
@@ -372,51 +432,51 @@ class _MaterialAlertContentSection extends StatelessWidget {
   }
 }
 
-class _MaterialActionSection extends StatelessWidget {
-  const _MaterialActionSection({
+class _ModernMaterialActionSection extends StatelessWidget {
+  const _ModernMaterialActionSection({
     Key? key,
     this.actions = const <Widget>[],
     this.cancelButton,
     this.scrollController,
+    required this.colorScheme,
   }) : super(key: key);
 
   final List<Widget> actions;
   final Widget? cancelButton;
   final ScrollController? scrollController;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    final Divider contentDivider = Divider(
-      height: 0.0,
-      color: Colors.grey.withOpacity(.5),
-    );
-    final Divider actionDivider = Divider(
-      height: 0.0,
-      color: Colors.grey.withOpacity(.2),
-    );
-    final Divider cancelDivider = Divider(
-      height: 0.0,
-      color: Colors.grey.withOpacity(.8),
-    );
-    if (actions != null && actions.isNotEmpty) {
-      children.add(contentDivider);
+    
+    // Add actions with modern spacing
+    if (actions.isNotEmpty) {
       for (int i = 0; i < actions.length; i++) {
-        children.add(actions[i]);
-        if (i != actions.length - 1) {
-          children.add(actionDivider);
-        }
+        children.add(Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: actions[i],
+        ));
       }
     }
+    
+    // Add cancel button with extra spacing
     if (cancelButton != null) {
-      children.add(cancelDivider);
-      children.add(cancelButton!);
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(height: 8)); // Extra spacing before cancel
+      }
+      children.add(Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        child: cancelButton!,
+      ));
     }
+    
     return Scrollbar(
+      controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: children,
         ),

@@ -18,8 +18,8 @@ void main() {
         value: AppProvider(
           brightness: WidgetsBinding.instance.window.platformBrightness,
         ),
-        // child: const App(),
-        child: const GetXApp(),
+        child: const App(),
+        // child: const GetXApp(),
       ),
     );
   });

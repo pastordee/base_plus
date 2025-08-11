@@ -92,6 +92,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           ),
           debugShowCheckedModeBanner: false,
           themeMode: appProvider.themeMode,
+          
         );
       },
       child: const Home(),

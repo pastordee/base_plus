@@ -5,6 +5,7 @@ import '../demo_page.dart';
 import '../demo_tile.dart';
 import 'backdrop_filter_demo.dart';
 import 'custom_height.dart';
+import 'ios26_liquid_glass_demo.dart';
 import 'news/news.dart';
 import 'toolbar_opacity.dart';
 
@@ -16,6 +17,11 @@ class AppBarDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<DemoTile> _demos = <DemoTile>[
+      DemoTile(
+        title: const Text('iOS 26 Liquid Glass'),
+        page: iOS26LiquidGlassDemo(),
+        fullscreenGackGesture: false,
+      ),
       const DemoTile(
         title: Text('height'),
         page: CustomHeight(),
@@ -54,6 +60,12 @@ class AppBarDemo extends StatelessWidget {
             'CupertinoNavigationBar在背景色透明时会默认添加一层高斯模糊效果。'
             '设置成false可以实现全透明导航栏\n'
             '可使用BaseTheme.backdropFilter全局设置',
+        'liquidGlassBlurIntensity': 'iOS 26 Liquid Glass blur intensity (20-100 sigma)\n'
+            'Controls the depth of the glass effect. Higher values create deeper blur.',
+        'liquidGlassGradientOpacity': 'iOS 26 Liquid Glass gradient overlay opacity (0.0-0.5)\n'
+            'Controls the strength of glass reflections and depth perception.',
+        'liquidGlassDynamicBlur': 'iOS 26 Liquid Glass dynamic blur effects\n'
+            'When enabled, blur intensity can respond to scroll position and interactions.',
         'bottom': 'Cupertino模式下也有效, 如加入TabBar，会去除水波纹跟高亮效果。',
         'toolbarOpacity':
             'Cupertino模式下也有效, 只是简单是设置leading，middle，trailing字体的透明度。',

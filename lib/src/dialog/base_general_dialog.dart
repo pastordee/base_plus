@@ -4,7 +4,20 @@ import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../mode/base_mode.dart';
 
-@Deprecated('')
+/// BaseGeneralDialog - DEPRECATED
+/// 
+/// @deprecated Use BaseAlertDialog with iOS 26 Liquid Glass Dynamic Material instead
+/// 
+/// This component is deprecated in favor of the enhanced BaseAlertDialog which provides:
+/// - iOS 26 Liquid Glass Dynamic Material with transparency and reflections
+/// - Material 3 design integration with semantic colors
+/// - Enhanced accessibility and interaction states
+/// - Cross-platform consistency with unified design language
+/// 
+/// Migration Guide:
+/// Replace BaseGeneralDialog with BaseAlertDialog for modern dialog experiences
+/// with sophisticated optical effects and improved usability.
+@Deprecated('Use BaseAlertDialog with iOS 26 Liquid Glass Dynamic Material instead')
 class BaseGeneralDialog extends BaseStatelessWidget {
   const BaseGeneralDialog({
     Key? key,
