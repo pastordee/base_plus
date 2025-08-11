@@ -320,7 +320,7 @@ class WithoutSplashFactory extends InteractiveInkFeatureFactory {
     double? radius,
     VoidCallback? onRemoved,
   }) {
-    return NoSplash(
+    return BaseNoSplash(
       controller: controller,
       referenceBox: referenceBox,
       onRemoved: onRemoved,
@@ -398,8 +398,8 @@ class Material3SplashFactory extends InteractiveInkFeatureFactory {
 }
 
 /// No-operation splash for minimal visual impact
-class NoSplash extends InteractiveInkFeature {
-  NoSplash({
+class BaseNoSplash extends InteractiveInkFeature {
+  BaseNoSplash({
     required MaterialInkController controller,
     required RenderBox referenceBox,
     VoidCallback? onRemoved,
