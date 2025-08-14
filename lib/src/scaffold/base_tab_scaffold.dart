@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart' show CupertinoTabView;
+import 'dart:ui';
+import 'package:flutter/cupertino.dart' hide CupertinoTabScaffold, CupertinoTabBar, CupertinoTabController;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -191,38 +192,107 @@ class _BaseTabScaffoldState extends BaseState<BaseTabScaffold> {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    final BaseTabBar tabBar = valueOf('tabBar', widget.tabBar);
-    final List<Widget> tabViews = valueOf(
-      'tabViews',
-      widget.tabViews,
+    final BaseTabBar? tabBar = valueOf('tabBar', widget.tabBar);
+    final Color? backgroundColor = valueOf('backgroundColor', widget.backgroundColor);
+    final bool? resizeToAvoidBottomInset = valueOf('resizeToAvoidBottomInset', widget.resizeToAvoidBottomInset);
+    final String? restorationId = valueOf('restorationId', widget.restorationId);
+    
+    // Get the raw CupertinoTabBar without Liquid Glass wrapping
+    final CupertinoTabBar rawTabBar = tabBar?.buildCupertinoTabBar(context) ?? 
+      CupertinoTabBar(items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+      ]);
+    
+    Widget scaffold = CupertinoTabScaffold(
+      tabBar: rawTabBar,
+      tabBuilder: _buildTabView,
+      controller: valueOf('controller', widget.controller),
+      backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset ?? false,
+      restorationId: restorationId,
     );
-    if (tabBar != null || tabViews != null) {
-      assert(
-        tabBar != null && tabViews != null,
-        'tabBar and tabView can not be null',
+    
+    // Apply iOS 26 Liquid Glass effects at scaffold level if enabled
+    if (tabBar != null && valueOf('enableLiquidGlass', tabBar.enableLiquidGlass)) {
+      scaffold = _wrapScaffoldWithLiquidGlass(context, scaffold);
+    }
+    
+    return scaffold;
+  }
+  
+  /// Builds individual tab views for CupertinoTabScaffold
+  Widget _buildTabView(BuildContext context, int index) {
+    final List<Widget>? tabViews = valueOf('tabViews', widget.tabViews);
+    final List<String?>? restorationScopeIds = valueOf('restorationScopeIds', widget.restorationScopeIds);
+    final Map<String, WidgetBuilder>? routes = valueOf('routes', widget.routes);
+    final List<GlobalKey<NavigatorState>?>? navigatorKeys = valueOf('navigatorKeys', widget.navigatorKeys);
+    final String? defaultTitle = valueOf('defaultTitle', widget.defaultTitle);
+    final RouteFactory? onGenerateRoute = valueOf('onGenerateRoute', widget.onGenerateRoute);
+    final RouteFactory? onUnknownRoute = valueOf('onUnknownRoute', widget.onUnknownRoute);
+    final List<NavigatorObserver> navigatorObservers = valueOf('navigatorObservers', widget.navigatorObservers);
+
+    if (tabViews != null && index < tabViews.length) {
+      return CupertinoTabView(
+        builder: (context) => tabViews[index],
+        navigatorKey: navigatorKeys?[index],
+        defaultTitle: defaultTitle,
+        routes: routes ?? const <String, WidgetBuilder>{},
+        onGenerateRoute: onGenerateRoute,
+        onUnknownRoute: onUnknownRoute,
+        navigatorObservers: navigatorObservers,
+        restorationScopeId: restorationScopeIds?[index],
       );
     }
-    return CupertinoTabScaffold(
-      tabBar: tabBar.build(context) as CupertinoTabBar,
-      tabBuilder: (BuildContext context, int index) {
-        return CupertinoTabView(
-          key: valueOf('tabViewKeys', widget.tabViewKeys)?[index],
-          navigatorKey: valueOf('navigatorKeys', widget.navigatorKeys)?[index],
-          builder: (BuildContext context) {
-            return tabViews[index];
-          },
-          routes: valueOf('routes', widget.routes),
-          defaultTitle: valueOf('defaultTitle', widget.defaultTitle),
-          onGenerateRoute: valueOf('onGenerateRoute', widget.onGenerateRoute),
-          onUnknownRoute: valueOf('onUnknownRoute', widget.onUnknownRoute),
-          navigatorObservers: valueOf('navigatorObservers', widget.navigatorObservers),
-          restorationScopeId: valueOf('restorationScopeIds', widget.restorationScopeIds)?[index],
-        );
-      },
-      controller: valueOf('controller', widget.controller),
-      backgroundColor: valueOf('backgroundColor', widget.backgroundColor),
-      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', widget.resizeToAvoidBottomInset),
-      restorationId: valueOf('restorationId', widget.restorationId),
+
+    // Fallback widget
+    return Container(
+      child: Center(
+        child: Text('Tab $index'),
+      ),
+    );
+  }
+  
+  /// Wraps the entire tab scaffold with iOS 26 Liquid Glass effects
+  /// Provides environmental awareness and dynamic transparency
+  Widget _wrapScaffoldWithLiquidGlass(BuildContext context, Widget scaffold) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.1),
+            Colors.white.withOpacity(0.05),
+            Colors.black.withOpacity(0.02),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: -5,
+            offset: const Offset(-5, -5),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: -2,
+            offset: const Offset(5, 5),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: scaffold,
+        ),
+      ),
     );
   }
 

@@ -20,7 +20,7 @@ class Settings extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: const BaseAppBar(
-        title: Text('设置'),
+        title: Text('Settings'),
         transitionBetweenRoutes: true,
       ),
       body: Consumer<AppProvider>(
@@ -56,7 +56,7 @@ class _DocWidget extends StatelessWidget {
       children: <Widget>[
         BaseTile(
           title: const Center(
-            child: Text('查看文档'),
+            child: Text('View Documentation'),
           ),
           onTap: () async {
             const String url = 'https://nillnil.github.io/flutter_base/#/';
@@ -83,7 +83,7 @@ class _VersionWidget extends StatelessWidget {
           margin: EdgeInsets.only(top: 20.0),
           children: <Widget>[
             BaseTile(
-              titleText: 'Flutter版本',
+              titleText: 'Flutter Version',
               trailing: Padding(
                 padding: EdgeInsets.only(right: 5.0),
                 child: Text(
@@ -95,7 +95,7 @@ class _VersionWidget extends StatelessWidget {
               ),
             ),
             BaseTile(
-              titleText: 'App版本',
+              titleText: 'App Version',
               trailing: Padding(
                 padding: EdgeInsets.only(right: 5.0),
                 child: Text(
@@ -125,7 +125,7 @@ class _CustomSettingWidget extends StatelessWidget {
       children: <Widget>[
         const _NightModeWidget(),
         BaseTile(
-          titleText: '个性化设置',
+          titleText: 'Personalization Settings',
           trailing: const BaseIcon(
             icon: CupertinoIcons.right_chevron,
             size: 25,
@@ -153,7 +153,7 @@ class _OtherSettingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appBar: const BaseAppBar(title: Text('个性化设置')),
+      appBar: const BaseAppBar(title: Text('Personalization Settings')),
       body: Consumer<AppProvider>(
         builder: (BuildContext context, AppProvider appProvider, _) {
           double? _currentAppBarHeight = appProvider.appBarHeight;
@@ -164,7 +164,7 @@ class _OtherSettingWidget extends StatelessWidget {
               BaseMaterialWidget.withoutSplash(
                 theme: BaseTheme.of(context).materialTheme,
                 child: ExpansionTile(
-                  title: const Text('导航栏默认高度'),
+                  title: const Text('Default Navigation Bar Height'),
                   childrenPadding: const EdgeInsets.all(10.0),
                   children: <Widget>[
                     Container(
@@ -203,13 +203,13 @@ class _OtherSettingWidget extends StatelessWidget {
                 ),
               ),
               BaseTile(
-                titleText: '路由全屏手势返回',
+                titleText: 'Full-screen Gesture Back for Routes',
                 trailing: BaseSwitch(
                   value: appProvider.routeFullscreenGackGesture,
                   onChanged: (bool value) {
                     if (value) {
                       const BaseAlertDialog(
-                        title: Text('启动全屏手势返回\n请自行解决手势冲突页面'),
+                        title: Text('Enable Full-screen Gesture Back\nPlease resolve gesture conflicts on pages yourself'),
                       ).show<void>(context);
                     }
                     appProvider.changeRouteFullscreenGackGesture();
@@ -237,19 +237,19 @@ class _NightModeWidget extends StatelessWidget {
         String themeModeText = '';
         switch (appProvider.themeMode) {
           case ThemeMode.light:
-            themeModeText = '浅色';
+            themeModeText = 'Light';
             break;
           case ThemeMode.dark:
-            themeModeText = '深色';
+            themeModeText = 'Dark';
             break;
           default:
-            themeModeText = '跟随系统';
+            themeModeText = 'Follow System';
         }
         return BaseTile(
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 10.0,
           ),
-          title: const Text('外观'),
+          title: const Text('Appearance'),
           trailing: SizedBox(
             width: 120,
             child: Row(
@@ -282,7 +282,7 @@ class _ThemeModePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: BaseAppBar(
-        title: const Text('外观'),
+        title: const Text('Appearance'),
         padding: EdgeInsetsDirectional.zero,
         leading: BaseIconButton(
           icon: CupertinoIcons.clear_thick,
@@ -312,7 +312,7 @@ class _ThemeModePage extends StatelessWidget {
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10.0,
                     ),
-                    title: const Text('跟随系统'),
+                    title: const Text('Follow System'),
                     trailing: appProvider.themeMode == ThemeMode.system ? trailing : blankWidget,
                     onTap: () {
                       appProvider.changeThemeMode(ThemeMode.system);
@@ -322,7 +322,7 @@ class _ThemeModePage extends StatelessWidget {
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10.0,
                     ),
-                    title: const Text('深色'),
+                    title: const Text('Dark'),
                     trailing: appProvider.themeMode == ThemeMode.dark ? trailing : blankWidget,
                     onTap: () {
                       appProvider.changeThemeMode(ThemeMode.dark);
@@ -332,7 +332,7 @@ class _ThemeModePage extends StatelessWidget {
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10.0,
                     ),
-                    title: const Text('浅色'),
+                    title: const Text('Light'),
                     trailing: appProvider.themeMode == ThemeMode.light ? trailing : blankWidget,
                     onTap: () {
                       appProvider.changeThemeMode(ThemeMode.light);
@@ -367,7 +367,7 @@ class _PlatformWidget extends StatelessWidget {
           header: Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: Text(
-              '当前平台构建模式：${isCupertinoMode ? 'Cupertino' : 'Material'}',
+              'Current Platform Build Mode: ${isCupertinoMode ? 'Cupertino' : 'Material'}',
               style: const TextStyle(
                 fontSize: 12.0,
                 color: Colors.grey,
@@ -379,7 +379,7 @@ class _PlatformWidget extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 10.0,
               ),
-              title: const Text('切换平台构建模式'),
+              title: const Text('Switch Platform Build Mode'),
               trailing: BaseSwitch(
                 value: currentBaseMode != defaultBaseMode,
                 onChanged: (_) {

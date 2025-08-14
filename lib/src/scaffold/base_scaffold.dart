@@ -212,6 +212,17 @@ class BaseScaffold extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Check if drawers are present - if so, automatically use Material design
+    // This ensures Scaffold.of(context).openDrawer() works without manual forceUseMaterial
+    final Widget? drawer = valueOf('drawer', this.drawer);
+    final Widget? endDrawer = valueOf('endDrawer', this.endDrawer);
+    
+    if (drawer != null || endDrawer != null) {
+      // Automatically use Material design when drawers are present
+      // This provides the proper Scaffold context for drawer functionality
+      return buildByMaterial(context);
+    }
+    
     final Widget body = valueOf('body', this.body);
     assert(body != null, 'body can\'t be null');
     final Color? backgroundColor = valueOf('backgroundColor', this.backgroundColor);
@@ -237,8 +248,67 @@ class BaseScaffold extends BaseStatelessWidget {
 
   @override
   Widget buildByMaterial(BuildContext context) {
-    final BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
+    BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
     final double? appBarHeight = BaseTheme.of(context).valueOf('appBarHeight', BaseTheme.of(context).appBarHeight);
+    
+    // Check if drawers are present and automatically inject menu icon if needed
+    final Widget? drawer = valueOf('drawer', this.drawer);
+    final Widget? endDrawer = valueOf('endDrawer', this.endDrawer);
+    
+    // Auto-inject drawer menu icon when drawer is present and no leading widget specified
+    if (appBar != null && drawer != null && appBar.leading == null && appBar.automaticallyImplyLeading) {
+      // Create a new BaseAppBar instance with drawer menu icon
+      appBar = BaseAppBar(
+        key: appBar.key,
+        leading: Builder(
+          builder: (BuildContext context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+          ),
+        ),
+        trailing: appBar.trailing,
+        automaticallyImplyLeading: appBar.automaticallyImplyLeading,
+        automaticallyImplyMiddle: appBar.automaticallyImplyMiddle,
+        backgroundColor: appBar.backgroundColor,
+        brightness: appBar.brightness,
+        previousPageTitle: appBar.previousPageTitle,
+        middle: appBar.middle,
+        border: appBar.border,
+        padding: appBar.padding,
+        transitionBetweenRoutes: appBar.transitionBetweenRoutes,
+        heroTag: appBar.heroTag,
+        backdropFilter: appBar.backdropFilter,
+        height: appBar.height,
+        title: appBar.title,
+        actions: appBar.actions,
+        flexibleSpace: appBar.flexibleSpace,
+        bottom: appBar.bottom,
+        elevation: appBar.elevation,
+        iconTheme: appBar.iconTheme,
+        shadowColor: appBar.shadowColor,
+        shape: appBar.shape,
+        actionsIconTheme: appBar.actionsIconTheme,
+        textTheme: appBar.textTheme,
+        primary: appBar.primary,
+        centerTitle: appBar.centerTitle,
+        titleSpacing: appBar.titleSpacing,
+        excludeHeaderSemantics: appBar.excludeHeaderSemantics,
+        toolbarOpacity: appBar.toolbarOpacity,
+        bottomOpacity: appBar.bottomOpacity,
+        foregroundColor: appBar.foregroundColor,
+        leadingWidth: appBar.leadingWidth,
+        backwardsCompatibility: appBar.backwardsCompatibility,
+        toolbarTextStyle: appBar.toolbarTextStyle,
+        titleTextStyle: appBar.titleTextStyle,
+        systemOverlayStyle: appBar.systemOverlayStyle,
+        liquidGlassBlurIntensity: appBar.liquidGlassBlurIntensity,
+        liquidGlassGradientOpacity: appBar.liquidGlassGradientOpacity,
+        liquidGlassDynamicBlur: appBar.liquidGlassDynamicBlur,
+        baseParam: appBar.baseParam,
+      );
+    }
+    
     Widget? _appBar;
     if (appBarHeight != null && appBar != null) {
       _appBar = appBar.build(context);
@@ -253,6 +323,13 @@ class BaseScaffold extends BaseStatelessWidget {
     final Widget? bodyWidget = valueOf('body', body);
     final Widget? wrappedBody = bodyWidget != null ? _wrapBodyWithSafeArea(bodyWidget, appBar) : null;
     
+    // Get theme-aware background color for Material mode
+    Color? effectiveBackgroundColor = valueOf('backgroundColor', backgroundColor);
+    if (effectiveBackgroundColor == null) {
+      // Use theme's scaffold background color when no explicit color is provided
+      effectiveBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    }
+    
     return Scaffold(
       appBar: _appBar != null ? _appBar as PreferredSizeWidget : null,
       body: wrappedBody,
@@ -266,7 +343,7 @@ class BaseScaffold extends BaseStatelessWidget {
       onEndDrawerChanged: valueOf('onEndDrawerChanged', onEndDrawerChanged),
       bottomNavigationBar: valueOf('bottomNavigationBar', bottomNavigationBar),
       bottomSheet: valueOf('bottomSheet', bottomSheet),
-      backgroundColor: valueOf('backgroundColor', backgroundColor),
+      backgroundColor: effectiveBackgroundColor,
       resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       primary: valueOf('primary', primary),
       drawerDragStartBehavior: valueOf('drawerDragStartBehavior', drawerDragStartBehavior),

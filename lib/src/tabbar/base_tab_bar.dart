@@ -239,6 +239,19 @@ class BaseTabBar extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    final CupertinoTabBar tabBar = buildCupertinoTabBar(context);
+
+    // Apply iOS 26 Liquid Glass effects if enabled
+    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+      return _wrapWithLiquidGlass(context, tabBar);
+    }
+
+    return tabBar;
+  }
+
+  /// Builds the raw CupertinoTabBar without Liquid Glass effects
+  /// Used by BaseTabScaffold which needs the actual CupertinoTabBar instance
+  CupertinoTabBar buildCupertinoTabBar(BuildContext context) {
     final ValueChanged<int>? onTap = valueOf('onTap', this.onTap);
     
     // Enhanced onTap with haptic feedback
@@ -252,7 +265,7 @@ class BaseTabBar extends BaseStatelessWidget {
       };
     }
 
-    Widget tabBar = CupertinoTabBar(
+    return CupertinoTabBar(
       items: valueOf('items', items),
       onTap: enhancedOnTap,
       currentIndex: valueOf('currentIndex', currentIndex),
@@ -262,13 +275,6 @@ class BaseTabBar extends BaseStatelessWidget {
       iconSize: valueOf('iconSize', iconSize) ?? 30.0,
       border: valueOf('border', border),
     );
-
-    // Apply iOS 26 Liquid Glass effects if enabled
-    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
-      return _wrapWithLiquidGlass(context, tabBar);
-    }
-
-    return tabBar;
   }
 
   @override

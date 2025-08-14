@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'demos/base_navigation_drawer_demo.dart';
 import 'demos/base_tab_scaffold_demo.dart';
 import 'demos/bottom_navigation_demo.dart';
 import 'demos/demos.dart';
@@ -53,6 +54,15 @@ final List<Widget> _children = <Widget>[
       style: TextStyle(color: Colors.purple),
     ),
     page: BaseCrossPlatformTabScaffoldDemo(),
+    fullscreenGackGesture: false,
+  ),
+  const _Item(
+    icon: BaseIcon(icon: Icons.menu, size: 40, color: Colors.indigo),
+    title: Text(
+      'Navigation Drawer',
+      style: TextStyle(color: Colors.indigo),
+    ),
+    page: BaseNavigationDrawerDemo(),
     fullscreenGackGesture: false,
   ),
   const _Item(
@@ -160,7 +170,7 @@ const Widget _tipsWidget = Text(
   '1、Material组件相对比较完善，没经过严格的测试，后续会完善优化\n\n'
   '2、每个组件都保留有forceUseCupertino、forceUseMaterial参数，都未经过严格测试，请慎用！！！'
   '因为各个组件之间有关联度，如果要切换组件的整体样式，强烈建议直接切换整个app使用的平台样式（并且不在app中动态切换），而不是使用'
-  '单个组件中的forceUseCupertino、forceUseMaterial，后续可能会删除这2参数。',
+  '单个组件中的forceUseCupertino、forceUseMaterial--，后续可能会删除这2参数。',
   style: TextStyle(
     fontSize: 16.0,
   ),
@@ -175,7 +185,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: BaseAppBar(
-        title: const Text('Base Example'),
+        title: const Text('Base Example--'),
         padding: const EdgeInsetsDirectional.only(start: 5.0, end: 5.0),
         baseParam: BaseParam(
           cupertino: <String, dynamic>{
@@ -245,7 +255,9 @@ class Home extends StatelessWidget {
         crossAxisCount: 3,
         children: _children,
       ),
-      drawer: _MaterialTipsPage(),
+      drawer: BaseNavigationDrawer(
+        child: _MaterialTipsPage(),
+      ),
     );
   }
 }
@@ -253,28 +265,26 @@ class Home extends StatelessWidget {
 class _MaterialTipsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: <Widget>[
-          Container(
-            color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
-            height: kToolbarHeight + MediaQuery.of(context).padding.top,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top,
-            ),
-            child: const Center(
-              child: Text(
-                '特别说明',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+    return Column(
+      children: <Widget>[
+        Container(
+          color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+          height: kToolbarHeight + MediaQuery.of(context).padding.top,
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top,
+          ),
+          child: const Center(
+            child: Text(
+              '特别说明',
+              style: TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            child: _tipsWidget,
-          ),
-        ],
-      ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(10.0),
+          child: _tipsWidget,
+        ),
+      ],
     );
   }
 }

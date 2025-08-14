@@ -146,10 +146,8 @@ class BaseParam {
         case TargetPlatform.windows:
           _map = windows;
           break;
-        default:
-          _map = others;
-          break;
       }
+      _map ??= others; // fallback to others if no platform match
       // 再根据模式取值
       switch (currentBaseMode) {
         case BaseMode.cupertino:
@@ -158,9 +156,17 @@ class BaseParam {
         case BaseMode.material:
           _map ??= forceUseCupertino ? cupertino : material;
           break;
-        default:
       }
     }
-    return _map != null ? _map[key] ?? value : value;
+    
+    dynamic result = _map != null ? _map[key] ?? value : value;
+    
+    // Special handling for backgroundColor in forceUseMaterial mode
+    // Return null to let BaseScaffold use theme's scaffold background color
+    if (key == 'backgroundColor' && result == null && forceUseMaterial) {
+      return null; // This allows BaseScaffold to use Theme.of(context).scaffoldBackgroundColor
+    }
+    
+    return result;
   }
 }
