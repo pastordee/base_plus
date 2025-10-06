@@ -41,7 +41,7 @@ extension BottomNavigationBarItemNativeExtension on BottomNavigationBarItem {
       activeIcon: activeIcon,
       label: label,
       tooltip: tooltip,
-      // backgroundColor: backgroundColor,
+      backgroundColor: backgroundColor,
     );
   }
 }

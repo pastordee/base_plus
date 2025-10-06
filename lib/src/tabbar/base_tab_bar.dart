@@ -37,12 +37,34 @@ import 'base_native_tab_bar_item.dart';
 /// automatically uses CNTabBar from cupertino_native on iOS, providing
 /// authentic iOS 26 navigation with SF Symbols.
 /// 
+/// ## CNTabBar Customization Properties:
+/// When using native CNTabBar, you can customize its appearance with:
+/// - `cnTint`: Tint color for selected items
+/// - `cnHeight`: Custom height for the tab bar
+/// - `cnSplit`: Enable split layout (left and right groups)
+/// - `cnRightCount`: Number of items on the right side when split
+/// - `cnShrinkCentered`: Shrink centered items in split layout
+/// - `cnSplitSpacing`: Spacing between split sections
+/// - `cnBackgroundOpacity`: Override background transparency (0.0 = fully transparent, 1.0 = fully opaque)
+/// 
+/// **Note on Background Transparency:**
+/// You can control CNTabBar transparency in two ways:
+/// 1. Set `backgroundColor` with alpha: `Colors.white.withOpacity(0.1)`
+/// 2. Use `cnBackgroundOpacity` to override: `cnBackgroundOpacity: 0.1` (easier!)
+/// 
+/// The `cnBackgroundOpacity` property provides explicit control without
+/// affecting Material tab bars, making it ideal for iOS-specific customization.
+/// 
 /// ## SF Symbol Specification Methods:
 /// 
 /// **Method 1: Convenience Factory (Recommended)**
 /// ```dart
 /// BaseTabBar(
 ///   useNativeCupertinoTabBar: true,
+///   cnTint: Colors.blue, // Customize tint color
+///   cnBackgroundOpacity: 0.8, // Control transparency (0.0-1.0)
+///   cnSplit: true, // Enable split layout
+///   cnRightCount: 1, // 1 item on right side
 ///   items: [
 ///     BottomNavigationBarItemNativeExtension.withSFSymbol(
 ///       sfSymbolName: SFSymbols.home,
@@ -126,6 +148,15 @@ class BaseTabBar extends BaseStatelessWidget {
     this.hapticFeedback = true,
     this.useMaterial3Tabs = true,
     this.useNativeCupertinoTabBar = true, // Enable CNTabBar from cupertino_native
+
+    // CNTabBar-specific properties (cupertino_native package)
+    this.cnTint,
+    this.cnHeight,
+    this.cnSplit = false,
+    this.cnRightCount = 1,
+    this.cnShrinkCentered = true,
+    this.cnSplitSpacing = 8.0,
+    this.cnBackgroundOpacity, // Optional: override background opacity for CNTabBar
 
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
@@ -259,6 +290,40 @@ class BaseTabBar extends BaseStatelessWidget {
 
   /// *** iOS 26 Liquid Glass Dynamic Material properties end ***
 
+  /// *** CNTabBar-specific properties start (cupertino_native package) ***
+
+  /// [CNTabBar.tint] - Tint color for the tab bar (iOS native)
+  /// Applied to selected items in the CNTabBar
+  final Color? cnTint;
+
+  /// [CNTabBar.height] - Custom height for the tab bar (iOS native)
+  /// If not specified, uses the default CNTabBar height
+  final double? cnHeight;
+
+  /// [CNTabBar.split] - Enable split tab bar layout (iOS native)
+  /// When true, creates a split layout with items distributed between left and right
+  final bool cnSplit;
+
+  /// [CNTabBar.rightCount] - Number of items on the right side when split is enabled
+  /// Only applies when cnSplit is true
+  final int cnRightCount;
+
+  /// [CNTabBar.shrinkCentered] - Shrink centered items in split layout
+  /// When true, centered items are shrunk to fit the available space
+  final bool cnShrinkCentered;
+
+  /// [CNTabBar.splitSpacing] - Spacing between split sections
+  /// Only applies when cnSplit is true
+  final double cnSplitSpacing;
+
+  /// Background opacity for CNTabBar (0.0 to 1.0)
+  /// When specified, applies this opacity to the backgroundColor for CNTabBar only.
+  /// If not specified, uses the backgroundColor's alpha as-is.
+  /// This provides explicit control over CNTabBar transparency without affecting Material tabs.
+  final double? cnBackgroundOpacity;
+
+  /// *** CNTabBar-specific properties end ***
+
   /// 用户BaseTabScaffold里构建bottomNavigationBar
   BaseTabBar copyWith({
     ValueChanged<int>? onTap,
@@ -295,6 +360,13 @@ class BaseTabBar extends BaseStatelessWidget {
       hapticFeedback: hapticFeedback,
       useMaterial3Tabs: useMaterial3Tabs,
       useNativeCupertinoTabBar: useNativeCupertinoTabBar,
+      cnTint: cnTint,
+      cnHeight: cnHeight,
+      cnSplit: cnSplit,
+      cnRightCount: cnRightCount,
+      cnShrinkCentered: cnShrinkCentered,
+      cnSplitSpacing: cnSplitSpacing,
+      cnBackgroundOpacity: cnBackgroundOpacity,
     );
   }
 
@@ -309,9 +381,9 @@ class BaseTabBar extends BaseStatelessWidget {
     final CupertinoTabBar tabBar = buildCupertinoTabBar(context);
 
     // Apply iOS 26 Liquid Glass effects if enabled
-    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
-      return _wrapWithLiquidGlass(context, tabBar);
-    }
+    // if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+    //   return _wrapWithLiquidGlass(context, tabBar);
+    // }
 
     return tabBar;
   }
@@ -362,16 +434,34 @@ class BaseTabBar extends BaseStatelessWidget {
       );
     }).toList();
 
+    // Determine background color with optional opacity override
+    Color? cnBackgroundColor = valueOf('backgroundColor', backgroundColor);
+    final double? opacityOverride = valueOf('cnBackgroundOpacity', cnBackgroundOpacity);
+    
+    if (cnBackgroundColor != null && opacityOverride != null) {
+      // Apply the opacity override to the background color
+      cnBackgroundColor = cnBackgroundColor.withOpacity(opacityOverride.clamp(0.0, 1.0));
+    }
+
     Widget tabBar = CNTabBar(
       items: cnItems,
       currentIndex: valueOf('currentIndex', currentIndex) ?? 0,
       onTap: enhancedOnTap ?? (int index) {}, // Provide default no-op if null
+      // CNTabBar-specific properties
+      tint: valueOf('cnTint', cnTint),
+      backgroundColor: cnBackgroundColor,
+      iconSize: valueOf('iconSize', iconSize),
+      height: valueOf('cnHeight', cnHeight),
+      split: valueOf('cnSplit', cnSplit),
+      rightCount: valueOf('cnRightCount', cnRightCount),
+      shrinkCentered: valueOf('cnShrinkCentered', cnShrinkCentered),
+      splitSpacing: valueOf('cnSplitSpacing', cnSplitSpacing),
     );
 
     // Apply iOS 26 Liquid Glass effects if enabled
-    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
-      return _wrapWithLiquidGlass(context, tabBar);
-    }
+    // if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+    //   return _wrapWithLiquidGlass(context, tabBar);
+    // }
 
     return tabBar;
   }
@@ -482,9 +572,9 @@ class BaseTabBar extends BaseStatelessWidget {
     }
 
     // Apply iOS 26 Liquid Glass effects if enabled
-    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
-      return _wrapWithLiquidGlass(context, tabBar);
-    }
+    // if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+    //   return _wrapWithLiquidGlass(context, tabBar);
+    // }
 
     return tabBar;
   }
@@ -521,59 +611,59 @@ class BaseTabBar extends BaseStatelessWidget {
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
-              decoration: BoxDecoration(
-                // Gradient background with environmental transparency
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.3, 0.7, 1.0],
-                  colors: [
-                    Colors.transparent,
-                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.08),
-                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.12),
-                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.15),
-                  ],
-                ),
-                // Subtle shadow for material presence
-                boxShadow: [
-                  BoxShadow(
-                    color: (isDark ? Colors.black : Colors.grey.shade300).withOpacity(0.2),
-                    offset: const Offset(0, -2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                  // Environmental reflection shadow
-                  BoxShadow(
-                    color: (isDark ? Colors.white : Colors.black).withOpacity(reflectionIntensity * 0.05),
-                    offset: const Offset(0, -1),
-                    blurRadius: 4,
-                    spreadRadius: -1,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-                    sigmaY: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      // Subtle reflective overlay for optical enhancement
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withOpacity(reflectionIntensity * 0.1),
-                          Colors.white.withOpacity(reflectionIntensity * 0.05),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // decoration: BoxDecoration(
+              //   color: Colors.transparent,
+              //   // Gradient background with environmental transparency
+              //   gradient: const LinearGradient(
+              //     begin: Alignment.topCenter,
+              //     end: Alignment.bottomCenter,
+              //     stops: [0.0, 0.3, 0.7, 1.0],
+              //     colors: [
+              //       Colors.transparent,
+              //       Colors.transparent,
+              //       Colors.transparent,
+              //     ],
+              //   ),
+              //   // Subtle shadow for material presence
+              //   boxShadow: [
+              //     BoxShadow(
+              //       color: (isDark ? Colors.black : Colors.grey.shade300).withOpacity(0.2),
+              //       offset: const Offset(0, -2),
+              //       blurRadius: 8,
+              //       spreadRadius: 0,
+              //     ),
+              //     // Environmental reflection shadow
+              //     BoxShadow(
+              //       color: (isDark ? Colors.white : Colors.black).withOpacity(reflectionIntensity * 0.05),
+              //       offset: const Offset(0, -1),
+              //       blurRadius: 4,
+              //       spreadRadius: -1,
+              //     ),
+              //   ],
+              // ),
+              // child: ClipRRect(
+              //   child: BackdropFilter(
+              //     filter: ImageFilter.blur(
+              //       sigmaX: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
+              //       sigmaY: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
+              //     ),
+              //     child: Container(
+              //       decoration: BoxDecoration(
+              //         // Subtle reflective overlay for optical enhancement
+              //         gradient: LinearGradient(
+              //           begin: Alignment.topCenter,
+              //           end: Alignment.bottomCenter,
+              //           colors: [
+              //             Colors.white.withOpacity(reflectionIntensity * 0.1),
+              //             Colors.white.withOpacity(reflectionIntensity * 0.05),
+              //             Colors.transparent,
+              //           ],
+              //           stops: const [0.0, 0.5, 1.0],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ),
           ),
         ),
