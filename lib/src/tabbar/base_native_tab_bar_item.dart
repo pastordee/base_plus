@@ -19,6 +19,56 @@ class BaseNativeTabBarItemKey extends ValueKey<String> {
   String get sfSymbolName => value;
 }
 
+/// Metadata for custom image-based tab bar items
+/// 
+/// Use this to specify custom image assets for both Material and iOS platforms.
+/// When iOS image is not provided, the Material image will be used for both.
+/// 
+/// Example with platform-specific images:
+/// ```dart
+/// BottomNavigationBarItem(
+///   icon: Image.asset('assets/home.png', key: BaseCustomImageKey(
+///     materialImage: 'assets/home.png',
+///     iosImage: 'assets/home_ios.png',
+///   )),
+///   label: 'Home',
+/// )
+/// ```
+/// 
+/// Example with single image for all platforms:
+/// ```dart
+/// BottomNavigationBarItem(
+///   icon: Image.asset('assets/home.png', key: BaseCustomImageKey(
+///     materialImage: 'assets/home.png',
+///   )),
+///   label: 'Home',
+/// )
+/// ```
+class BaseCustomImageKey extends ValueKey<String> {
+  const BaseCustomImageKey({
+    required this.materialImage,
+    this.iosImage,
+    this.width = 24.0,
+    this.height = 24.0,
+  }) : super(materialImage);
+  
+  /// The image asset path for Material design (Android)
+  final String materialImage;
+  
+  /// The image asset path for iOS (optional, uses materialImage if not provided)
+  final String? iosImage;
+  
+  /// Width of the image in the tab bar
+  final double width;
+  
+  /// Height of the image in the tab bar
+  final double height;
+  
+  /// Get the appropriate image for the current platform
+  String get imageForIOS => iosImage ?? materialImage;
+  String get imageForMaterial => materialImage;
+}
+
 /// Extension to make it easier to add SF Symbol metadata to BottomNavigationBarItem
 extension BottomNavigationBarItemNativeExtension on BottomNavigationBarItem {
   /// Create a BottomNavigationBarItem with SF Symbol metadata for native iOS tab bars

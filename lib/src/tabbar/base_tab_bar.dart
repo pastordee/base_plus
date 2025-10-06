@@ -1,4 +1,3 @@
-import 'dart:ui' show ImageFilter;
 import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoDynamicColor;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show MouseCursor;
@@ -390,12 +389,33 @@ class BaseTabBar extends BaseStatelessWidget {
 
   /// Build native CNTabBar using cupertino_native package
   /// Provides authentic iOS 26 tab bar with SF Symbols
+  /// 
+  /// Note: CNTabBar only supports SF Symbols. If custom images are detected,
+  /// this will automatically fall back to standard CupertinoTabBar which supports
+  /// any widget (including images) as icons.
   Widget _buildNativeCupertinoTabBar(BuildContext context) {
     final ValueChanged<int>? onTap = valueOf('onTap', this.onTap);
     final List<BottomNavigationBarItem>? items = valueOf('items', this.items);
     
     if (items == null || items.isEmpty) {
       // Fallback if no items
+      return buildCupertinoTabBar(context);
+    }
+
+    // Check if any items use custom images
+    bool hasCustomImages = items.any((item) {
+      if (item.icon is KeyedSubtree) {
+        final KeyedSubtree keyedIcon = item.icon as KeyedSubtree;
+        return keyedIcon.key is BaseCustomImageKey;
+      } else if (item.icon is Image) {
+        return true; // Direct Image widget
+      }
+      return false;
+    });
+
+    // If custom images are used, fall back to standard CupertinoTabBar
+    // which supports arbitrary widgets as icons
+    if (hasCustomImages) {
       return buildCupertinoTabBar(context);
     }
 
@@ -410,27 +430,26 @@ class BaseTabBar extends BaseStatelessWidget {
       };
     }
 
-    // Convert BottomNavigationBarItem to CNTabBarItem
+    // Convert BottomNavigationBarItem to CNTabBarItem (SF Symbols only)
     final List<CNTabBarItem> cnItems = items.map((item) {
-      // Extract icon name from item
-      String iconName = 'circle.fill'; // Default icon
+      String sfSymbolName = 'circle.fill'; // Default icon
       String label = item.label ?? '';
       
-      // Check if icon has SF Symbol metadata via BaseNativeTabBarItemKey
+      // Priority 1: Check for SF Symbol metadata via BaseNativeTabBarItemKey
       if (item.icon is KeyedSubtree) {
         final KeyedSubtree keyedIcon = item.icon as KeyedSubtree;
         if (keyedIcon.key is BaseNativeTabBarItemKey) {
-          iconName = (keyedIcon.key as BaseNativeTabBarItemKey).sfSymbolName;
+          sfSymbolName = (keyedIcon.key as BaseNativeTabBarItemKey).sfSymbolName;
         }
       } else if (item.icon is Icon) {
-        // Fallback: try to map common icons to SF Symbols
+        // Priority 2: Try to map Material icon to SF Symbol
         final Icon icon = item.icon as Icon;
-        iconName = _mapIconToSFSymbol(icon.icon);
+        sfSymbolName = _mapIconToSFSymbol(icon.icon);
       }
 
       return CNTabBarItem(
         label: label,
-        icon: CNSymbol(iconName),
+        icon: CNSymbol(sfSymbolName),
       );
     }).toList();
 
@@ -468,23 +487,109 @@ class BaseTabBar extends BaseStatelessWidget {
 
   /// Map common Flutter icons to SF Symbol names
   /// This provides reasonable defaults for standard navigation icons
+  /// Expanded mapping for better automatic conversion support
   String _mapIconToSFSymbol(IconData? iconData) {
     if (iconData == null) return 'circle.fill';
     
-    // Map based on icon code point (this is a simplified mapping)
-    // In a real implementation, you'd want a more comprehensive mapping
-    // or custom metadata to specify SF Symbol names
+    // Comprehensive mapping of Material icons to SF Symbols
+    // Based on icon code points for accurate matching
     final Map<int, String> iconMap = {
+      // Navigation & UI
       0xe318: 'house.fill', // Icons.home
+      0xe88a: 'house', // Icons.home_outlined
       0xe8b5: 'magnifyingglass', // Icons.search
+      0xe8b6: 'magnifyingglass', // Icons.search_outlined
       0xe7fd: 'person.crop.circle', // Icons.person
+      0xe7ff: 'person.crop.circle', // Icons.person_outline
       0xe571: 'gearshape.fill', // Icons.settings
+      0xe8b8: 'gearshape', // Icons.settings_outlined
+      
+      // Common Actions
+      0xe145: 'plus.circle.fill', // Icons.add
+      0xe147: 'plus.circle', // Icons.add_circle_outline
+      0xe15b: 'checkmark.circle.fill', // Icons.check_circle
+      0xe16c: 'xmark.circle.fill', // Icons.cancel
+      0xe5c4: 'arrow.right', // Icons.arrow_forward
+      0xe5c8: 'arrow.left', // Icons.arrow_back
+      0xe5d8: 'arrow.up', // Icons.arrow_upward
+      0xe5db: 'arrow.down', // Icons.arrow_downward
+      0xe3af: 'ellipsis.circle', // Icons.more_horiz
+      0xe3b0: 'ellipsis', // Icons.more_vert
+      
+      // Communication
       0xe0e0: 'heart.fill', // Icons.favorite
+      0xe0e1: 'heart', // Icons.favorite_border
       0xe24d: 'bell.fill', // Icons.notifications
+      0xe250: 'bell', // Icons.notifications_outlined
       0xe0be: 'envelope.fill', // Icons.email
+      0xe0bf: 'envelope', // Icons.email_outlined
       0xe0c8: 'phone.fill', // Icons.phone
+      0xe0cd: 'phone', // Icons.phone_outlined
+      0xe0ca: 'message.fill', // Icons.message
+      0xe0cb: 'message', // Icons.chat_bubble_outline
+      
+      // Media
       0xe157: 'camera.fill', // Icons.camera
+      0xe3b3: 'camera', // Icons.camera_alt_outlined
       0xe412: 'photo.fill', // Icons.photo
+      0xe413: 'photo', // Icons.photo_outlined
+      0xe04b: 'play.circle.fill', // Icons.play_circle_filled
+      0xe04c: 'play.circle', // Icons.play_circle_outline
+      0xe039: 'pause.circle.fill', // Icons.pause_circle_filled
+      0xe1a7: 'music.note', // Icons.music_note
+      0xe04e: 'video.fill', // Icons.videocam
+      0xe04f: 'video', // Icons.videocam_outlined
+      
+      // Location & Travel
+      0xe55f: 'mappin.circle.fill', // Icons.location_on
+      0xe1b1: 'map.fill', // Icons.map
+      0xe1b2: 'map', // Icons.map_outlined
+      0xe531: 'airplane', // Icons.flight
+      0xe1e3: 'car.fill', // Icons.directions_car
+      
+      // Shopping & Business
+      0xe8cc: 'cart.fill', // Icons.shopping_cart
+      0xe8cb: 'cart', // Icons.shopping_cart_outlined
+      0xe8d1: 'bag.fill', // Icons.shopping_bag
+      0xe8de: 'creditcard.fill', // Icons.payment
+      0xe227: 'dollarsign.circle.fill', // Icons.attach_money
+      
+      // Documents & Files
+      0xe1af: 'doc.fill', // Icons.description
+      0xe873: 'folder.fill', // Icons.folder
+      0xe2c7: 'doc.text.fill', // Icons.insert_drive_file
+      0xe226: 'arrow.down.doc.fill', // Icons.download
+      0xe2c6: 'square.and.arrow.up.fill', // Icons.upload
+      0xe14d: 'paperclip', // Icons.attach_file
+      
+      // Social & Sharing
+      0xe80d: 'square.and.arrow.up', // Icons.share
+      0xe866: 'person.2.fill', // Icons.group
+      0xe7ee: 'bubble.left.and.bubble.right.fill', // Icons.forum
+      0xe8f2: 'star.fill', // Icons.star
+      0xe8f3: 'star', // Icons.star_border
+      0xe8f5: 'star.leadinghalf.filled', // Icons.star_half
+      
+      // Time & Calendar
+      0xe192: 'calendar', // Icons.calendar_today
+      0xe8df: 'clock.fill', // Icons.access_time
+      0xe425: 'timer', // Icons.timer
+      0xe8b1: 'alarm.fill', // Icons.alarm
+      
+      // Utilities
+      0xe897: 'lock.fill', // Icons.lock
+      0xe898: 'lock.open.fill', // Icons.lock_open
+      0xe8a1: 'eye.fill', // Icons.visibility
+      0xe8a2: 'eye.slash.fill', // Icons.visibility_off
+      0xe3c9: 'info.circle.fill', // Icons.info
+      0xe002: 'exclamationmark.triangle.fill', // Icons.warning
+      0xe000: 'exclamationmark.circle.fill', // Icons.error
+      0xe86c: 'power', // Icons.power_settings_new
+      
+      // Basic Shapes
+      0xe5d2: 'circle.fill', // Icons.circle
+      0xe24a: 'square.fill', // Icons.crop_square
+      0xe86a: 'star.circle.fill', // Icons.stars
     };
 
     return iconMap[iconData.codePoint] ?? 'circle.fill';
@@ -591,99 +696,6 @@ class BaseTabBar extends BaseStatelessWidget {
       );
     }).toList();
   }
-
-  /// iOS 26 Liquid Glass Dynamic Material wrapper for tab bars
-  /// 
-  /// Implements sophisticated optical properties for tab navigation including:
-  /// - Environmental transparency with adaptive opacity
-  /// - Subtle reflections for spatial awareness
-  /// - Enhanced interaction states for navigation clarity
-  Widget _wrapWithLiquidGlass(BuildContext context, Widget child) {
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
-    final glassOpacity = valueOf('glassOpacity', this.glassOpacity);
-    final reflectionIntensity = valueOf('reflectionIntensity', this.reflectionIntensity);
-    
-    // Wrap in a Container that allows pointer events to pass through
-    return Stack(
-      children: [
-        // Background effects layer (non-interactive)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Container(
-              // decoration: BoxDecoration(
-              //   color: Colors.transparent,
-              //   // Gradient background with environmental transparency
-              //   gradient: const LinearGradient(
-              //     begin: Alignment.topCenter,
-              //     end: Alignment.bottomCenter,
-              //     stops: [0.0, 0.3, 0.7, 1.0],
-              //     colors: [
-              //       Colors.transparent,
-              //       Colors.transparent,
-              //       Colors.transparent,
-              //     ],
-              //   ),
-              //   // Subtle shadow for material presence
-              //   boxShadow: [
-              //     BoxShadow(
-              //       color: (isDark ? Colors.black : Colors.grey.shade300).withOpacity(0.2),
-              //       offset: const Offset(0, -2),
-              //       blurRadius: 8,
-              //       spreadRadius: 0,
-              //     ),
-              //     // Environmental reflection shadow
-              //     BoxShadow(
-              //       color: (isDark ? Colors.white : Colors.black).withOpacity(reflectionIntensity * 0.05),
-              //       offset: const Offset(0, -1),
-              //       blurRadius: 4,
-              //       spreadRadius: -1,
-              //     ),
-              //   ],
-              // ),
-              // child: ClipRRect(
-              //   child: BackdropFilter(
-              //     filter: ImageFilter.blur(
-              //       sigmaX: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-              //       sigmaY: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-              //     ),
-              //     child: Container(
-              //       decoration: BoxDecoration(
-              //         // Subtle reflective overlay for optical enhancement
-              //         gradient: LinearGradient(
-              //           begin: Alignment.topCenter,
-              //           end: Alignment.bottomCenter,
-              //           colors: [
-              //             Colors.white.withOpacity(reflectionIntensity * 0.1),
-              //             Colors.white.withOpacity(reflectionIntensity * 0.05),
-              //             Colors.transparent,
-              //           ],
-              //           stops: const [0.0, 0.5, 1.0],
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ),
-          ),
-        ),
-        // Interactive child layer (receives pointer events)
-        child,
-      ],
-    );
-  }
-
-  // @Deprecated('已废弃')
-  // List<BottomNavigationBarItem> _buildBarItem(
-  //   BuildContext context,
-  //   List<BaseBarItem> items,
-  // ) {
-  //   final List<BottomNavigationBarItem> barItems = <BottomNavigationBarItem>[];
-  //   for (int i = 0; i < items.length; i++) {
-  //     barItems.add(items[i].build(context));
-  //   }
-  //   return barItems;
-  // }
 }
 
 const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(

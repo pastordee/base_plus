@@ -111,6 +111,8 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
     const _HomePage(),
     const _SearchPage(),
     const _ProfilePage(),
+    const _ProfilePage(),
+    const _ProfilePage(),
   ];
 
   @override
@@ -264,13 +266,10 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
   /// This demonstrates the recommended approach using BaseTabBar with SF Symbol metadata
   Widget _buildAutoBaseTabBar() {
     return BaseTabBar(
-      // Enable native iOS tab bar (will use CNTabBar on iOS, Material elsewhere)
+      // Enable native iOS tab bar (will use CNTabBar on iOS with SF Symbols, Material elsewhere)
       useNativeCupertinoTabBar: true,
-      cnSplit: true,
-      backgroundColor: Colors.red,
-      cnBackgroundOpacity: 0.1,
       items: [
-        // Approach 1: Using convenience factory method
+        // Approach 1: Using convenience factory method with SF Symbols
         BottomNavigationBarItemNativeExtension.withSFSymbol(
           sfSymbolName: SFSymbols.home,
           icon: const Icon(Icons.home_outlined),
@@ -278,7 +277,6 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           label: 'Home',
         ),
 
-        
         // Approach 2: Using KeyedSubtree manually for more control
         const BottomNavigationBarItem(
           icon: KeyedSubtree(
@@ -288,13 +286,30 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           activeIcon: Icon(Icons.search),
           label: 'Search',
         ),
+        
         // Approach 3: Let BaseTabBar automatically map icon to SF Symbol
-        // BaseTabBar will attempt to map Icons.person_outline to a corresponding SF Symbol
+        // BaseTabBar will attempt to map Icons.person_outline to 'person.crop.circle'
         const BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
           label: 'Profile',
         ),
+        
+        // Approach 4: Custom images with platform-specific assets
+        // NOTE: When custom images are used, BaseTabBar automatically falls back
+        // to standard CupertinoTabBar (not CNTabBar) since CNTabBar only supports SF Symbols
+        // BottomNavigationBarItem(
+        //   icon: Image.asset(
+        //     'assets/icons/custom_settings.png',
+        //     key: const BaseCustomImageKey(
+        //       materialImage: 'assets/icons/custom_settings.png',
+        //       iosImage: 'assets/icons/custom_settings_ios.png', // Optional iOS-specific version
+        //       width: 24,
+        //       height: 24,
+        //     ),
+        //   ),
+        //   label: 'Settings',
+        // ),
       ],
       currentIndex: _autoTabIndex,
       onTap: (index) {
