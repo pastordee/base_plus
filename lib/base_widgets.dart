@@ -26,5 +26,6 @@ export 'src/section/base_tile.dart';
 export 'src/slider/base_slider.dart';
 export 'src/switch/base_switch.dart';
 export 'src/tabbar/base_bar_item.dart';
+export 'src/tabbar/base_native_tab_bar_item.dart';
 export 'src/tabbar/base_tab_bar.dart';
 export 'src/text_field/base_text_field.dart';

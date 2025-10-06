@@ -13,6 +13,9 @@ dependencies:
     sdk: flutter
   vector_math: ^2.0.8
   get: ^4.6.6
+  cupertino_native: ^0.1.1
+  # liquid_glass_texture: ^0.0.4
+  # archive: 4.0.7
 
 dev_dependencies:
   flutter_test:

@@ -3,10 +3,12 @@ import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoDynamicCo
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show MouseCursor;
 import 'package:flutter/services.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../flutter/cupertino/bottom_tab_bar.dart';
+import 'base_native_tab_bar_item.dart';
 
 /// BaseTabBar with iOS 26 Liquid Glass Dynamic Material and Material 3 support
 /// 
@@ -26,10 +28,62 @@ import '../flutter/cupertino/bottom_tab_bar.dart';
 /// Cross-platform support:
 /// - CupertinoTabBar with Liquid Glass enhancement by cupertino
 /// - Material 3 TabBar with enhanced visual states by material
+/// - **Native iOS CNTabBar** with SF Symbols (cupertino_native package)
 /// *** not support cupertino = { forceUseMaterial: true }
 /// *** not support material = { forceUseCupertino: true }
 /// 
+/// Native iOS Tab Bar Integration:
+/// When [useNativeCupertinoTabBar] is enabled (default: true), BaseTabBar
+/// automatically uses CNTabBar from cupertino_native on iOS, providing
+/// authentic iOS 26 navigation with SF Symbols.
+/// 
+/// ## SF Symbol Specification Methods:
+/// 
+/// **Method 1: Convenience Factory (Recommended)**
+/// ```dart
+/// BaseTabBar(
+///   useNativeCupertinoTabBar: true,
+///   items: [
+///     BottomNavigationBarItemNativeExtension.withSFSymbol(
+///       sfSymbolName: SFSymbols.home,
+///       icon: Icon(Icons.home_outlined),
+///       activeIcon: Icon(Icons.home),
+///       label: 'Home',
+///     ),
+///   ],
+/// )
+/// ```
+/// 
+/// **Method 2: KeyedSubtree with Metadata**
+/// ```dart
+/// BottomNavigationBarItem(
+///   icon: KeyedSubtree(
+///     key: BaseNativeTabBarItemKey(SFSymbols.search),
+///     child: Icon(Icons.search_outlined),
+///   ),
+///   label: 'Search',
+/// )
+/// ```
+/// 
+/// **Method 3: Automatic Icon Mapping**
+/// ```dart
+/// BottomNavigationBarItem(
+///   icon: Icon(Icons.person_outline),
+///   label: 'Profile',
+/// )
+/// ```
+/// BaseTabBar will attempt to map common Material icons to corresponding SF Symbols.
+/// 
+/// ## SFSymbols Helper Class:
+/// Use the `SFSymbols` class for common SF Symbol names:
+/// - `SFSymbols.home` → 'house.fill'
+/// - `SFSymbols.search` → 'magnifyingglass'
+/// - `SFSymbols.profile` → 'person.crop.circle'
+/// - `SFSymbols.settings` → 'gearshape.fill'
+/// - And 30+ more...
+/// 
 /// Enhanced: 2024.01.20 with iOS 26 Liquid Glass Dynamic Material
+/// Enhanced: 2024.01.21 with Native iOS CNTabBar and SF Symbol integration
 class BaseTabBar extends BaseStatelessWidget {
   const BaseTabBar({
     Key? key,
@@ -71,6 +125,7 @@ class BaseTabBar extends BaseStatelessWidget {
     this.adaptiveInteraction = true,
     this.hapticFeedback = true,
     this.useMaterial3Tabs = true,
+    this.useNativeCupertinoTabBar = true, // Enable CNTabBar from cupertino_native
 
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
@@ -197,6 +252,11 @@ class BaseTabBar extends BaseStatelessWidget {
   /// Provides modern Material Design 3 tab patterns and tokens
   final bool useMaterial3Tabs;
 
+  /// Use native CNTabBar from cupertino_native package on iOS
+  /// Provides authentic iOS 26 tab bar with SF Symbols and native styling
+  /// When enabled, uses CNTabBar with CNTabBarItem and CNSymbol for icons
+  final bool useNativeCupertinoTabBar;
+
   /// *** iOS 26 Liquid Glass Dynamic Material properties end ***
 
   /// 用户BaseTabScaffold里构建bottomNavigationBar
@@ -234,11 +294,18 @@ class BaseTabBar extends BaseStatelessWidget {
       adaptiveInteraction: adaptiveInteraction,
       hapticFeedback: hapticFeedback,
       useMaterial3Tabs: useMaterial3Tabs,
+      useNativeCupertinoTabBar: useNativeCupertinoTabBar,
     );
   }
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Use native CNTabBar if enabled and items are available
+    if (valueOf('useNativeCupertinoTabBar', useNativeCupertinoTabBar)) {
+      return _buildNativeCupertinoTabBar(context);
+    }
+
+    // Fallback to standard CupertinoTabBar
     final CupertinoTabBar tabBar = buildCupertinoTabBar(context);
 
     // Apply iOS 26 Liquid Glass effects if enabled
@@ -247,6 +314,90 @@ class BaseTabBar extends BaseStatelessWidget {
     }
 
     return tabBar;
+  }
+
+  /// Build native CNTabBar using cupertino_native package
+  /// Provides authentic iOS 26 tab bar with SF Symbols
+  Widget _buildNativeCupertinoTabBar(BuildContext context) {
+    final ValueChanged<int>? onTap = valueOf('onTap', this.onTap);
+    final List<BottomNavigationBarItem>? items = valueOf('items', this.items);
+    
+    if (items == null || items.isEmpty) {
+      // Fallback if no items
+      return buildCupertinoTabBar(context);
+    }
+
+    // Enhanced onTap with haptic feedback
+    ValueChanged<int>? enhancedOnTap;
+    if (onTap != null) {
+      enhancedOnTap = (int index) {
+        if (valueOf('hapticFeedback', hapticFeedback) && valueOf('adaptiveInteraction', adaptiveInteraction)) {
+          HapticFeedback.selectionClick();
+        }
+        onTap(index);
+      };
+    }
+
+    // Convert BottomNavigationBarItem to CNTabBarItem
+    final List<CNTabBarItem> cnItems = items.map((item) {
+      // Extract icon name from item
+      String iconName = 'circle.fill'; // Default icon
+      String label = item.label ?? '';
+      
+      // Check if icon has SF Symbol metadata via BaseNativeTabBarItemKey
+      if (item.icon is KeyedSubtree) {
+        final KeyedSubtree keyedIcon = item.icon as KeyedSubtree;
+        if (keyedIcon.key is BaseNativeTabBarItemKey) {
+          iconName = (keyedIcon.key as BaseNativeTabBarItemKey).sfSymbolName;
+        }
+      } else if (item.icon is Icon) {
+        // Fallback: try to map common icons to SF Symbols
+        final Icon icon = item.icon as Icon;
+        iconName = _mapIconToSFSymbol(icon.icon);
+      }
+
+      return CNTabBarItem(
+        label: label,
+        icon: CNSymbol(iconName),
+      );
+    }).toList();
+
+    Widget tabBar = CNTabBar(
+      items: cnItems,
+      currentIndex: valueOf('currentIndex', currentIndex) ?? 0,
+      onTap: enhancedOnTap ?? (int index) {}, // Provide default no-op if null
+    );
+
+    // Apply iOS 26 Liquid Glass effects if enabled
+    if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+      return _wrapWithLiquidGlass(context, tabBar);
+    }
+
+    return tabBar;
+  }
+
+  /// Map common Flutter icons to SF Symbol names
+  /// This provides reasonable defaults for standard navigation icons
+  String _mapIconToSFSymbol(IconData? iconData) {
+    if (iconData == null) return 'circle.fill';
+    
+    // Map based on icon code point (this is a simplified mapping)
+    // In a real implementation, you'd want a more comprehensive mapping
+    // or custom metadata to specify SF Symbol names
+    final Map<int, String> iconMap = {
+      0xe318: 'house.fill', // Icons.home
+      0xe8b5: 'magnifyingglass', // Icons.search
+      0xe7fd: 'person.crop.circle', // Icons.person
+      0xe571: 'gearshape.fill', // Icons.settings
+      0xe0e0: 'heart.fill', // Icons.favorite
+      0xe24d: 'bell.fill', // Icons.notifications
+      0xe0be: 'envelope.fill', // Icons.email
+      0xe0c8: 'phone.fill', // Icons.phone
+      0xe157: 'camera.fill', // Icons.camera
+      0xe412: 'photo.fill', // Icons.photo
+    };
+
+    return iconMap[iconData.codePoint] ?? 'circle.fill';
   }
 
   /// Builds the raw CupertinoTabBar without Liquid Glass effects
@@ -363,61 +514,72 @@ class BaseTabBar extends BaseStatelessWidget {
     final glassOpacity = valueOf('glassOpacity', this.glassOpacity);
     final reflectionIntensity = valueOf('reflectionIntensity', this.reflectionIntensity);
     
-    return Container(
-      decoration: BoxDecoration(
-        // Gradient background with environmental transparency
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.3, 0.7, 1.0],
-          colors: [
-            Colors.transparent,
-            (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.08),
-            (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.12),
-            (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.15),
-          ],
-        ),
-        // Subtle shadow for material presence
-        boxShadow: [
-          BoxShadow(
-            color: (isDark ? Colors.black : Colors.grey.shade300).withOpacity(0.2),
-            offset: const Offset(0, -2),
-            blurRadius: 8,
-            spreadRadius: 0,
-          ),
-          // Environmental reflection shadow
-          BoxShadow(
-            color: (isDark ? Colors.white : Colors.black).withOpacity(reflectionIntensity * 0.05),
-            offset: const Offset(0, -1),
-            blurRadius: 4,
-            spreadRadius: -1,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-            sigmaY: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              // Subtle reflective overlay for optical enhancement
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(reflectionIntensity * 0.1),
-                  Colors.white.withOpacity(reflectionIntensity * 0.05),
-                  Colors.transparent,
+    // Wrap in a Container that allows pointer events to pass through
+    return Stack(
+      children: [
+        // Background effects layer (non-interactive)
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                // Gradient background with environmental transparency
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.3, 0.7, 1.0],
+                  colors: [
+                    Colors.transparent,
+                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.08),
+                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.12),
+                    (isDark ? Colors.white : Colors.black).withOpacity(glassOpacity * 0.15),
+                  ],
+                ),
+                // Subtle shadow for material presence
+                boxShadow: [
+                  BoxShadow(
+                    color: (isDark ? Colors.black : Colors.grey.shade300).withOpacity(0.2),
+                    offset: const Offset(0, -2),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                  ),
+                  // Environmental reflection shadow
+                  BoxShadow(
+                    color: (isDark ? Colors.white : Colors.black).withOpacity(reflectionIntensity * 0.05),
+                    offset: const Offset(0, -1),
+                    blurRadius: 4,
+                    spreadRadius: -1,
+                  ),
                 ],
-                stops: const [0.0, 0.5, 1.0],
+              ),
+              child: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
+                    sigmaY: valueOf('adaptiveInteraction', adaptiveInteraction) ? 10.0 : 0.0,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // Subtle reflective overlay for optical enhancement
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withOpacity(reflectionIntensity * 0.1),
+                          Colors.white.withOpacity(reflectionIntensity * 0.05),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            child: child,
           ),
         ),
-      ),
+        // Interactive child layer (receives pointer events)
+        child,
+      ],
     );
   }
 

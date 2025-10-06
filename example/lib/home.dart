@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import 'demos/base_navigation_drawer_demo.dart';
 import 'demos/base_tab_scaffold_demo.dart';
-import 'demos/bottom_navigation_demo.dart';
 import 'demos/demos.dart';
 import 'demos/scaffold/scaffold_demos.dart';
 import 'iconfont/iconfont.dart';
@@ -44,7 +43,7 @@ final List<Widget> _children = <Widget>[
       'Bottom Navigation',
       style: TextStyle(color: Colors.teal),
     ),
-    page: BottomNavigationDemo(),
+    page: BottomNavigationExample(),
     fullscreenGackGesture: false,
   ),
   const _Item(
@@ -163,6 +162,19 @@ final List<Widget> _children = <Widget>[
       style: TextStyle(color: Colors.indigo.withBlue(125)),
     ),
     page: const ToolsDemo(),
+  ),
+  const _Item(
+    icon: BaseIcon(
+      icon: Icons.water_drop,
+      size: 40,
+      color: Colors.lightBlue,
+    ),
+    title: Text(
+      'Enhanced Liquid Glass',
+      style: TextStyle(color: Colors.lightBlue),
+    ),
+    page: EnhancedLiquidGlassDemo(),
+    fullscreenGackGesture: false,
   ),
 ];
 
