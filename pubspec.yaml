@@ -1,9 +1,9 @@
 name: base
-publish_to: none
 description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
 version: 3.0.1
 # author: Nil <2073582423@qq.com>
 homepage: https://github.com/nillnil/flutter_base
+publish_to: none 
 
 
 environment:
@@ -15,6 +15,8 @@ dependencies:
     sdk: flutter
   vector_math: ^2.0.8
   get: ^4.6.6
+
+
   cupertino_native:
     git:
       url: https://github.com/pastordee/cupertino_native.git
