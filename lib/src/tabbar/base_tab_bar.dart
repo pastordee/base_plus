@@ -388,34 +388,15 @@ class BaseTabBar extends BaseStatelessWidget {
   }
 
   /// Build native CNTabBar using cupertino_native package
-  /// Provides authentic iOS 26 tab bar with SF Symbols
+  /// Provides authentic iOS 26 tab bar with SF Symbols and custom images
   /// 
-  /// Note: CNTabBar only supports SF Symbols. If custom images are detected,
-  /// this will automatically fall back to standard CupertinoTabBar which supports
-  /// any widget (including images) as icons.
+  /// Supports both SF Symbols and custom images via CNTabBarItem's image property
   Widget _buildNativeCupertinoTabBar(BuildContext context) {
     final ValueChanged<int>? onTap = valueOf('onTap', this.onTap);
     final List<BottomNavigationBarItem>? items = valueOf('items', this.items);
     
     if (items == null || items.isEmpty) {
       // Fallback if no items
-      return buildCupertinoTabBar(context);
-    }
-
-    // Check if any items use custom images
-    bool hasCustomImages = items.any((item) {
-      if (item.icon is KeyedSubtree) {
-        final KeyedSubtree keyedIcon = item.icon as KeyedSubtree;
-        return keyedIcon.key is BaseCustomImageKey;
-      } else if (item.icon is Image) {
-        return true; // Direct Image widget
-      }
-      return false;
-    });
-
-    // If custom images are used, fall back to standard CupertinoTabBar
-    // which supports arbitrary widgets as icons
-    if (hasCustomImages) {
       return buildCupertinoTabBar(context);
     }
 
@@ -430,26 +411,65 @@ class BaseTabBar extends BaseStatelessWidget {
       };
     }
 
-    // Convert BottomNavigationBarItem to CNTabBarItem (SF Symbols only)
+    // Convert BottomNavigationBarItem to CNTabBarItem (supports both SF Symbols and images)
     final List<CNTabBarItem> cnItems = items.map((item) {
-      String sfSymbolName = 'circle.fill'; // Default icon
       String label = item.label ?? '';
       
-      // Priority 1: Check for SF Symbol metadata via BaseNativeTabBarItemKey
+      // Check for custom image metadata via BaseCustomImageKey
       if (item.icon is KeyedSubtree) {
         final KeyedSubtree keyedIcon = item.icon as KeyedSubtree;
-        if (keyedIcon.key is BaseNativeTabBarItemKey) {
-          sfSymbolName = (keyedIcon.key as BaseNativeTabBarItemKey).sfSymbolName;
+        
+        if (keyedIcon.key is BaseCustomImageKey) {
+          // Custom image - use CNTabBarItem's image property
+          final BaseCustomImageKey imageKey = keyedIcon.key as BaseCustomImageKey;
+          return CNTabBarItem(
+            label: label,
+            image: AssetImage(imageKey.imageForIOS),
+            imageSize: imageKey.imageSize,
+          );
+        } else if (keyedIcon.key is BaseNativeTabBarItemKey) {
+          // SF Symbol specified
+          final String sfSymbolName = (keyedIcon.key as BaseNativeTabBarItemKey).sfSymbolName;
+          return CNTabBarItem(
+            label: label,
+            icon: CNSymbol(sfSymbolName),
+          );
+        }
+      } else if (item.icon is Image) {
+        // Direct Image widget - check for BaseCustomImageKey in its key
+        final Image imageIcon = item.icon as Image;
+        if (imageIcon.key is BaseCustomImageKey) {
+          final BaseCustomImageKey imageKey = imageIcon.key as BaseCustomImageKey;
+          return CNTabBarItem(
+            label: label,
+            image: AssetImage(imageKey.imageForIOS),
+            imageSize: imageKey.imageSize,
+          );
+        }
+        // If no metadata, try to extract image from the widget
+        // This is a fallback for direct Image.asset usage without metadata
+        if (imageIcon.image is AssetImage) {
+          final AssetImage assetImage = imageIcon.image as AssetImage;
+          return CNTabBarItem(
+            label: label,
+            image: assetImage,
+            imageSize: 28.0, // Default size
+          );
         }
       } else if (item.icon is Icon) {
-        // Priority 2: Try to map Material icon to SF Symbol
+        // Material icon - map to SF Symbol
         final Icon icon = item.icon as Icon;
-        sfSymbolName = _mapIconToSFSymbol(icon.icon);
+        final String sfSymbolName = _mapIconToSFSymbol(icon.icon);
+        return CNTabBarItem(
+          label: label,
+          icon: CNSymbol(sfSymbolName),
+        );
       }
-
+      
+      // Fallback: default SF Symbol
       return CNTabBarItem(
         label: label,
-        icon: CNSymbol(sfSymbolName),
+        icon: CNSymbol('circle.fill'),
       );
     }).toList();
 

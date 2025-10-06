@@ -286,7 +286,18 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           activeIcon: Icon(Icons.search),
           label: 'Search',
         ),
-        
+
+        BottomNavigationBarItem(
+          icon: Image.asset(
+            'assets/custom.png',
+            key: BaseCustomImageKey(
+              materialImage: 'assets/pray_new.png',
+              imageSize: 28.0,
+            ),
+          ),
+          label: 'Custom',
+        ),
+                
         // Approach 3: Let BaseTabBar automatically map icon to SF Symbol
         // BaseTabBar will attempt to map Icons.person_outline to 'person.crop.circle'
         const BottomNavigationBarItem(
@@ -295,20 +306,31 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           label: 'Profile',
         ),
         
-        // Approach 4: Custom images with platform-specific assets
-        // NOTE: When custom images are used, BaseTabBar automatically falls back
-        // to standard CupertinoTabBar (not CNTabBar) since CNTabBar only supports SF Symbols
+        // Approach 4: Custom images using convenience factory (NEW!)
+        // This works with CNTabBar on iOS using native image property
+        // To use this, uncomment and add your image assets:
+        // BottomNavigationBarItemNativeExtension.withImage(
+        //   materialImage: 'assets/icons/custom_settings.png',
+        //   iosImage: 'assets/icons/custom_settings_ios.png', // Optional iOS-specific
+        //   imageSize: 28.0,  // iOS size in points
+        //   width: 24.0,      // Material size
+        //   height: 24.0,
+        //   label: 'Settings',
+        // ),
+        //
+        // Alternative: Manual approach with BaseCustomImageKey
         // BottomNavigationBarItem(
         //   icon: Image.asset(
-        //     'assets/icons/custom_settings.png',
+        //     'assets/icons/custom.png',
         //     key: const BaseCustomImageKey(
-        //       materialImage: 'assets/icons/custom_settings.png',
-        //       iosImage: 'assets/icons/custom_settings_ios.png', // Optional iOS-specific version
-        //       width: 24,
-        //       height: 24,
+        //       materialImage: 'assets/icons/custom.png',
+        //       iosImage: 'assets/icons/custom_ios.png',
+        //       imageSize: 28.0,
+        //       width: 24.0,
+        //       height: 24.0,
         //     ),
         //   ),
-        //   label: 'Settings',
+        //   label: 'Custom',
         // ),
       ],
       currentIndex: _autoTabIndex,

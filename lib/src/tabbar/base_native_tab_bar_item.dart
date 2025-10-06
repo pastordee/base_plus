@@ -22,15 +22,19 @@ class BaseNativeTabBarItemKey extends ValueKey<String> {
 /// Metadata for custom image-based tab bar items
 /// 
 /// Use this to specify custom image assets for both Material and iOS platforms.
-/// When iOS image is not provided, the Material image will be used for both.
+/// On iOS with CNTabBar, uses the native `image` property for better performance.
 /// 
 /// Example with platform-specific images:
 /// ```dart
 /// BottomNavigationBarItem(
-///   icon: Image.asset('assets/home.png', key: BaseCustomImageKey(
-///     materialImage: 'assets/home.png',
-///     iosImage: 'assets/home_ios.png',
-///   )),
+///   icon: Image.asset(
+///     'assets/home.png',
+///     key: BaseCustomImageKey(
+///       materialImage: 'assets/home.png',
+///       iosImage: 'assets/home_ios.png',
+///       imageSize: 28.0, // Size in points for iOS
+///     ),
+///   ),
 ///   label: 'Home',
 /// )
 /// ```
@@ -38,9 +42,13 @@ class BaseNativeTabBarItemKey extends ValueKey<String> {
 /// Example with single image for all platforms:
 /// ```dart
 /// BottomNavigationBarItem(
-///   icon: Image.asset('assets/home.png', key: BaseCustomImageKey(
-///     materialImage: 'assets/home.png',
-///   )),
+///   icon: Image.asset(
+///     'assets/home.png',
+///     key: BaseCustomImageKey(
+///       materialImage: 'assets/home.png',
+///       imageSize: 28.0,
+///     ),
+///   ),
 ///   label: 'Home',
 /// )
 /// ```
@@ -48,6 +56,7 @@ class BaseCustomImageKey extends ValueKey<String> {
   const BaseCustomImageKey({
     required this.materialImage,
     this.iosImage,
+    this.imageSize = 28.0,
     this.width = 24.0,
     this.height = 24.0,
   }) : super(materialImage);
@@ -58,10 +67,14 @@ class BaseCustomImageKey extends ValueKey<String> {
   /// The image asset path for iOS (optional, uses materialImage if not provided)
   final String? iosImage;
   
-  /// Width of the image in the tab bar
+  /// Size of the image in points for iOS CNTabBar (default: 28.0)
+  /// This is used with CNTabBarItem's imageSize property
+  final double imageSize;
+  
+  /// Width of the image in the tab bar for Material design (default: 24.0)
   final double width;
   
-  /// Height of the image in the tab bar
+  /// Height of the image in the tab bar for Material design (default: 24.0)
   final double height;
   
   /// Get the appropriate image for the current platform
@@ -88,6 +101,53 @@ extension BottomNavigationBarItemNativeExtension on BottomNavigationBarItem {
 
     return BottomNavigationBarItem(
       icon: keyedIcon,
+      activeIcon: activeIcon,
+      label: label,
+      tooltip: tooltip,
+      backgroundColor: backgroundColor,
+    );
+  }
+
+  /// Create a BottomNavigationBarItem with custom image for native iOS tab bars
+  /// 
+  /// Uses CNTabBarItem's native image property on iOS for better performance.
+  /// 
+  /// Example:
+  /// ```dart
+  /// BottomNavigationBarItemNativeExtension.withImage(
+  ///   materialImage: 'assets/icons/custom.png',
+  ///   iosImage: 'assets/icons/custom_ios.png', // Optional
+  ///   imageSize: 28.0, // iOS size in points
+  ///   label: 'Custom',
+  /// )
+  /// ```
+  static BottomNavigationBarItem withImage({
+    required String materialImage,
+    String? iosImage,
+    double imageSize = 28.0,
+    double width = 24.0,
+    double height = 24.0,
+    String? label,
+    Widget? activeIcon,
+    String? tooltip,
+    Color? backgroundColor,
+  }) {
+    // Create the icon with BaseCustomImageKey metadata
+    final Widget icon = Image.asset(
+      materialImage,
+      key: BaseCustomImageKey(
+        materialImage: materialImage,
+        iosImage: iosImage,
+        imageSize: imageSize,
+        width: width,
+        height: height,
+      ),
+      width: width,
+      height: height,
+    );
+
+    return BottomNavigationBarItem(
+      icon: icon,
       activeIcon: activeIcon,
       label: label,
       tooltip: tooltip,

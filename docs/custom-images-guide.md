@@ -7,15 +7,15 @@ This guide explains how to use custom images (PNG, SVG, etc.) in your tab bar ic
 `BaseTabBar` supports multiple icon types:
 1. **Material Icons** → Auto-mapped to SF Symbols on iOS
 2. **SF Symbols** → Explicit SF Symbol specification  
-3. **Custom Images** → Your own image assets
+3. **Custom Images** → Your own image assets (PNG, JPG, etc.)
 
 ## Custom Image Support
 
 ### How It Works
 
-- **iOS with CNTabBar**: CNTabBar (native iOS tab bar) **only supports SF Symbols**
-- **Custom images on iOS**: BaseTabBar **automatically falls back** to standard `CupertinoTabBar` which supports any widget
-- **Android/Material**: Custom images work seamlessly with `BottomNavigationBar`
+- **iOS with CNTabBar**: Uses CNTabBarItem's native `image` property with `AssetImage`
+- **Custom images on iOS**: Works seamlessly with CNTabBar (no fallback needed!)
+- **Android/Material**: Custom images work with `BottomNavigationBar` as widgets
 
 ### Platform-Specific Images
 
@@ -28,8 +28,9 @@ BottomNavigationBarItem(
     key: const BaseCustomImageKey(
       materialImage: 'assets/icons/home_material.png',
       iosImage: 'assets/icons/home_ios.png',
-      width: 24,
-      height: 24,
+      imageSize: 28.0,  // Size in points for iOS CNTabBar
+      width: 24.0,      // Size for Material design
+      height: 24.0,
     ),
   ),
   label: 'Home',
@@ -46,8 +47,9 @@ BottomNavigationBarItem(
     'assets/icons/home.png',
     key: const BaseCustomImageKey(
       materialImage: 'assets/icons/home.png',
-      width: 24,
-      height: 24,
+      imageSize: 28.0,
+      width: 24.0,
+      height: 24.0,
     ),
   ),
   label: 'Home',
@@ -127,8 +129,9 @@ class BaseCustomImageKey {
   const BaseCustomImageKey({
     required String materialImage,  // Required: Asset path for Material design
     String? iosImage,                // Optional: iOS-specific asset path
-    double width = 24.0,             // Icon width in the tab bar
-    double height = 24.0,            // Icon height in the tab bar
+    double imageSize = 28.0,         // Size in points for iOS CNTabBar
+    double width = 24.0,             // Icon width for Material design
+    double height = 24.0,            // Icon height for Material design
   });
 }
 ```
@@ -137,8 +140,9 @@ class BaseCustomImageKey {
 
 - **`materialImage`** (required): Path to the image asset used on Android/Material design
 - **`iosImage`** (optional): Path to iOS-specific image. If not provided, `materialImage` is used
-- **`width`**: Width of the image in logical pixels (default: 24.0)
-- **`height`**: Height of the image in logical pixels (default: 24.0)
+- **`imageSize`**: Size of the image in points for iOS CNTabBar (default: 28.0)
+- **`width`**: Width of the image in logical pixels for Material design (default: 24.0)
+- **`height`**: Height of the image in logical pixels for Material design (default: 24.0)
 
 ## Asset Setup
 
@@ -202,53 +206,66 @@ BaseCustomImageKey(
 |-----------|-------------------|-------------------------------------|
 | Material Icon | BottomNavigationBar | CNTabBar (auto-mapped to SF Symbol) |
 | SF Symbol (explicit) | BottomNavigationBar (shows Material icon) | CNTabBar (SF Symbol) |
-| Custom Image | BottomNavigationBar (image) | CupertinoTabBar (image) ⚠️ |
-| Mixed | BottomNavigationBar | CupertinoTabBar (if any custom images) |
+| Custom Image | BottomNavigationBar (image widget) | **CNTabBar (native image)** ✨ |
+| Mixed | BottomNavigationBar | CNTabBar with SF Symbols + Images ✨ |
 
-⚠️ **Important**: If **any** tab item uses a custom image, `BaseTabBar` falls back from `CNTabBar` to standard `CupertinoTabBar` because CNTabBar only supports SF Symbols.
+✨ **Great News**: Custom images now work seamlessly with `CNTabBar` using the native `image` property!
 
-## Automatic Fallback
+## Native Image Support in CNTabBar
 
-When `useNativeCupertinoTabBar: true` and custom images are detected:
+CNTabBar supports custom images through its `image` property. BaseTabBar automatically:
+
+1. Detects `BaseCustomImageKey` metadata
+2. Extracts the appropriate image path for iOS
+3. Creates CNTabBarItem with `image: AssetImage(path)` and `imageSize`
+4. No fallback needed - stays with native CNTabBar!
 
 ```dart
-// BaseTabBar internally:
-bool hasCustomImages = items.any((item) => 
-  item.icon is Image || 
-  (item.icon has BaseCustomImageKey)
-);
-
-if (hasCustomImages) {
-  return buildCupertinoTabBar(context); // Standard tab bar with image support
-} else {
-  return CNTabBar(...); // Native iOS tab bar with SF Symbols only
-}
+// Internally, BaseTabBar creates:
+CNTabBarItem(
+  label: 'Custom',
+  image: AssetImage('assets/my_icon.png'),
+  imageSize: 28, // Control the size in points!
+)
 ```
 
 ## Combining Approaches
 
-You can mix different icon specification methods:
+You can mix different icon specification methods - they all work with CNTabBar!
 
 ```dart
 BaseTabBar(
+  useNativeCupertinoTabBar: true,
   items: [
-    // SF Symbol (CNTabBar on iOS)
+    // SF Symbol
     BottomNavigationBarItemNativeExtension.withSFSymbol(
       sfSymbolName: 'house.fill',
       icon: Icon(Icons.home),
       label: 'Home',
     ),
     
-    // Custom image (triggers fallback to CupertinoTabBar)
+    // Custom image (CNTabBar native image support!)
     BottomNavigationBarItem(
-      icon: Image.asset('assets/custom.png'),
+      icon: Image.asset(
+        'assets/custom.png',
+        key: BaseCustomImageKey(
+          materialImage: 'assets/custom.png',
+          imageSize: 28.0,
+        ),
+      ),
       label: 'Custom',
+    ),
+    
+    // Auto-mapped Material icon
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings),
+      label: 'Settings',
     ),
   ],
 )
 ```
 
-**Result**: BaseTabBar uses standard `CupertinoTabBar` to support the custom image.
+**Result**: All items work together in CNTabBar on iOS - SF Symbols, custom images, and auto-mapped icons!
 
 ## SVG Support
 
@@ -341,12 +358,14 @@ BottomNavigationBarItem(
 - Ensure `BaseCustomImageKey` is set correctly
 - Check that `materialImage` is always specified
 - Verify `iosImage` path exists in assets
+- Check `imageSize` value for iOS (typically 24-32 points)
 
-### CNTabBar not used
+### CNTabBar still shows default icons
 
-- If **any** item has a custom image, BaseTabBar falls back to `CupertinoTabBar`
-- This is expected behavior since CNTabBar only supports SF Symbols
-- To use CNTabBar, all icons must be Material Icons or SF Symbols
+- If **any** item fails to load its image, CNTabBar may show fallback icons
+- Verify all image paths are correct in `pubspec.yaml`
+- Check console for image loading errors
+- Ensure `imageSize` is appropriate for your design (default: 28.0)
 
 ## See Also
 
