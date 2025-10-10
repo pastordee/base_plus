@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'demos/base_navigation_drawer_demo.dart';
 import 'demos/base_tab_scaffold_demo.dart';
+import 'demos/cupertino_native_demo.dart';
 import 'demos/demos.dart';
 import 'demos/scaffold/scaffold_demos.dart';
 import 'iconfont/iconfont.dart';
@@ -174,6 +175,19 @@ final List<Widget> _children = <Widget>[
       style: TextStyle(color: Colors.lightBlue),
     ),
     page: EnhancedLiquidGlassDemo(),
+    fullscreenGackGesture: false,
+  ),
+  const _Item(
+    icon: BaseIcon(
+      icon: Icons.apple,
+      size: 40,
+      color: Colors.cyan,
+    ),
+    title: Text(
+      'Native Components',
+      style: TextStyle(color: Colors.cyan),
+    ),
+    page: CupertinoNativeDemo(),
     fullscreenGackGesture: false,
   ),
 ];

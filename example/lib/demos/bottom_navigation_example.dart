@@ -2,6 +2,8 @@ import 'package:base/base.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/material.dart';
 
+import 'cupertino_native_demo.dart';
+
 /// Example demonstrating proper bottom navigation implementation using BaseScaffold
 /// 
 /// This example shows three approaches:
@@ -111,7 +113,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
     const _HomePage(),
     const _SearchPage(),
     const _ProfilePage(),
-    const _ProfilePage(),
+    const CupertinoNativeDemo(),
     const _ProfilePage(),
   ];
 
@@ -135,45 +137,35 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
         title: const Text('Bottom Navigation'),
         centerTitle: true,
         actions: [
-          // Toggle between three approaches
-          PopupMenuButton<String>(
-            icon: Icon(_selectedApproach == 'material' 
-                ? Icons.android 
-                : (_selectedApproach == 'native' ? Icons.apple : Icons.phonelink)),
-            onSelected: (value) => setState(() => _selectedApproach = value),
-            tooltip: 'Switch Navigation Style',
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'material',
-                child: Row(
-                  children: [
-                    Icon(Icons.android),
-                    SizedBox(width: 8),
-                    Text('Material Design'),
-                  ],
-                ),
+          // Toggle between three approaches using BasePopupMenuButton
+          BasePopupMenuButton.icon(
+            items: const [
+              BasePopupMenuItem(
+                label: 'Material Design',
+                iosIcon: 'square.grid.2x2',
+                iconData: Icons.grid_view,
               ),
-              const PopupMenuItem(
-                value: 'native',
-                child: Row(
-                  children: [
-                    Icon(Icons.apple),
-                    SizedBox(width: 8),
-                    Text('Native iOS (CNTabBar)'),
-                  ],
-                ),
+              BasePopupMenuItem(
+                label: 'Native iOS (CNTabBar)',
+                iosIcon: 'apple.logo',
+                iconData: Icons.phone_iphone,
               ),
-              const PopupMenuItem(
-                value: 'auto',
-                child: Row(
-                  children: [
-                    Icon(Icons.phonelink),
-                    SizedBox(width: 8),
-                    Text('Auto (BaseTabBar)'),
-                  ],
-                ),
+              BasePopupMenuItem(
+                label: 'Auto (BaseTabBar)',
+                iosIcon: 'iphone',
+                iconData: Icons.smartphone,
               ),
             ],
+            onSelected: (index) {
+              final approaches = ['material', 'native', 'auto'];
+              setState(() => _selectedApproach = approaches[index]);
+            },
+            iosIcon: _selectedApproach == 'material' 
+                ? 'square.grid.2x2' 
+                : (_selectedApproach == 'native' ? 'apple.logo' : 'iphone'),
+            materialIcon: _selectedApproach == 'material'
+                ? Icons.grid_view
+                : (_selectedApproach == 'native' ? Icons.phone_iphone : Icons.smartphone),
           ),
         ],
       ),
@@ -204,6 +196,16 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
           label: 'Profile',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.apple),
+          activeIcon: Icon(Icons.apple),
+          label: 'Native',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings_outlined),
+          activeIcon: Icon(Icons.settings),
+          label: 'Settings',
         ),
       ],
       currentIndex: _currentIndex,
@@ -256,6 +258,8 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
         CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
         CNTabBarItem(label: 'Search', icon: CNSymbol('magnifyingglass')),
         CNTabBarItem(label: 'Profile', icon: CNSymbol('person.crop.circle')),
+        CNTabBarItem(label: 'Native', icon: CNSymbol('apple.logo')),
+        CNTabBarItem(label: 'Settings', icon: CNSymbol('gearshape.fill')),
       ],
       currentIndex: _tabIndex,
       onTap: (i) => setState(() => _tabIndex = i),
@@ -286,17 +290,6 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           activeIcon: Icon(Icons.search),
           label: 'Search',
         ),
-
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/custom.png',
-            key: BaseCustomImageKey(
-              materialImage: 'assets/pray_new.png',
-              imageSize: 28.0,
-            ),
-          ),
-          label: 'Custom',
-        ),
                 
         // Approach 3: Let BaseTabBar automatically map icon to SF Symbol
         // BaseTabBar will attempt to map Icons.person_outline to 'person.crop.circle'
@@ -305,10 +298,44 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           activeIcon: Icon(Icons.person),
           label: 'Profile',
         ),
+
+        // Approach 4: Native Components demo with Apple logo
+        const BottomNavigationBarItem(
+          icon: KeyedSubtree(
+            key: BaseNativeTabBarItemKey('apple.logo'),
+            child: Icon(Icons.apple),
+          ),
+          activeIcon: Icon(Icons.apple),
+          label: 'Native',
+        ),
+
+        // Approach 5: Settings with gear icon
+        BottomNavigationBarItemNativeExtension.withSFSymbol(
+          sfSymbolName: SFSymbols.settings,
+          icon: const Icon(Icons.settings_outlined),
+          activeIcon: const Icon(Icons.settings),
+          label: 'Settings',
+        ),
         
-        // Approach 4: Custom images using convenience factory (NEW!)
-        // This works with CNTabBar on iOS using native image property
-        // To use this, uncomment and add your image assets:
+        // Custom Image Examples (commented for reference):
+        // BottomNavigationBarItem(
+        //   icon: Image.asset(
+        //     'assets/custom.png',
+        //     key: const BaseCustomImageKey(
+        //       materialImage: 'assets/pray_new.png',
+        //       imageSize: 28.0,
+        //     ),
+        //   ),
+        //   label: 'Custom',
+        // ),
+        //
+        // BottomNavigationBarItemNativeExtension.withImage(
+        //   materialImage: 'assets/custom.png',
+        //   imageSize: 28.0,
+        //   label: 'Custom',
+        // ),
+        
+        // More custom image examples:
         // BottomNavigationBarItemNativeExtension.withImage(
         //   materialImage: 'assets/icons/custom_settings.png',
         //   iosImage: 'assets/icons/custom_settings_ios.png', // Optional iOS-specific
@@ -384,6 +411,17 @@ class _HomePage extends StatelessWidget {
                       Text('• Native iOS (CNTabBar Direct)'),
                       Text('• Auto (BaseTabBar with SF Symbols)'),
                       SizedBox(height: 12),
+                      Text(
+                        '📱 5 Tabs Available:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Text('• Home - This page'),
+                      Text('• Search - Search functionality'),
+                      Text('• Profile - User profile'),
+                      Text('• Native - Cupertino Native Components Demo'),
+                      Text('• Settings - App settings'),
+                      SizedBox(height: 12),
                       Divider(),
                       SizedBox(height: 12),
                       Text(
@@ -396,46 +434,8 @@ class _HomePage extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      Text(
-                        '💡 Recommended: Auto Approach',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'The Auto approach uses BaseTabBar which automatically detects iOS and renders CNTabBar with SF Symbols, while using Material Design on other platforms.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      Text(
-                        '💡 Recommended: Auto Approach',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'The Auto approach uses BaseTabBar which automatically detects iOS and renders CNTabBar with SF Symbols, while using Material Design on other platforms.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      Text(
-                        '💡 Recommended: Auto Approach',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'The Auto approach uses BaseTabBar which automatically detects iOS and renders CNTabBar with SF Symbols, while using Material Design on other platforms.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      Text(
-                        '💡 Recommended: Auto Approach',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'The Auto approach uses BaseTabBar which automatically detects iOS and renders CNTabBar with SF Symbols, while using Material Design on other platforms.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
+                     
+                      
                     ],
                   ),
                 ),

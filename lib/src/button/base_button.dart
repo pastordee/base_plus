@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart' show CupertinoButton, ShapeBorder, Cuper
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
@@ -89,6 +90,11 @@ class BaseButton extends BaseStatelessWidget {
     this.liquidGlassBlurIntensity = 15.0,
     this.liquidGlassOpacity = 0.8,
     this.adaptiveHaptics = true,
+    
+    /// CNButton (cupertino_native) properties
+    this.useCNButton = false,
+    this.cnButtonStyle,
+    this.shrinkWrap = false,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -127,6 +133,9 @@ class BaseButton extends BaseStatelessWidget {
     double liquidGlassBlurIntensity,
     double liquidGlassOpacity,
     bool adaptiveHaptics,
+    bool useCNButton,
+    CNButtonStyle? cnButtonStyle,
+    bool shrinkWrap,
     BaseParam? baseParam,
   }) = _BaseButtonWithIcon;
 
@@ -298,6 +307,22 @@ class BaseButton extends BaseStatelessWidget {
 
   /// *** iOS 26 Liquid Glass Dynamic Material properties end ***
 
+  /// *** CNButton (cupertino_native) properties start ***
+
+  /// Use CNButton from cupertino_native package (native iOS button with glass effects)
+  /// When true, uses CNButton instead of CupertinoButton on iOS
+  final bool useCNButton;
+
+  /// CNButton style (plain, gray, filled, tinted, bordered, prominentGlass)
+  /// Only used when useCNButton is true
+  final CNButtonStyle? cnButtonStyle;
+
+  /// Shrink wrap button to fit content (CNButton only)
+  /// Only used when useCNButton is true
+  final bool shrinkWrap;
+
+  /// *** CNButton properties end ***
+
   /// *** material properties end ***
 
   @override
@@ -309,6 +334,15 @@ class BaseButton extends BaseStatelessWidget {
   /// 最终的构建方法，为了兼容BaseButton.icon
   Widget buildByCupertinoWithChild(Widget child) {
     assert(child != null, 'child can\'t be null.');
+    
+    // Check if CNButton should be used
+    final bool _useCNButton = valueOf('useCNButton', useCNButton);
+    
+    if (_useCNButton) {
+      return _buildCNButton(child);
+    }
+    
+    // Original CupertinoButton implementation
     final Color _disabledColor = valueOf('disabledColor', disabledColor) ?? CupertinoColors.quaternarySystemFill;
     final EdgeInsetsGeometry? _padding = valueOf('padding', padding);
     final VoidCallback? _onPressed = valueOf('onPressed', onPressed);
@@ -458,6 +492,102 @@ class BaseButton extends BaseStatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Build button using CNButton from cupertino_native package
+  Widget _buildCNButton(Widget child) {
+    final VoidCallback? _onPressed = valueOf('onPressed', onPressed);
+    final CNButtonStyle _style = valueOf('cnButtonStyle', cnButtonStyle) ?? CNButtonStyle.plain;
+    final bool _shrinkWrap = valueOf('shrinkWrap', shrinkWrap);
+    
+    // Check if child contains both icon and label (BaseButton.icon)
+    if (child is _ButtonWithIconChild) {
+      // Extract icon and label from child
+      final buttonChild = child;
+      final iconWidget = buttonChild.icon;
+      final labelWidget = buttonChild.label;
+      
+      // Convert icon widget to CNSymbol if possible
+      CNSymbol? cnSymbol;
+      if (iconWidget is Icon) {
+        // Try to map Material icon to SF Symbol
+        final sfSymbolName = _mapIconToSFSymbol(iconWidget.icon);
+        if (sfSymbolName != null) {
+          cnSymbol = CNSymbol(sfSymbolName, size: iconWidget.size ?? 18);
+        }
+      } else if (iconWidget is CNIcon) {
+        cnSymbol = iconWidget.symbol;
+      }
+      
+      // Get label text
+      String? labelText;
+      if (labelWidget is Text) {
+        labelText = labelWidget.data;
+      }
+      
+      // Build CNButton with icon and label
+      if (cnSymbol != null && labelText != null) {
+        return CNButton(
+          label: labelText,
+          style: _style,
+          onPressed: _onPressed,
+          shrinkWrap: _shrinkWrap,
+        );
+      } else if (cnSymbol != null) {
+        return CNButton.icon(
+          icon: cnSymbol,
+          style: _style,
+          onPressed: _onPressed,
+        );
+      }
+    }
+    
+    // Extract label from child if it's a Text widget
+    String? labelText;
+    if (child is Text) {
+      labelText = child.data ?? '';
+    }
+    
+    if (labelText != null && labelText.isNotEmpty) {
+      return CNButton(
+        label: labelText,
+        style: _style,
+        onPressed: _onPressed,
+        shrinkWrap: _shrinkWrap,
+      );
+    }
+    
+    // Fallback to regular CupertinoButton if we can't extract the necessary info
+    return CupertinoButton(
+      child: child,
+      onPressed: _onPressed,
+    );
+  }
+
+  /// Map common Material icons to SF Symbols
+  String? _mapIconToSFSymbol(IconData? iconData) {
+    if (iconData == null) return null;
+    
+    final Map<int, String> iconMap = {
+      // Common icons
+      0xe87d: 'heart.fill',       // Icons.favorite
+      0xe87e: 'heart',            // Icons.favorite_border
+      0xe838: 'star.fill',        // Icons.star
+      0xe8e8: 'star',             // Icons.star_border
+      0xe145: 'plus',             // Icons.add
+      0xe15b: 'checkmark',        // Icons.check
+      0xe5cd: 'xmark',            // Icons.close
+      0xe3af: 'ellipsis',         // Icons.more_horiz
+      0xe3b0: 'ellipsis',         // Icons.more_vert
+      0xe571: 'gearshape',        // Icons.settings
+      0xe3c9: 'info.circle',      // Icons.info
+      0xe80d: 'square.and.arrow.up', // Icons.share
+      0xe1fe: 'trash',            // Icons.delete
+      0xe3c3: 'pencil',           // Icons.edit
+      0xe0e0: 'heart',            // Icons.favorite_border
+    };
+
+    return iconMap[iconData.codePoint];
   }
 
   @override
@@ -635,6 +765,9 @@ class _BaseButtonWithIcon extends BaseButton {
     double liquidGlassBlurIntensity = 15.0,
     double liquidGlassOpacity = 0.8,
     bool adaptiveHaptics = true,
+    bool useCNButton = false,
+    CNButtonStyle? cnButtonStyle,
+    bool shrinkWrap = false,
     BaseParam? baseParam,
   }) : super(
           key: key,
@@ -660,6 +793,9 @@ class _BaseButtonWithIcon extends BaseButton {
           liquidGlassBlurIntensity: liquidGlassBlurIntensity,
           liquidGlassOpacity: liquidGlassOpacity,
           adaptiveHaptics: adaptiveHaptics,
+          useCNButton: useCNButton,
+          cnButtonStyle: cnButtonStyle,
+          shrinkWrap: shrinkWrap,
           baseParam: baseParam,
         );
 
