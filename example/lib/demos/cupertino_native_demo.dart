@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/cupertino_native.dart' hide CNSheetItem, CNSheetDetent;
 import 'package:base/base_widgets.dart';
 
 /// Comprehensive demo of all cupertino_native components
@@ -398,9 +398,208 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
               ],
             ),
           ),
+
+          _buildSection(
+            title: 'BaseCNBottomToolbar (Expandable Search)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS bottom toolbar with expandable search functionality',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).canvasColor,
+                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: BaseCNBottomToolbar(
+                    leadingAction: CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      child: const Icon(CupertinoIcons.line_horizontal_3),
+                      onPressed: () => _set('Menu pressed'),
+                    ),
+                    searchPlaceholder: 'Search messages...',
+                    onSearchChanged: (text) => _set('Search: $text'),
+                    onSearchFocusChanged: (focused) => _set('Search focused: $focused'),
+                    trailingAction: CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      child: const Icon(CupertinoIcons.square_pencil),
+                      onPressed: () => _set('Compose pressed'),
+                    ),
+                    currentTabIcon: CupertinoIcons.house_fill,
+                    currentTabLabel: 'Home',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Expandable search with context display\n'
+                  '• Leading and trailing action buttons\n'
+                  '• Smooth animations and transitions\n'
+                  '• Apple HIG compliant design\n'
+                  '• Cross-platform Material fallback',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
+            title: 'BaseCNSearchBar (Native UISearchBar)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS UISearchBar with scope filtering and advanced features',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: BaseCNSearchBar(
+                    placeholder: 'Shows, Movies, and More',
+                    showsCancelButton: true,
+                    showsScopeBar: true,
+                    scopeButtonTitles: const ['All', 'Movies', 'TV Shows'],
+                    selectedScopeIndex: 0,
+                    onTextChanged: (text) => _set('Search: $text'),
+                    onSearchButtonClicked: (text) => _set('Search submitted: $text'),
+                    onCancelButtonClicked: () => _set('Search cancelled'),
+                    onScopeChanged: (index) => _set('Scope changed to: $index'),
+                    height: 56,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Native iOS UISearchBar rendering\n'
+                  '• Scope bar for content filtering\n'
+                  '• Multiple search bar styles (default, prominent, minimal)\n'
+                  '• Advanced keyboard and input configuration\n'
+                  '• Apple HIG compliant search behavior\n'
+                  '• Material Design fallback for other platforms',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
+            title: 'BaseCNNativeSheet (Native UISheetPresentationController)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS sheet presentation with resizable detents and nonmodal support',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _showNativeSheet(),
+                      child: const Text('Modal Sheet'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _showNonmodalSheet(),
+                      child: const Text('Nonmodal Sheet'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _showCustomHeaderSheet(),
+                      child: const Text('Custom Header'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Native UISheetPresentationController rendering\n'
+                  '• Resizable sheets with detents (medium, large, custom)\n'
+                  '• Nonmodal sheets for background interaction\n'
+                  '• Custom header with title and close button\n'
+                  '• Apple HIG compliant sheet behavior\n'
+                  '• Material Design bottom sheet fallback',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  // Native Sheet Methods
+  Future<void> _showNativeSheet() async {
+    final selectedIndex = await BaseCNNativeSheet.show(
+      context: context,
+      title: 'Settings',
+      message: 'Configure your app preferences',
+      items: [
+        const CNSheetItem(title: 'Brightness', icon: 'sun.max'),
+        const CNSheetItem(title: 'Appearance', icon: 'moon'),
+        const CNSheetItem(title: 'Notifications', icon: 'bell'),
+      ],
+      detents: [CNSheetDetent.medium],
+      prefersGrabberVisible: true,
+    );
+    
+    if (selectedIndex != null) {
+      final options = ['Brightness', 'Appearance', 'Notifications'];
+      _set('Sheet selected: ${options[selectedIndex]}');
+    } else {
+      _set('Sheet dismissed');
+    }
+  }
+
+  Future<void> _showNonmodalSheet() async {
+    final selectedIndex = await BaseCNNativeSheet.show(
+      context: context,
+      title: 'Format',
+      items: [
+        const CNSheetItem(title: 'Bold', icon: 'bold', dismissOnTap: false),
+        const CNSheetItem(title: 'Italic', icon: 'italic', dismissOnTap: false),
+        const CNSheetItem(title: 'Underline', icon: 'underline'),
+      ],
+      detents: [CNSheetDetent.custom(280)],
+      isModal: false, // Nonmodal - allows background interaction
+      prefersGrabberVisible: true,
+    );
+    
+    if (selectedIndex != null) {
+      final formats = ['Bold', 'Italic', 'Underline'];
+      _set('Nonmodal sheet: ${formats[selectedIndex]}');
+    } else {
+      _set('Nonmodal sheet dismissed');
+    }
+  }
+
+  Future<void> _showCustomHeaderSheet() async {
+    final selectedIndex = await BaseCNNativeSheet.showWithCustomHeader(
+      context: context,
+      title: 'Custom Header',
+      headerTitleSize: 18,
+      headerTitleWeight: FontWeight.w600,
+      headerHeight: 56,
+      items: [
+        const CNSheetItem(title: 'Option 1', icon: 'star'),
+        const CNSheetItem(title: 'Option 2', icon: 'heart'),
+        const CNSheetItem(title: 'Option 3', icon: 'bookmark'),
+      ],
+      detents: [CNSheetDetent.custom(320)],
+    );
+    
+    if (selectedIndex != null) {
+      _set('Custom header option ${selectedIndex + 1} selected');
+    } else {
+      _set('Custom header sheet dismissed');
+    }
   }
 
   Widget _buildSection({required String title, required Widget child}) {
@@ -434,6 +633,13 @@ class _CNToolbarDemoPage extends StatefulWidget {
 class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
   bool _isTransparent = true;
   BaseToolbarAlignment _middleAlignment = BaseToolbarAlignment.center;
+  // CNToolbarMiddleAlignment _middleAlignment = CNToolbarMiddleAlignment.center;
+  bool _isSearchExpanded = false;
+  String _searchText = '';
+
+    // Remember the toolbar state before search expansion
+  bool _lastTransparentState = true;
+  BaseToolbarAlignment _lastMiddleAlignment = BaseToolbarAlignment.center;
 
   @override
   Widget build(BuildContext context) {
@@ -539,6 +745,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                     icon: const CNSymbol('gear'),
                     onPressed: () => print('Settings tapped'),
                   ),
+                  const CNToolbarAction.flexibleSpace(),
                   CNToolbarAction(
                     icon: const CNSymbol('plus'),
                     onPressed: () => print('Add tapped'),
@@ -552,59 +759,121 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
           
           // Bottom toolbar
           Positioned(
-            left: 0,
-            right: 0,
+            left: 10,
+            right: 10,
             bottom: 0,
             child: SafeArea(
-              top: false,
-              child: BaseCNToolbar(
-                middleAlignment: _middleAlignment,
-                tint: CupertinoColors.label,
-                leading: [
-                  CNToolbarAction(
-                    label: 'Download',
-                    icon: const CNSymbol('square.and.arrow.down', size: 40),
-                    onPressed: () => print('Download tapped'),
-                  ),
-                  CNToolbarAction(
-                    icon: const CNSymbol('star', size: 40),
-                    onPressed: () => print('Favorite tapped'),
-                  ),
-                  CNToolbarAction(
-                    label: 'Share',
-                    icon: const CNSymbol('square.and.arrow.up', size: 40),
-                    onPressed: () => print('Share tapped'),
-                  ),
-                ],
-                middle: [
-                  CNToolbarAction(
-                    icon: const CNSymbol('pencil', size: 40),
-                    onPressed: () => print('Edit tapped'),
-                  ),
-                  CNToolbarAction(
-                    icon: const CNSymbol('trash', size: 40),
-                    onPressed: () => print('Delete tapped'),
-                  ),
-                ],
-                trailing: [
-                  CNToolbarAction(
-                    icon: const CNSymbol('ellipsis', size: 40),
-                    onPressed: () => print('More tapped'),
-                  ),
-                  CNToolbarAction(
-                    icon: const CNSymbol('square.and.arrow.up', size: 40),
-                    onPressed: () => print('Share tapped'),
-                  ),
-                  CNToolbarAction(
-                    icon: const CNSymbol('ellipsis', size: 40),
-                    onPressed: () => print('More options'),
-                  ),
-                ],
-                transparent: _isTransparent,
-              ),
+              bottom: false,
+              child: _isSearchExpanded
+                  ? _buildExpandedSearchToolbar()
+                  : _buildNormalToolbar(),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+   Widget _buildExpandedSearchToolbar() {
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+        child: Row(
+          children: [
+            // Show a mini toolbar with the back icon on the left
+            // Using 'trailing' for single-item toolbar positions it naturally
+            SizedBox(
+              width: 80,
+              height: 44,
+              child: BaseCNToolbar(
+                trailing: [
+                  CNToolbarAction(
+                    icon: CNSymbol('plus', size: 22),
+                    onPressed: () {
+                      // Return to normal toolbar state
+                      setState(() {
+                        _isSearchExpanded = false;
+                        _isTransparent = _lastTransparentState;
+                        _middleAlignment = _lastMiddleAlignment;
+                        _searchText = '';
+                      });
+                    },
+                  ),
+                ],
+                transparent: _lastTransparentState,
+                tint: CupertinoColors.label,
+              ),
+            ),
+            const SizedBox(width: 0),
+            // Expanded search bar
+            Expanded(
+              child: BaseCNSearchBar(
+                placeholder: 'Search',
+                showsCancelButton: true,
+                onTextChanged: (text) {
+                  setState(() => _searchText = text);
+                  print('Searching: $text');
+                },
+                onSearchButtonClicked: (text) {
+                  print('Search submitted: $text');
+                },
+                onCancelButtonClicked: () {
+                  setState(() {
+                    _isSearchExpanded = false;
+                    _isTransparent = _lastTransparentState;
+                    _middleAlignment = _lastMiddleAlignment;
+                    _searchText = '';
+                  });
+                },
+                height: 40,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildNormalToolbar() {
+    return SafeArea(
+      top: false,
+      child: BaseCNToolbar(
+        middleAlignment: _middleAlignment,
+        leading: [
+          
+          CNToolbarAction(
+            icon: CNSymbol('square.and.arrow.up'),
+            onPressed: () => print('Share tapped'),
+          ),
+        ],
+        middle: [
+          CNToolbarAction(
+            icon: CNSymbol('pencil', size: 40),
+            onPressed: () => print('Edit tapped'),
+          ),
+          const CNToolbarAction.fixedSpace(12),
+          CNToolbarAction(
+            icon: CNSymbol('trash', size: 40),
+            onPressed: () => print('Delete tapped'),
+          ),
+        ],
+        trailing: [
+          CNToolbarAction(
+            icon: CNSymbol('magnifyingglass'),
+            onPressed: () {
+              setState(() {
+                // Save current state before expanding search
+                _lastTransparentState = _isTransparent;
+                _lastMiddleAlignment = _middleAlignment;
+                _isSearchExpanded = true;
+              });
+            },
+          ),
+         
+        ],
+        tint: CupertinoColors.label,
+        transparent: _isTransparent,
       ),
     );
   }
@@ -810,6 +1079,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                         print('Settings tapped');
                       },
                     ),
+                   
                     CNNavigationBarAction(
                       icon: CNSymbol('plus'),
                       onPressed: () {

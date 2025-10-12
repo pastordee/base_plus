@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../demo_page.dart';
 import '../demo_tile.dart';
 import 'alert_dialog_demo.dart';
+import 'cn_alert_demo.dart';
 import 'ios26_liquid_glass_dialog_demo.dart';
 
 /// Dialo Demo
@@ -12,6 +13,77 @@ class DialogDemo extends StatelessWidget {
     Key? key,
   }) : super(key: key);
   final List<DemoTile> _demos = <DemoTile>[
+    DemoTile(
+      title: const Text('CNAlert - Native iOS'),
+      page: const AlertDialogDemo(),
+      onTop: (BuildContext context) async {
+        await BaseCNAlert.show(
+          context: context,
+          title: 'Delete Photo',
+          message: 'Are you sure you want to delete this photo? This action cannot be undone.',
+          actions: [
+            CNAlertAction(
+              title: 'Cancel',
+              style: CNAlertActionStyle.cancel,
+            ),
+            CNAlertAction(
+              title: 'Delete',
+              style: CNAlertActionStyle.destructive,
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Photo deleted')),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    ),
+    DemoTile(
+      title: const Text('CNAlert - Confirmation'),
+      page: const AlertDialogDemo(),
+      onTop: (BuildContext context) async {
+        final confirmed = await BaseCNAlert.showConfirmation(
+          context: context,
+          title: 'Save Changes',
+          message: 'Do you want to save your changes before leaving?',
+          confirmTitle: 'Save',
+          onConfirm: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Changes saved')),
+            );
+          },
+        );
+        
+        if (!confirmed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Changes discarded')),
+          );
+        }
+      },
+    ),
+    DemoTile(
+      title: const Text('CNAlert - Demo Page'),
+      page: const CNAlertDemo(),
+      onTop: (BuildContext context) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const CNAlertDemo(),
+          ),
+        );
+      },
+    ),
+    DemoTile(
+      title: const Text('CNAlert - Info'),
+      page: const AlertDialogDemo(),
+      onTop: (BuildContext context) async {
+        await BaseCNAlert.showInfo(
+          context: context,
+          title: 'Welcome',
+          message: 'This is a native iOS alert using cupertino_native package.',
+        );
+      },
+    ),
     DemoTile(
       title: const Text('iOS 26 Liquid Glass'),
       page: const iOS26LiquidGlassDialogDemo(),

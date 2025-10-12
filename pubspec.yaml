@@ -1,6 +1,6 @@
 name: base
 description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
-version: 3.0.2
+version: 3.0.3
 # author: Nil <2073582423@qq.com>
 homepage: https://github.com/nillnil/flutter_base
 publish_to: none 
@@ -20,7 +20,13 @@ dependencies:
   cupertino_native:
     git:
       url: https://github.com/pastordee/cupertino_native.git
-      ref: pc.1.0.1
+      ref: pc_102
+
+  cupertino_interactive_keyboard:
+    git:
+      url: https://github.com/pastordee/cupertino_interactive_keyboard.git
+      ref: pc
+  
   # liquid_glass_texture: ^0.0.4
   # archive: 4.0.7
 
