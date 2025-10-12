@@ -6,6 +6,7 @@ export 'appbar/app_bar_demo.dart';
 export 'bottom_navigation_example.dart';
 export 'button/button_demos.dart';
 export 'components/components_demo.dart';
+export 'components/cupertino_interactive_keyboard_demo.dart';
 export 'dialog/dialog_demo.dart';
 export 'refresh/refresh_demos.dart';
 export 'route/route_demo.dart';

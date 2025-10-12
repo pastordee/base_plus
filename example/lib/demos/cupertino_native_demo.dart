@@ -593,6 +593,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
         const CNSheetItem(title: 'Option 3', icon: 'bookmark'),
       ],
       detents: [CNSheetDetent.custom(320)],
+      isModal: false,
     );
     
     if (selectedIndex != null) {

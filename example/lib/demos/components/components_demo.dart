@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import 'drawer_demo.dart';
+import 'cupertino_interactive_keyboard_demo.dart';
 // import 'expansion_demo.dart';
 
 /// Componentes 说明
@@ -26,7 +27,7 @@ class ComponentesDemo extends StatelessWidget {
             children: <Widget>[
               const SizedBox(height: 20),
               BaseTile(
-                titleText: 'drawer',
+                titleText: 'Drawer',
                 trailing: const BaseIcon(
                   icon: CupertinoIcons.right_chevron,
                   color: Colors.grey,
@@ -34,6 +35,32 @@ class ComponentesDemo extends StatelessWidget {
                 onTap: () {
                   BaseRoute<void>(
                     builder: (_) => const DrawerDemo(),
+                  ).push(context);
+                },
+              ),
+              BaseTile(
+                titleText: 'Interactive Keyboard',
+                subtitle: const Text('iOS-style keyboard dismissal'),
+                trailing: const BaseIcon(
+                  icon: CupertinoIcons.right_chevron,
+                  color: Colors.grey,
+                ),
+                onTap: () {
+                  BaseRoute<void>(
+                    builder: (_) => const CupertinoInteractiveKeyboardDemo(),
+                  ).push(context);
+                },
+              ),
+              BaseTile(
+                titleText: 'Keyboard Variations',
+                subtitle: const Text('Different toolbar styles'),
+                trailing: const BaseIcon(
+                  icon: CupertinoIcons.right_chevron,
+                  color: Colors.grey,
+                ),
+                onTap: () {
+                  BaseRoute<void>(
+                    builder: (_) => const CupertinoInteractiveKeyboardVariationsDemo(),
                   ).push(context);
                 },
               ),

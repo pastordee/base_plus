@@ -20,6 +20,7 @@ export 'src/components/base_cn_segmented_control.dart';
 export 'src/components/base_cn_slider.dart';
 export 'src/components/base_cn_switch.dart';
 export 'src/components/base_cn_toolbar.dart';
+export 'src/components/base_cupertino_interactive_keyboard.dart';
 export 'src/components/base_popup_menu_button.dart';
 export 'src/config/base_config.dart';
 export 'src/dialog/base_alert_dialog.dart';
