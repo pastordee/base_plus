@@ -643,6 +643,22 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
   bool _lastTransparentState = true;
   BaseToolbarAlignment _lastMiddleAlignment = BaseToolbarAlignment.center;
 
+  void _showAlert(BuildContext context, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Action'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -755,6 +771,31 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                     onPressed: () => print('Settings tapped'),
                   ),
                   const CNToolbarAction.fixedSpace(5),
+                  CNToolbarAction.popupMenu(
+                    icon: const CNSymbol('paintbrush'),
+                    iconSize: 16,
+                    popupMenuItems: const [
+                      CNPopupMenuItem(
+                        label: 'Red',
+                        icon: CNSymbol('circle.fill'),
+                      ),
+                      CNPopupMenuItem(
+                        label: 'Blue',
+                        icon: CNSymbol('circle.fill'),
+                      ),
+                      CNPopupMenuItem(
+                        label: 'Green',
+                        icon: CNSymbol('circle.fill'),
+                      ),
+                    ],
+                    onPopupMenuSelected: (index) {
+                      print('Popup menu selected: $index'); // Debug output
+                      final colors = ['Red', 'Blue', 'Green'];
+                      if (index < colors.length) {
+                        _showAlert(context, 'Color: ${colors[index]}');
+                      }
+                    },
+                  ),
                   const CNToolbarAction.flexibleSpace(),
                   CNToolbarAction(
                     icon: const CNSymbol('plus', size: 20),
@@ -910,6 +951,22 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
   bool _showLargeTitle = false;
   double _titleSize = 18.0;
   bool _enableTitleTap = true;
+
+  void _showAlert(BuildContext context, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Navigation Action'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1173,7 +1230,32 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                         print('Settings tapped');
                       },
                     ),
-                   
+                    CNNavigationBarAction.popupMenu(
+                      icon: const CNSymbol('ellipsis.circle'),
+                      iconSize: 16,
+                      popupMenuItems: const [
+                        CNPopupMenuItem(
+                          label: 'Copy',
+                          icon: CNSymbol('doc.on.doc'),
+                        ),
+                        CNPopupMenuItem(
+                          label: 'Paste',
+                          icon: CNSymbol('doc.on.clipboard'),
+                        ),
+                        CNPopupMenuDivider(),
+                        CNPopupMenuItem(
+                          label: 'Delete',
+                          icon: CNSymbol('trash'),
+                        ),
+                      ],
+                      onPopupMenuSelected: (index) {
+                        print('Navigation popup menu selected: $index'); // Debug output
+                        final actions = ['Copy', 'Paste', 'Delete'];
+                        if (index < actions.length) {
+                          _showAlert(context, 'Action: ${actions[index]}');
+                        }
+                      },
+                    ),
                     CNNavigationBarAction(
                       icon: CNSymbol('plus'),
                       iconSize: 15,
