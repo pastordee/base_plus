@@ -86,6 +86,31 @@ import 'base_native_tab_bar_item.dart';
 /// )
 /// ```
 /// 
+/// **Search Functionality:**
+/// Use the factory constructor for search-enabled tab bars:
+/// ```dart
+/// BaseTabBar.search(
+///   items: [
+///     BottomNavigationBarItemNativeExtension.withSFSymbol(
+///       sfSymbolName: SFSymbols.home,
+///       icon: Icon(Icons.home_outlined),
+///       label: 'Home',
+///     ),
+///     BottomNavigationBarItemNativeExtension.withSFSymbol(
+///       sfSymbolName: SFSymbols.star,
+///       icon: Icon(Icons.star_outline),
+///       label: 'Favorites',
+///     ),
+///   ],
+///   searchConfig: CNSearchConfig(
+///     placeholder: 'Search tabs...',
+///     onSearchTextChanged: (text) => print('Search: $text'),
+///     resultsBuilder: (context, text) => SearchResultsWidget(text),
+///   ),
+///   cnTint: Colors.blue,
+/// )
+/// ```
+/// 
 /// **Method 3: Automatic Icon Mapping**
 /// ```dart
 /// BottomNavigationBarItem(
@@ -157,8 +182,50 @@ class BaseTabBar extends BaseStatelessWidget {
     this.cnSplitSpacing = 8.0,
     this.cnBackgroundOpacity, // Optional: override background opacity for CNTabBar
 
+    // Search functionality
+    this.searchConfig,
+
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
+
+  /// Factory constructor for search-enabled tab bar
+  const BaseTabBar.search({
+    Key? key,
+    List<BottomNavigationBarItem>? items,
+    ValueChanged<int>? onTap,
+    int currentIndex = 0,
+    required CNSearchConfig searchConfig,
+    double? iconSize,
+    Color? backgroundColor,
+    Color? activeColor,
+    Color? cnTint,
+    double? cnHeight,
+    bool cnSplit = false,
+    int cnRightCount = 1,
+    bool cnShrinkCentered = true,
+    double cnSplitSpacing = 8.0,
+    double? cnBackgroundOpacity,
+    bool useNativeCupertinoTabBar = true,
+    BaseParam? baseParam,
+  }) : this(
+         key: key,
+         items: items,
+         onTap: onTap,
+         currentIndex: currentIndex,
+         searchConfig: searchConfig,
+         iconSize: iconSize,
+         backgroundColor: backgroundColor,
+         activeColor: activeColor,
+         cnTint: cnTint,
+         cnHeight: cnHeight,
+         cnSplit: cnSplit,
+         cnRightCount: cnRightCount,
+         cnShrinkCentered: cnShrinkCentered,
+         cnSplitSpacing: cnSplitSpacing,
+         cnBackgroundOpacity: cnBackgroundOpacity,
+         useNativeCupertinoTabBar: useNativeCupertinoTabBar,
+         baseParam: baseParam,
+       );
 
   /// *** general properties start ***
 
@@ -321,6 +388,9 @@ class BaseTabBar extends BaseStatelessWidget {
   /// This provides explicit control over CNTabBar transparency without affecting Material tabs.
   final double? cnBackgroundOpacity;
 
+  /// Search configuration for search-enabled tab bar
+  final CNSearchConfig? searchConfig;
+
   /// *** CNTabBar-specific properties end ***
 
   /// 用户BaseTabScaffold里构建bottomNavigationBar
@@ -366,6 +436,7 @@ class BaseTabBar extends BaseStatelessWidget {
       cnShrinkCentered: cnShrinkCentered,
       cnSplitSpacing: cnSplitSpacing,
       cnBackgroundOpacity: cnBackgroundOpacity,
+      searchConfig: searchConfig,
     );
   }
 
@@ -480,6 +551,26 @@ class BaseTabBar extends BaseStatelessWidget {
     if (cnBackgroundColor != null && opacityOverride != null) {
       // Apply the opacity override to the background color
       cnBackgroundColor = cnBackgroundColor.withOpacity(opacityOverride.clamp(0.0, 1.0));
+    }
+
+    // Check if this is a search tab bar
+    final searchConf = valueOf('searchConfig', searchConfig);
+    if (searchConf != null) {
+      return CNTabBar.search(
+        items: cnItems,
+        currentIndex: valueOf('currentIndex', currentIndex) ?? 0,
+        onTap: enhancedOnTap ?? (int index) {}, // Provide default no-op if null
+        searchConfig: searchConf,
+        // CNTabBar-specific properties
+        tint: valueOf('cnTint', cnTint),
+        backgroundColor: cnBackgroundColor,
+        iconSize: valueOf('iconSize', iconSize),
+        height: valueOf('cnHeight', cnHeight),
+        split: valueOf('cnSplit', cnSplit),
+        rightCount: valueOf('cnRightCount', cnRightCount),
+        shrinkCentered: valueOf('cnShrinkCentered', cnShrinkCentered),
+        splitSpacing: valueOf('cnSplitSpacing', cnSplitSpacing),
+      );
     }
 
     Widget tabBar = CNTabBar(

@@ -39,6 +39,24 @@ enum BaseToolbarAlignment {
 ///   ],
 /// )
 /// ```
+/// 
+/// For search functionality, use the factory constructor:
+/// ```dart
+/// BaseCNToolbar.search(
+///   leading: [
+///     CNToolbarAction(icon: CNSymbol('star.fill'), onPressed: () {}),
+///   ],
+///   trailing: [
+///     CNToolbarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
+///   ],
+///   searchConfig: CNSearchConfig(
+///     placeholder: 'Search',
+///     onSearchTextChanged: (text) => print(text),
+///     resultsBuilder: (context, text) => SearchResults(text),
+///   ),
+///   contextIcon: CNSymbol('apps.iphone'),
+/// )
+/// ```
 class BaseCNToolbar extends BaseStatelessWidget {
   const BaseCNToolbar({
     Key? key,
@@ -52,8 +70,37 @@ class BaseCNToolbar extends BaseStatelessWidget {
     this.pillHeight,
     this.middleAlignment = BaseToolbarAlignment.center,
     this.backgroundColor,
+    this.searchConfig,
+    this.contextIcon,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
+
+  /// Factory constructor for search-enabled toolbar
+  const BaseCNToolbar.search({
+    Key? key,
+    List<CNToolbarAction>? leading,
+    List<CNToolbarAction>? trailing,
+    required CNSearchConfig searchConfig,
+    CNSymbol? contextIcon,
+    Color? tint,
+    bool transparent = false,
+    double? height,
+    double? pillHeight,
+    Color? backgroundColor,
+    BaseParam? baseParam,
+  }) : this(
+         key: key,
+         leading: leading,
+         trailing: trailing,
+         searchConfig: searchConfig,
+         contextIcon: contextIcon,
+         tint: tint,
+         transparent: transparent,
+         height: height,
+         pillHeight: pillHeight,
+         backgroundColor: backgroundColor,
+         baseParam: baseParam,
+       );
 
   /// Leading toolbar actions (typically back button, share)
   final List<CNToolbarAction>? leading;
@@ -85,10 +132,31 @@ class BaseCNToolbar extends BaseStatelessWidget {
   /// Background color (Material only)
   final Color? backgroundColor;
 
+  /// Search configuration for search-enabled toolbar
+  final CNSearchConfig? searchConfig;
+
+  /// Context icon for search toolbar
+  final CNSymbol? contextIcon;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert our alignment to CNToolbarMiddleAlignment
     final alignment = _toCNToolbarAlignment(valueOf('middleAlignment', middleAlignment));
+    
+    // Check if this is a search toolbar
+    final searchConf = valueOf('searchConfig', searchConfig);
+    if (searchConf != null) {
+      return CNToolbar.search(
+        leading: valueOf('leading', leading),
+        trailing: valueOf('trailing', trailing),
+        searchConfig: searchConf,
+        contextIcon: valueOf('contextIcon', contextIcon),
+        tint: valueOf('tint', tint),
+        transparent: valueOf('transparent', transparent),
+        height: valueOf('height', height),
+        pillHeight: valueOf('pillHeight', pillHeight),
+      );
+    }
     
     return CNToolbar(
       leading: valueOf('leading', leading),
@@ -123,6 +191,12 @@ class BaseCNToolbar extends BaseStatelessWidget {
     
     final tintColor = valueOf('tint', tint) ?? Colors.white;
     final toolbarHeight = valueOf('height', height) ?? 56.0;
+    
+    // Check if this is a search toolbar
+    final searchConf = valueOf('searchConfig', searchConfig);
+    if (searchConf != null) {
+      return _buildMaterialSearchToolbar(context, bgColor, tintColor, toolbarHeight, searchConf);
+    }
     
     return Container(
       height: toolbarHeight,
@@ -168,6 +242,66 @@ class BaseCNToolbar extends BaseStatelessWidget {
             )
           else
             const Spacer(),
+          
+          // Trailing actions
+          if (valueOf('trailing', trailing) != null) ...[
+            const SizedBox(width: 8),
+            ..._buildMaterialActions(
+              valueOf('trailing', trailing)!,
+              tintColor,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Build Material search toolbar
+  Widget _buildMaterialSearchToolbar(
+    BuildContext context,
+    Color bgColor,
+    Color tintColor,
+    double toolbarHeight,
+    CNSearchConfig searchConfig,
+  ) {
+    return Container(
+      height: toolbarHeight,
+      color: valueOf('transparent', transparent) 
+          ? Colors.transparent 
+          : bgColor,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          // Leading actions
+          if (valueOf('leading', leading) != null) ...[
+            ..._buildMaterialActions(
+              valueOf('leading', leading)!,
+              tintColor,
+            ),
+            const SizedBox(width: 8),
+          ],
+          
+          // Search field
+          Expanded(
+            child: Container(
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextField(
+                onChanged: searchConfig.onSearchTextChanged,
+                style: TextStyle(color: tintColor),
+                decoration: InputDecoration(
+                  hintText: searchConfig.placeholder,
+                  hintStyle: TextStyle(color: tintColor.withOpacity(0.7)),
+                  prefixIcon: Icon(Icons.search, color: tintColor.withOpacity(0.7)),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+            ),
+          ),
           
           // Trailing actions
           if (valueOf('trailing', trailing) != null) ...[

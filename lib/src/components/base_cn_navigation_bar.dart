@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 
+import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
 /// BaseCNNavigationBar - Native iOS navigation bar using CNNavigationBar
@@ -38,6 +39,28 @@ import '../base_stateless_widget.dart';
 ///   largeTitle: false,
 /// )
 /// ```
+/// 
+/// For search functionality, use the factory constructor:
+/// ```dart
+/// BaseCNNavigationBar.search(
+///   leading: [
+///     CNNavigationBarAction(icon: CNSymbol('chevron.left'), onPressed: () {}),
+///   ],
+///   trailing: [
+///     CNNavigationBarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
+///   ],
+///   searchConfig: CNSearchConfig(
+///     placeholder: 'Search',
+///     onSearchTextChanged: (text) => print(text),
+///     resultsBuilder: (context, text) => SearchResults(text),
+///   ),
+/// )
+/// ```
+/// 
+/// Available action types:
+/// - `CNNavigationBarAction()` - Regular action with icon/label
+/// - `CNNavigationBarAction.fixedSpace(5)` - Fixed spacing
+/// - `CNNavigationBarAction.flexibleSpace()` - Flexible spacing
 class BaseCNNavigationBar extends BaseStatelessWidget {
   const BaseCNNavigationBar({
     Key? key,
@@ -48,15 +71,46 @@ class BaseCNNavigationBar extends BaseStatelessWidget {
     this.transparent = false,
     this.largeTitle = false,
     this.height,
-  }) : super(key: key);
+    this.titleSize,
+    this.onTitlePressed,
+    this.searchConfig,
+    BaseParam? baseParam,
+  }) : super(key: key, baseParam: baseParam);
 
-  /// Leading actions (typically back button with optional label)
+  /// Factory constructor for search-enabled navigation bar
+  const BaseCNNavigationBar.search({
+    Key? key,
+    List<CNNavigationBarAction>? leading,
+    List<CNNavigationBarAction>? trailing,
+    required CNSearchConfig searchConfig,
+    Color? tint,
+    bool transparent = false,
+    bool largeTitle = false,
+    double? height,
+    double? titleSize,
+    VoidCallback? onTitlePressed,
+    BaseParam? baseParam,
+  }) : this(
+         key: key,
+         leading: leading,
+         trailing: trailing,
+         searchConfig: searchConfig,
+         tint: tint,
+         transparent: transparent,
+         largeTitle: largeTitle,
+         height: height,
+         titleSize: titleSize,
+         onTitlePressed: onTitlePressed,
+         baseParam: baseParam,
+       );
+
+  /// Leading navigation actions
   final List<CNNavigationBarAction>? leading;
 
   /// Navigation bar title
   final String? title;
 
-  /// Trailing actions (typically action buttons)
+  /// Trailing navigation actions
   final List<CNNavigationBarAction>? trailing;
 
   /// Tint color for icons and text
@@ -65,189 +119,301 @@ class BaseCNNavigationBar extends BaseStatelessWidget {
   /// Whether the navigation bar should be transparent
   final bool transparent;
 
-  /// Whether to show large title style (iOS 11+)
+  /// Whether to use large title style
   final bool largeTitle;
 
   /// Custom height for the navigation bar
   final double? height;
 
+  /// Title text size
+  final double? titleSize;
+
+  /// Callback when title is tapped
+  final VoidCallback? onTitlePressed;
+
+  /// Search configuration for search-enabled navigation bar
+  final CNSearchConfig? searchConfig;
+
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Check if this is a search navigation bar
+    final searchConf = valueOf('searchConfig', searchConfig);
+    if (searchConf != null) {
+      return CNNavigationBar.search(
+        leading: valueOf('leading', leading),
+        trailing: valueOf('trailing', trailing),
+        searchConfig: searchConf,
+        tint: valueOf('tint', tint),
+        transparent: valueOf('transparent', transparent),
+        largeTitle: valueOf('largeTitle', largeTitle),
+        height: valueOf('height', height),
+        titleSize: valueOf('titleSize', titleSize),
+        onTitlePressed: valueOf('onTitlePressed', onTitlePressed),
+      );
+    }
+
     return CNNavigationBar(
-      leading: leading,
-      title: title,
-      trailing: trailing,
-      tint: tint,
-      transparent: transparent,
-      largeTitle: largeTitle,
-      height: height,
+      leading: valueOf('leading', leading),
+      title: valueOf('title', title),
+      trailing: valueOf('trailing', trailing),
+      tint: valueOf('tint', tint),
+      transparent: valueOf('transparent', transparent),
+      largeTitle: valueOf('largeTitle', largeTitle),
+      height: valueOf('height', height),
+      titleSize: valueOf('titleSize', titleSize),
+      onTitlePressed: valueOf('onTitlePressed', onTitlePressed),
     );
   }
 
   @override
   Widget buildByMaterial(BuildContext context) {
     final theme = Theme.of(context);
-    final iconColor = tint ?? theme.colorScheme.primary;
-    final textColor = tint ?? theme.colorScheme.onSurface;
+    final iconColor = valueOf('tint', tint) ?? theme.colorScheme.primary;
+    final textColor = valueOf('tint', tint) ?? theme.colorScheme.onSurface;
+
+    // Check if this is a search navigation bar
+    final searchConf = valueOf('searchConfig', searchConfig);
+    if (searchConf != null) {
+      return _buildMaterialSearchNavBar(context, theme, iconColor, textColor, searchConf);
+    }
 
     return Container(
-      height: height ?? (largeTitle ? 96 : 56),
-      decoration: transparent
+      height: valueOf('height', height) ?? (valueOf('largeTitle', largeTitle) ? 96 : 56),
+      decoration: valueOf('transparent', transparent)
           ? null
           : BoxDecoration(
               color: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
                 ),
               ],
             ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            height: 56,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Row(
-              children: [
-                // Leading actions
-                if (leading != null && leading!.isNotEmpty) ...[
-                  ..._buildMaterialActions(leading!, iconColor, textColor),
-                  const SizedBox(width: 8),
-                ],
-                // Title
-                Expanded(
-                  child: title != null
-                      ? Text(
-                          title!,
-                          style: largeTitle
-                              ? theme.textTheme.headlineSmall?.copyWith(color: textColor)
-                              : theme.textTheme.titleLarge?.copyWith(color: textColor),
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                // Trailing actions
-                if (trailing != null && trailing!.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  ..._buildMaterialActions(trailing!, iconColor, textColor),
-                ],
-              ],
-            ),
-          ),
-          // Large title section
-          if (largeTitle && title != null)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                    title!,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ),
-        ],
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: valueOf('largeTitle', largeTitle)
+              ? _buildLargeTitleLayout(textColor, iconColor)
+              : _buildRegularLayout(textColor, iconColor),
+        ),
       ),
     );
   }
 
-  List<Widget> _buildMaterialActions(
-    List<CNNavigationBarAction> actions,
+  /// Build Material search navigation bar
+  Widget _buildMaterialSearchNavBar(
+    BuildContext context,
+    ThemeData theme,
     Color iconColor,
     Color textColor,
+    CNSearchConfig searchConfig,
   ) {
+    return Container(
+      height: valueOf('height', height) ?? 56,
+      decoration: valueOf('transparent', transparent)
+          ? null
+          : BoxDecoration(
+              color: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              // Leading actions
+              if (valueOf('leading', leading) != null) ...[
+                ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
+                const SizedBox(width: 12),
+              ],
+              
+              // Search field
+              Expanded(
+                child: Container(
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    onChanged: searchConfig.onSearchTextChanged,
+                    style: TextStyle(color: textColor),
+                    decoration: InputDecoration(
+                      hintText: searchConfig.placeholder,
+                      hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+                      prefixIcon: Icon(Icons.search, color: iconColor.withOpacity(0.7), size: 20),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Trailing actions
+              if (valueOf('trailing', trailing) != null) ...[
+                const SizedBox(width: 12),
+                ..._buildMaterialActions(valueOf('trailing', trailing)!, iconColor),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLargeTitleLayout(Color textColor, Color iconColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Top row with actions
+        SizedBox(
+          height: 44,
+          child: Row(
+            children: [
+              if (valueOf('leading', leading) != null) ...[
+                ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
+                const Spacer(),
+              ] else
+                const Spacer(),
+              if (valueOf('trailing', trailing) != null)
+                ..._buildMaterialActions(valueOf('trailing', trailing)!, iconColor),
+            ],
+          ),
+        ),
+        // Large title
+        if (valueOf('title', title) != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              valueOf('title', title)!,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRegularLayout(Color textColor, Color iconColor) {
+    return Row(
+      children: [
+        // Leading actions
+        if (valueOf('leading', leading) != null) ...[
+          ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
+          const SizedBox(width: 12),
+        ],
+        
+        // Title
+        if (valueOf('title', title) != null)
+          Expanded(
+            child: Text(
+              valueOf('title', title)!,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          const Spacer(),
+        
+        // Trailing actions
+        if (valueOf('trailing', trailing) != null) ...[
+          const SizedBox(width: 12),
+          ..._buildMaterialActions(valueOf('trailing', trailing)!, iconColor),
+        ],
+      ],
+    );
+  }
+
+  List<Widget> _buildMaterialActions(List<CNNavigationBarAction> actions, Color iconColor) {
     return actions.map((action) {
-      if (action.icon != null) {
-        final materialIcon = _mapSFSymbolToMaterialIcon(action.icon!.name);
+      // Handle special action types
+      if (action.runtimeType.toString().contains('FixedSpace')) {
+        // This is a fixed space action - extract width if possible
+        // For now, default to 8px spacing
+        return const SizedBox(width: 8);
+      }
+      
+      if (action.runtimeType.toString().contains('FlexibleSpace')) {
+        // This is a flexible space action
+        return const Expanded(child: SizedBox());
+      }
+      
+      // Regular action with icon/label
+      if (action.icon != null && action.label != null) {
+        // Both icon and label
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: action.onPressed,
+              icon: _buildMaterialIcon(action.icon!),
+              color: iconColor,
+              iconSize: 20,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+            Text(
+              action.label!,
+              style: TextStyle(color: iconColor, fontSize: 10),
+            ),
+          ],
+        );
+      } else if (action.icon != null) {
+        // Icon only
         return IconButton(
-          icon: Icon(materialIcon, color: iconColor),
           onPressed: action.onPressed,
-          padding: const EdgeInsets.all(8.0),
+          icon: _buildMaterialIcon(action.icon!),
+          color: iconColor,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         );
       } else if (action.label != null) {
+        // Label only
         return TextButton(
           onPressed: action.onPressed,
-          child: Text(action.label!, style: TextStyle(color: textColor)),
+          child: Text(action.label!, style: TextStyle(color: iconColor)),
         );
       }
+      
       return const SizedBox.shrink();
     }).toList();
   }
 
+  Widget _buildMaterialIcon(CNSymbol symbol) {
+    // Map SF Symbol to Material icon
+    final iconData = _mapSFSymbolToMaterialIcon(symbol.name);
+    return Icon(iconData, size: symbol.size);
+  }
+
   IconData _mapSFSymbolToMaterialIcon(String sfSymbol) {
-    // Map common SF Symbols to Material Icons
-    const iconMap = {
-      // Navigation
+    final Map<String, IconData> iconMap = {
       'chevron.left': Icons.chevron_left,
       'chevron.right': Icons.chevron_right,
-      'chevron.up': Icons.expand_less,
-      'chevron.down': Icons.expand_more,
-      'arrow.left': Icons.arrow_back,
-      'arrow.right': Icons.arrow_forward,
-      'arrow.up': Icons.arrow_upward,
-      'arrow.down': Icons.arrow_downward,
-      
-      // Actions
       'plus': Icons.add,
-      'minus': Icons.remove,
-      'xmark': Icons.close,
-      'checkmark': Icons.check,
-      'pencil': Icons.edit,
-      'trash': Icons.delete,
       'gear': Icons.settings,
-      'ellipsis': Icons.more_horiz,
+      'gearshape': Icons.settings,
       'ellipsis.circle': Icons.more_vert,
-      
-      // Communication
-      'paperplane': Icons.send,
-      'paperplane.fill': Icons.send,
-      'envelope': Icons.email,
-      'envelope.fill': Icons.email,
-      'phone': Icons.phone,
-      'phone.fill': Icons.phone,
-      'message': Icons.message,
-      'message.fill': Icons.message,
-      
-      // Media
-      'photo': Icons.photo,
-      'photo.fill': Icons.photo,
-      'camera': Icons.camera_alt,
-      'camera.fill': Icons.camera_alt,
-      'video': Icons.videocam,
-      'video.fill': Icons.videocam,
-      'play': Icons.play_arrow,
-      'play.fill': Icons.play_arrow,
-      'pause': Icons.pause,
-      'pause.fill': Icons.pause,
-      
-      // UI
-      'heart': Icons.favorite_border,
-      'heart.fill': Icons.favorite,
-      'star': Icons.star_border,
       'star.fill': Icons.star,
-      'bookmark': Icons.bookmark_border,
-      'bookmark.fill': Icons.bookmark,
-      'tag': Icons.label_outline,
-      'tag.fill': Icons.label,
-      
-      // Content
-      'doc': Icons.description,
-      'doc.fill': Icons.description,
-      'folder': Icons.folder_outlined,
-      'folder.fill': Icons.folder,
-      'square.and.arrow.up': Icons.share,
-      'square.and.arrow.down': Icons.download,
+      'star': Icons.star_border,
+      'magnifyingglass': Icons.search,
+      'apps.iphone': Icons.apps,
+      // Add more mappings as needed
     };
-
-    return iconMap[sfSymbol] ?? Icons.circle_outlined;
+    return iconMap[sfSymbol] ?? Icons.circle;
   }
 }
