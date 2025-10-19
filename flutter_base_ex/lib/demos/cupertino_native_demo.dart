@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:base/base.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cupertino_native/cupertino_native.dart' hide CNSheetItem, CNSheetDetent;
-import 'package:base/base_widgets.dart';
+import 'package:flutter/material.dart';
+
+// Pull-down button classes are re-exported from base_widgets via base_cn_pull_down_button
 
 /// Comprehensive demo of all cupertino_native components
 /// Shows CNButton, CNIcon, CNSlider, CNSwitch, CNSegmentedControl, and CNPopupMenuButton
@@ -14,13 +16,29 @@ class CupertinoNativeDemo extends StatefulWidget {
 
 class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   String _lastAction = 'No action yet';
+  String _lastInlineAction = 'None';
   double _sliderValue = 50.0;
   bool _switchValue = true;
   bool _coloredSwitchValue = false;
   int _segmentedControlIndex = 0;
+  
+  // For format sheet demo
+  bool _isBold = false;
+  bool _isItalic = false;
+  bool _isUnderline = false;
+  bool _isStrikethrough = false;
 
   void _set(String action) {
     setState(() => _lastAction = action);
+  }
+  
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   @override
@@ -93,12 +111,12 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   shrinkWrap: true,
                   child: const Text('ProminentGlass'),
                 ),
-                BaseButton(
+                const BaseButton(
                   useCNButton: true,
                   cnButtonStyle: CNButtonStyle.bordered,
                   onPressed: null,
                   shrinkWrap: true,
-                  child: const Text('Disabled'),
+                  child: Text('Disabled'),
                 ),
               ],
             ),
@@ -146,9 +164,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
 
           _buildSection(
             title: 'CNIcon (SF Symbols)',
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
+              children: [
                 BaseCNIcon(symbol: 'heart', size: 32),
                 BaseCNIcon(symbol: 'heart.fill', size: 32),
                 BaseCNIcon(symbol: 'star', size: 32),
@@ -161,7 +179,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
 
           _buildSection(
             title: 'CNIcon with Colors',
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 BaseCNIcon(
@@ -334,6 +352,113 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           ),
 
           _buildSection(
+            title: 'BaseCNPullDownButton (NEW!)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS pull-down button with inline actions',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Icon-style pull-down button with inline actions
+                    BaseCNPullDownButton.icon(
+                      buttonIcon: const CNSymbol('ellipsis.circle', size: 24),
+                      size: 44,
+                      items: [
+                        CNPullDownMenuInlineActions(
+                          actions: [
+                            CNPullDownInlineAction(
+                              label: 'Crop',
+                              icon: CNSymbol('crop', size: 24),
+                            ),
+                            CNPullDownInlineAction(
+                              label: 'Filter',
+                              icon: CNSymbol('camera.filters', size: 24),
+                            ),
+                            CNPullDownInlineAction(
+                              label: 'Adjust',
+                              icon: CNSymbol('slider.horizontal.3', size: 24),
+                            ),
+                          ],
+                        ),
+                        CNPullDownMenuDivider(),
+                        CNPullDownMenuItem(
+                          label: 'Save to Photos',
+                          icon: CNSymbol('square.and.arrow.down'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'Duplicate',
+                          icon: CNSymbol('doc.on.doc'),
+                        ),
+                        CNPullDownMenuDivider(),
+                        CNPullDownMenuItem(
+                          label: 'Delete',
+                          icon: CNSymbol('trash'),
+                          isDestructive: true,
+                        ),
+                      ],
+                      onSelected: (index) {
+                        final actions = ['Save to Photos', 'Duplicate', 'Delete'];
+                        setState(() => _lastAction = 'Menu: ${actions[index]}');
+                      },
+                      onInlineActionSelected: (index) {
+                        final actions = ['Crop', 'Filter', 'Adjust'];
+                        setState(() {
+                          _lastAction = 'Inline: ${actions[index]}';
+                          _lastInlineAction = actions[index];
+                        });
+                      },
+                    ),
+                    
+                    // Label-style pull-down button
+                    BaseCNPullDownButton(
+                      buttonLabel: 'Edit Photo',
+                      items: [
+                        CNPullDownMenuItem(
+                          label: 'Rotate Left',
+                          icon: CNSymbol('rotate.left'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'Rotate Right',
+                          icon: CNSymbol('rotate.right'),
+                        ),
+                        CNPullDownMenuDivider(),
+                        CNPullDownMenuItem(
+                          label: 'Flip Horizontal',
+                          icon: CNSymbol('arrow.left.and.right'),
+                        ),
+                      ],
+                      onSelected: (index) {
+                        final actions = ['Rotate Left', 'Rotate Right', 'Flip Horizontal'];
+                        setState(() => _lastAction = 'Edit: ${actions[index]}');
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Last Inline Action: $_lastInlineAction',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Native iOS pull-down button (UIButton)\n'
+                  '• Inline action buttons at top of menu\n'
+                  '• Regular menu items with icons\n'
+                  '• Dividers for organization\n'
+                  '• Destructive action styling\n'
+                  '• Separate callbacks for inline vs menu items',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
             title: 'BaseCNNavigationBar (Tap to Open Demo)',
             child: Column(
               children: [
@@ -495,7 +620,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
             child: Column(
               children: [
                 const Text(
-                  'Native iOS sheet presentation with resizable detents and nonmodal support',
+                  'Native iOS sheet presentation with resizable detents, inline actions, and item rows',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -515,6 +640,14 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                       onPressed: () => _showCustomHeaderSheet(),
                       child: const Text('Custom Header'),
                     ),
+                    ElevatedButton(
+                      onPressed: () => _showFormatSheet(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Format Sheet (NEW!)'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -524,6 +657,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   '• Resizable sheets with detents (medium, large, custom)\n'
                   '• Nonmodal sheets for background interaction\n'
                   '• Custom header with title and close button\n'
+                  '• Inline action buttons (NEW!)\n'
+                  '• Item rows - side-by-side buttons (NEW!)\n'
+                  '• Custom styling for all elements\n'
                   '• Apple HIG compliant sheet behavior\n'
                   '• Material Design bottom sheet fallback',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -602,6 +738,119 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
     } else {
       _set('Custom header sheet dismissed');
     }
+  }
+
+  void _showFormatSheet() {
+    BaseCNNativeSheet.showWithCustomHeader(
+      context: context,
+      title: 'Format',
+      subtitle: 'Text Formatting Options',
+      isModal: true,
+      headerTitleAlignment: 'center',
+      headerHeight: 70,
+      detents: const [
+        CNSheetDetent.medium,
+        CNSheetDetent.large,
+      ],
+      // Inline action buttons - like iOS Notes formatting toolbar
+      inlineActions: [
+        CNSheetInlineActions(
+          actions: [
+            CNSheetInlineAction(
+              label: 'B',
+              icon: 'bold',
+              isToggled: _isBold,
+            ),
+            CNSheetInlineAction(
+              label: 'I',
+              icon: 'italic',
+              isToggled: _isItalic,
+            ),
+            CNSheetInlineAction(
+              label: 'U',
+              icon: 'underline',
+              isToggled: _isUnderline,
+            ),
+            CNSheetInlineAction(
+              label: 'S',
+              icon: 'strikethrough',
+              isToggled: _isStrikethrough,
+            ),
+          ],
+        ),
+      ],
+      onInlineActionSelected: (actionIndex, inlineActionIndex) {
+        setState(() {
+          _lastInlineAction = 'Row $actionIndex, Button $inlineActionIndex pressed';
+          // Toggle the formatting state based on which button was pressed
+          switch (inlineActionIndex) {
+            case 0:
+              _isBold = !_isBold;
+              _showMessage('Bold ${_isBold ? 'enabled' : 'disabled'}');
+              break;
+            case 1:
+              _isItalic = !_isItalic;
+              _showMessage('Italic ${_isItalic ? 'enabled' : 'disabled'}');
+              break;
+            case 2:
+              _isUnderline = !_isUnderline;
+              _showMessage('Underline ${_isUnderline ? 'enabled' : 'disabled'}');
+              break;
+            case 3:
+              _isStrikethrough = !_isStrikethrough;
+              _showMessage('Strikethrough ${_isStrikethrough ? 'enabled' : 'disabled'}');
+              break;
+          }
+        });
+      },
+      // Item rows - side-by-side buttons with equal widths
+      itemRows: const [
+        CNSheetItemRow(
+          items: [
+            CNSheetItem(
+              title: 'Reset All',
+              icon: 'arrow.counterclockwise',
+            ),
+            CNSheetItem(
+              title: 'Copy Format',
+              icon: 'doc.on.clipboard',
+            ),
+          ],
+        ),
+      ],
+      onItemSelected: (itemIndex) {
+        if (itemIndex == 0) {
+          // Reset All
+          setState(() {
+            _isBold = false;
+            _isItalic = false;
+            _isUnderline = false;
+            _isStrikethrough = false;
+            _lastInlineAction = '';
+          });
+          _showMessage('All formatting reset');
+        } else {
+          // Copy Format
+          Navigator.pop(context);
+          _showMessage('Format copied to clipboard');
+        }
+      },
+      // Regular list items
+      items: const [
+        CNSheetItem(
+          title: 'Font Size',
+          icon: 'textformat.size',
+        ),
+        CNSheetItem(
+          title: 'Text Color',
+          icon: 'paintpalette',
+        ),
+        CNSheetItem(
+          title: 'Background Color',
+          icon: 'paintbrush.fill',
+        ),
+      ],
+    );
   }
 
   Widget _buildSection({required String title, required Widget child}) {

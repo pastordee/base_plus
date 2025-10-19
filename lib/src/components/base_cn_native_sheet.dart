@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
+// import 'package:cupertino_native/components/native_sheet.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,53 +10,7 @@ import 'package:flutter/services.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-/// Detent heights for resizable sheets (iOS only)
-class CNSheetDetent {
-  final String type;
-  final double? height;
-  
-  const CNSheetDetent._(this.type, this.height);
-  
-  /// Medium height (~50% of screen)
-  static const medium = CNSheetDetent._('medium', null);
-  
-  /// Large height (~100% of screen)
-  static const large = CNSheetDetent._('large', null);
-  
-  /// Custom fixed height in points
-  /// Example: CNSheetDetent.custom(300) for a 300pt tall sheet
-  static CNSheetDetent custom(double height) => CNSheetDetent._('custom', height);
-  
-  Map<String, dynamic> toMap() {
-    return {
-      'type': type,
-      if (height != null) 'height': height,
-    };
-  }
-}
 
-/// An item to display in a native sheet
-class CNSheetItem {
-  final String? title;
-  final String? icon;
-  final bool dismissOnTap;
-  
-  /// Creates a simple sheet item with title and optional icon.
-  /// This will be rendered natively using UISheetPresentationController.
-  const CNSheetItem({
-    required this.title,
-    this.icon,
-    this.dismissOnTap = true,
-  });
-  
-  Map<String, dynamic> toMap() {
-    return {
-      if (title != null) 'title': title,
-      if (icon != null) 'icon': icon,
-      'dismissOnTap': dismissOnTap,
-    };
-  }
-}
 
 /// Base wrapper for CNNativeSheet with cross-platform support
 /// 
@@ -223,6 +179,8 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
   /// - Close button allows manual dismissal
   /// - Still supports nonmodal behavior with `isModal: false`
   /// - Full control over header styling
+  /// - Supports inline action buttons (horizontal rows of buttons)
+  /// - Supports item rows (side-by-side items with equal width)
   /// 
   /// **Example:**
   /// ```dart
@@ -232,10 +190,24 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
   ///   headerTitleSize: 20,
   ///   headerTitleWeight: FontWeight.w600,
   ///   headerHeight: 56,
+  ///   inlineActions: [
+  ///     CNSheetInlineActions(
+  ///       actions: [
+  ///         CNSheetInlineAction(label: 'B', icon: 'bold', isToggled: true),
+  ///         CNSheetInlineAction(label: 'I', icon: 'italic'),
+  ///       ],
+  ///     ),
+  ///   ],
   ///   items: [
   ///     CNSheetItem(title: 'Bold', icon: 'bold'),
   ///     CNSheetItem(title: 'Italic', icon: 'italic'),
   ///   ],
+  ///   onInlineActionSelected: (rowIndex, actionIndex) {
+  ///     print('Inline action: row $rowIndex, action $actionIndex');
+  ///   },
+  ///   onItemSelected: (index) {
+  ///     print('Item selected: $index');
+  ///   },
   ///   detents: [CNSheetDetent.custom(280)],
   ///   isModal: false, // Nonmodal - can interact with background
   /// );
@@ -243,16 +215,24 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
   /// 
   /// [context] - Build context for presentation
   /// [title] - Title displayed in the header (required for custom header)
+  /// [subtitle] - Optional subtitle below the title in header
   /// [message] - Optional message below the header
-  /// [items] - List of items to display
+  /// [items] - List of items to display (full width, vertical list)
+  /// [itemRows] - List of item rows (side-by-side items with equal width)
+  /// [inlineActions] - List of inline action button rows
   /// [detents] - Heights at which the sheet can rest
   /// [prefersGrabberVisible] - Whether to show the grabber handle
   /// [isModal] - Whether the sheet blocks background interaction
+  /// 
+  /// **Callbacks:**
+  /// [onItemSelected] - Callback for when a vertical list item is tapped (receives index)
+  /// [onInlineActionSelected] - Callback for inline action buttons (receives rowIndex, actionIndex)
   /// 
   /// **Header Styling Options:**
   /// [headerTitleSize] - Font size for the title (default: 20)
   /// [headerTitleWeight] - Font weight for the title (default: semibold/600)
   /// [headerTitleColor] - Color for the title (default: label color)
+  /// [headerTitleAlignment] - Alignment of title: 'left', 'center', 'right' (default: 'left')
   /// [headerHeight] - Height of the header bar (default: 56)
   /// [headerBackgroundColor] - Background color of the header (default: system background)
   /// [showHeaderDivider] - Whether to show divider below header (default: true)
@@ -268,18 +248,25 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
   static Future<int?> showWithCustomHeader({
     required BuildContext context,
     required String title,
+    String? subtitle,
     String? message,
     List<CNSheetItem> items = const [],
+    List<CNSheetItemRow> itemRows = const [],
+    List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
     bool prefersEdgeAttachedInCompactHeight = false,
     bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
     double? preferredCornerRadius,
+    // Callbacks
+    void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
+    void Function(int index)? onItemSelected,
     // Header styling
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
+    String? headerTitleAlignment,
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -304,17 +291,23 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
       return await _CNNativeSheetCupertino.showWithCustomHeader(
         context: context,
         title: title,
+        subtitle: subtitle,
         message: message,
         items: items,
+        itemRows: itemRows,
+        inlineActions: inlineActions,
         detents: detents,
         prefersGrabberVisible: prefersGrabberVisible,
         isModal: isModal,
         prefersEdgeAttachedInCompactHeight: prefersEdgeAttachedInCompactHeight,
         widthFollowsPreferredContentSizeWhenEdgeAttached: widthFollowsPreferredContentSizeWhenEdgeAttached,
         preferredCornerRadius: preferredCornerRadius,
+        onInlineActionSelected: onInlineActionSelected,
+        onItemSelected: onItemSelected,
         headerTitleSize: headerTitleSize,
         headerTitleWeight: headerTitleWeight,
         headerTitleColor: headerTitleColor,
+        headerTitleAlignment: headerTitleAlignment,
         headerHeight: headerHeight,
         headerBackgroundColor: headerBackgroundColor,
         showHeaderDivider: showHeaderDivider,
@@ -331,17 +324,23 @@ class BaseCNNativeSheet extends BaseStatelessWidget {
       return await _CNNativeSheetMaterial.showWithCustomHeader(
         context: context,
         title: title,
+        subtitle: subtitle,
         message: message,
         items: items,
+        itemRows: itemRows,
+        inlineActions: inlineActions,
         detents: detents,
         prefersGrabberVisible: prefersGrabberVisible,
         isModal: isModal,
         prefersEdgeAttachedInCompactHeight: prefersEdgeAttachedInCompactHeight,
         widthFollowsPreferredContentSizeWhenEdgeAttached: widthFollowsPreferredContentSizeWhenEdgeAttached,
         preferredCornerRadius: preferredCornerRadius,
+        onInlineActionSelected: onInlineActionSelected,
+        onItemSelected: onItemSelected,
         headerTitleSize: headerTitleSize,
         headerTitleWeight: headerTitleWeight,
         headerTitleColor: headerTitleColor,
+        headerTitleAlignment: headerTitleAlignment,
         headerHeight: headerHeight,
         headerBackgroundColor: headerBackgroundColor,
         showHeaderDivider: showHeaderDivider,
@@ -426,18 +425,25 @@ class _CNNativeSheetCupertino {
   static Future<int?> showWithCustomHeader({
     required BuildContext context,
     required String title,
+    String? subtitle,
     String? message,
     List<CNSheetItem> items = const [],
+    List<CNSheetItemRow> itemRows = const [],
+    List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
     bool prefersEdgeAttachedInCompactHeight = false,
     bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
     double? preferredCornerRadius,
+    // Callbacks
+    void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
+    void Function(int index)? onItemSelected,
     // Header styling
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
+    String? headerTitleAlignment,
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -454,8 +460,11 @@ class _CNNativeSheetCupertino {
     try {
       final result = await _customChannel.invokeMethod('showSheet', {
         'title': title,
+        if (subtitle != null) 'subtitle': subtitle,
         'message': message,
         'items': items.map((item) => item.toMap()).toList(),
+        'itemRows': _serializeItemRows(itemRows),
+        'inlineActions': _serializeInlineActions(inlineActions),
         'detents': detents.map((d) => d.toMap()).toList(),
         'prefersGrabberVisible': prefersGrabberVisible,
         'isModal': isModal,
@@ -466,6 +475,7 @@ class _CNNativeSheetCupertino {
         if (headerTitleSize != null) 'headerTitleSize': headerTitleSize,
         if (headerTitleWeight != null) 'headerTitleWeight': _fontWeightToString(headerTitleWeight),
         if (headerTitleColor != null) 'headerTitleColor': headerTitleColor.value,
+        if (headerTitleAlignment != null) 'headerTitleAlignment': headerTitleAlignment,
         if (headerHeight != null) 'headerHeight': headerHeight,
         if (headerBackgroundColor != null) 'headerBackgroundColor': headerBackgroundColor.value,
         'showHeaderDivider': showHeaderDivider,
@@ -480,7 +490,19 @@ class _CNNativeSheetCupertino {
         if (itemTintColor != null) 'itemTintColor': itemTintColor.value,
       });
       
+      // Handle callbacks from native side
       if (result is Map) {
+        if (result.containsKey('inlineActionSelected')) {
+          final rowIndex = result['inlineActionRow'] as int;
+          final actionIndex = result['inlineActionIndex'] as int;
+          onInlineActionSelected?.call(rowIndex, actionIndex);
+        }
+        
+        if (result.containsKey('itemSelected')) {
+          final index = result['itemIndex'] as int;
+          onItemSelected?.call(index);
+        }
+        
         return result['selectedIndex'] as int?;
       }
       return null;
@@ -502,6 +524,46 @@ class _CNNativeSheetCupertino {
     if (weight == FontWeight.w800) return 'heavy';
     if (weight == FontWeight.w900) return 'black';
     return 'regular';
+  }
+
+  // Helper to serialize CNSheetItemRow for method channel
+  static List<Map<String, dynamic>> _serializeItemRows(List<CNSheetItemRow> itemRows) {
+    return itemRows.map((row) {
+      return {
+        'items': row.items.map((item) => item.toMap()).toList(),
+        if (row.spacing != null) 'spacing': row.spacing,
+        if (row.height != null) 'height': row.height,
+      };
+    }).toList();
+  }
+
+  // Helper to serialize CNSheetInlineActions for method channel
+  static List<Map<String, dynamic>> _serializeInlineActions(List<CNSheetInlineActions> inlineActions) {
+    return inlineActions.map((actionGroup) {
+      final actionMaps = actionGroup.actions.map((action) {
+        final map = <String, dynamic>{
+          'label': action.label,
+          'icon': action.icon,
+          'enabled': action.enabled,
+          'isToggled': action.isToggled,
+        };
+        if (action.backgroundColor != null) map['backgroundColor'] = action.backgroundColor!.value;
+        if (action.width != null) map['width'] = action.width;
+        if (action.iconSize != null) map['iconSize'] = action.iconSize;
+        if (action.labelSize != null) map['labelSize'] = action.labelSize;
+        if (action.cornerRadius != null) map['cornerRadius'] = action.cornerRadius;
+        if (action.iconLabelSpacing != null) map['iconLabelSpacing'] = action.iconLabelSpacing;
+        return map;
+      }).toList();
+
+      return {
+        'actions': actionMaps,
+        if (actionGroup.spacing != null) 'spacing': actionGroup.spacing,
+        if (actionGroup.horizontalPadding != null) 'horizontalPadding': actionGroup.horizontalPadding,
+        if (actionGroup.verticalPadding != null) 'verticalPadding': actionGroup.verticalPadding,
+        if (actionGroup.height != null) 'height': actionGroup.height,
+      };
+    }).toList();
   }
 }
 
@@ -623,18 +685,25 @@ class _CNNativeSheetMaterial {
   static Future<int?> showWithCustomHeader({
     required BuildContext context,
     required String title,
+    String? subtitle,
     String? message,
     List<CNSheetItem> items = const [],
+    List<CNSheetItemRow> itemRows = const [],
+    List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
     bool prefersEdgeAttachedInCompactHeight = false,
     bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
     double? preferredCornerRadius,
+    // Callbacks
+    void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
+    void Function(int index)? onItemSelected,
     // Header styling
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
+    String? headerTitleAlignment,
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -651,6 +720,7 @@ class _CNNativeSheetMaterial {
     final theme = Theme.of(context);
     
     int? selectedIndex;
+    int totalItemIndex = 0; // Track total item index across all sections
     
     await showModalBottomSheet<int>(
       context: context,
@@ -663,124 +733,283 @@ class _CNNativeSheetMaterial {
             top: Radius.circular(preferredCornerRadius ?? 20),
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Grabber handle (if enabled)
-            if (prefersGrabberVisible)
-              Container(
-                margin: const EdgeInsets.only(top: 8, bottom: 4),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            
-            // Custom header
-            Container(
-              height: headerHeight ?? 56,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: headerBackgroundColor ?? theme.colorScheme.surface,
-                border: showHeaderDivider
-                  ? Border(
-                      bottom: BorderSide(
-                        color: headerDividerColor ?? theme.dividerColor,
-                        width: 1,
-                      ),
-                    )
-                  : null,
-              ),
-              child: Row(
-                children: [
-                  if (closeButtonPosition == 'leading')
-                    IconButton(
-                      icon: Icon(
-                        _getCloseIcon(closeButtonIcon),
-                        size: closeButtonSize ?? 17,
-                        color: closeButtonColor ?? theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: headerTitleSize ?? 20,
-                        fontWeight: headerTitleWeight ?? FontWeight.w600,
-                        color: headerTitleColor ?? theme.colorScheme.onSurface,
-                      ),
-                      textAlign: closeButtonPosition == 'leading' 
-                        ? TextAlign.center 
-                        : TextAlign.left,
-                    ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Grabber handle (if enabled)
+              if (prefersGrabberVisible)
+                Container(
+                  margin: const EdgeInsets.only(top: 8, bottom: 4),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  
-                  if (closeButtonPosition == 'trailing')
-                    IconButton(
-                      icon: Icon(
-                        _getCloseIcon(closeButtonIcon),
-                        size: closeButtonSize ?? 17,
-                        color: closeButtonColor ?? theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                ],
-              ),
-            ),
-            
-            // Message (if provided)
-            if (message != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  message,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-            
-            // Items
-            ...items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
               
-              return ListTile(
-                title: Text(
-                  item.title ?? '',
-                  style: TextStyle(
-                    color: itemTextColor ?? theme.colorScheme.onSurface,
+              // Custom header
+              Container(
+                height: headerHeight ?? 56,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: headerBackgroundColor ?? theme.colorScheme.surface,
+                  border: showHeaderDivider
+                    ? Border(
+                        bottom: BorderSide(
+                          color: headerDividerColor ?? theme.dividerColor,
+                          width: 1,
+                        ),
+                      )
+                    : null,
+                ),
+                child: Row(
+                  children: [
+                    if (closeButtonPosition == 'leading')
+                      IconButton(
+                        icon: Icon(
+                          _getCloseIcon(closeButtonIcon),
+                          size: closeButtonSize ?? 17,
+                          color: closeButtonColor ?? theme.colorScheme.onSurface,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: _getHeaderAlignment(headerTitleAlignment, closeButtonPosition),
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: headerTitleSize ?? 20,
+                              fontWeight: headerTitleWeight ?? FontWeight.w600,
+                              color: headerTitleColor ?? theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          if (subtitle != null)
+                            Text(
+                              subtitle,
+                              style: TextStyle(
+                                fontSize: (headerTitleSize ?? 20) * 0.7,
+                                color: (headerTitleColor ?? theme.colorScheme.onSurface).withOpacity(0.6),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    
+                    if (closeButtonPosition == 'trailing')
+                      IconButton(
+                        icon: Icon(
+                          _getCloseIcon(closeButtonIcon),
+                          size: closeButtonSize ?? 17,
+                          color: closeButtonColor ?? theme.colorScheme.onSurface,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                  ],
+                ),
+              ),
+              
+              // Message (if provided)
+              if (message != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                leading: item.icon != null
-                  ? Icon(
-                      _getIconData(item.icon!),
-                      color: itemTintColor ?? theme.colorScheme.primary,
-                    )
-                  : null,
-                onTap: () {
-                  selectedIndex = index;
-                  if (item.dismissOnTap) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                tileColor: itemBackgroundColor,
-              );
-            }).toList(),
-            
-            // Bottom padding for safe area
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-          ],
+              
+              // Inline action rows
+              ...inlineActions.asMap().entries.map((entry) {
+                final rowIndex = entry.key;
+                final actionRow = entry.value;
+                
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: actionRow.horizontalPadding ?? 16,
+                    vertical: actionRow.verticalPadding ?? 8,
+                  ),
+                  child: SizedBox(
+                    height: actionRow.height ?? 60,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: actionRow.actions.length,
+                      separatorBuilder: (_, __) => SizedBox(width: actionRow.spacing ?? 8),
+                      itemBuilder: (context, actionIndex) {
+                        final action = actionRow.actions[actionIndex];
+                        return SizedBox(
+                          width: 70,
+                          child: Material(
+                            color: theme.colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              onTap: () {
+                                onInlineActionSelected?.call(rowIndex, actionIndex);
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (action.icon != null)
+                                    Icon(
+                                      _getIconData(action.icon),
+                                      size: 24,
+                                      color: theme.colorScheme.onSecondaryContainer,
+                                    ),
+                                  if (action.label != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      action.label,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.onSecondaryContainer,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }).toList(),
+              
+              // Regular vertical items
+              ...items.asMap().entries.map((entry) {
+                final index = totalItemIndex++;
+                final item = entry.value;
+                
+                return ListTile(
+                  title: Text(
+                    item.title ?? '',
+                    style: TextStyle(
+                      color: item.textColor ?? itemTextColor ?? theme.colorScheme.onSurface,
+                      fontSize: item.fontSize,
+                      fontWeight: item.fontWeight,
+                    ),
+                  ),
+                  leading: item.icon != null
+                    ? Icon(
+                        _getIconData(item.icon!),
+                        size: item.iconSize,
+                        color: item.iconColor ?? itemTintColor ?? theme.colorScheme.primary,
+                      )
+                    : null,
+                  onTap: () {
+                    selectedIndex = index;
+                    onItemSelected?.call(index);
+                    if (item.dismissOnTap) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  tileColor: item.backgroundColor ?? itemBackgroundColor,
+                  minVerticalPadding: item.height != null ? (item.height! - 20) / 2 : null,
+                );
+              }).toList(),
+              
+              // Item rows (side-by-side items)
+              ...itemRows.map((itemRow) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: itemRow.items.asMap().entries.map((entry) {
+                      final itemIndex = entry.key;
+                      final item = entry.value;
+                      final currentIndex = totalItemIndex++;
+                      
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: itemIndex < itemRow.items.length - 1 ? (itemRow.spacing ?? 8) : 0,
+                          ),
+                          child: SizedBox(
+                            height: itemRow.height ?? 56,
+                            child: Material(
+                              color: item.backgroundColor ?? itemBackgroundColor ?? theme.colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                onTap: () {
+                                  selectedIndex = currentIndex;
+                                  onItemSelected?.call(currentIndex);
+                                  if (item.dismissOnTap) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (item.icon != null)
+                                      Icon(
+                                        _getIconData(item.icon!),
+                                        size: item.iconSize ?? 20,
+                                        color: item.iconColor ?? itemTintColor ?? theme.colorScheme.onSecondaryContainer,
+                                      ),
+                                    if (item.icon != null && item.title != null)
+                                      const SizedBox(width: 8),
+                                    if (item.title != null)
+                                      Flexible(
+                                        child: Text(
+                                          item.title!,
+                                          style: TextStyle(
+                                            color: item.textColor ?? itemTextColor ?? theme.colorScheme.onSecondaryContainer,
+                                            fontSize: item.fontSize ?? 14,
+                                            fontWeight: item.fontWeight ?? FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }).toList(),
+              
+              // Bottom padding for safe area
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+            ],
+          ),
         ),
       ),
     );
     
     return selectedIndex;
+  }
+  
+  // Helper to get header text alignment
+  static CrossAxisAlignment _getHeaderAlignment(String? alignment, String closeButtonPosition) {
+    if (closeButtonPosition == 'leading') {
+      return CrossAxisAlignment.center;
+    }
+    switch (alignment) {
+      case 'center':
+        return CrossAxisAlignment.center;
+      case 'right':
+        return CrossAxisAlignment.end;
+      default:
+        return CrossAxisAlignment.start;
+    }
   }
 
   // Helper to map SF Symbol names to Material icons
@@ -898,18 +1127,25 @@ class CNNativeSheet {
   static Future<int?> showWithCustomHeader({
     required BuildContext context,
     required String title,
+    String? subtitle,
     String? message,
     List<CNSheetItem> items = const [],
+    List<CNSheetItemRow> itemRows = const [],
+    List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
     bool prefersEdgeAttachedInCompactHeight = false,
     bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
     double? preferredCornerRadius,
+    // Callbacks
+    void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
+    void Function(int index)? onItemSelected,
     // Header styling
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
+    String? headerTitleAlignment,
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -926,17 +1162,23 @@ class CNNativeSheet {
     return await BaseCNNativeSheet.showWithCustomHeader(
       context: context,
       title: title,
+      subtitle: subtitle,
       message: message,
       items: items,
+      itemRows: itemRows,
+      inlineActions: inlineActions,
       detents: detents,
       prefersGrabberVisible: prefersGrabberVisible,
       isModal: isModal,
       prefersEdgeAttachedInCompactHeight: prefersEdgeAttachedInCompactHeight,
       widthFollowsPreferredContentSizeWhenEdgeAttached: widthFollowsPreferredContentSizeWhenEdgeAttached,
       preferredCornerRadius: preferredCornerRadius,
+      onInlineActionSelected: onInlineActionSelected,
+      onItemSelected: onItemSelected,
       headerTitleSize: headerTitleSize,
       headerTitleWeight: headerTitleWeight,
       headerTitleColor: headerTitleColor,
+      headerTitleAlignment: headerTitleAlignment,
       headerHeight: headerHeight,
       headerBackgroundColor: headerBackgroundColor,
       showHeaderDivider: showHeaderDivider,
