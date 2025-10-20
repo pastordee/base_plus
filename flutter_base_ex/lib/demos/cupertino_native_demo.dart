@@ -28,6 +28,12 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   bool _isUnderline = false;
   bool _isStrikethrough = false;
 
+  // For CNPopupButton demo - separate state for each button to show independent behavior
+  int _filterIndex1 = 0; // Plain style button
+  int _filterIndex2 = 0; // Tinted style button
+  int _filterIndex3 = 0; // Gray style button with prefix
+  final List<String> _filterOptions = ['All', 'Images', 'Videos', 'Documents'];
+
   void _set(String action) {
     setState(() => _lastAction = action);
   }
@@ -363,11 +369,12 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    
                     // Icon-style pull-down button with inline actions
                     BaseCNPullDownButton.icon(
                       buttonIcon: const CNSymbol('ellipsis.circle', size: 24),
                       size: 44,
-                      items: [
+                      items: const [
                         CNPullDownMenuInlineActions(
                           actions: [
                             CNPullDownInlineAction(
@@ -388,6 +395,21 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         CNPullDownMenuItem(
                           label: 'Save to Photos',
                           icon: CNSymbol('square.and.arrow.down'),
+                        ),
+                        const CNPullDownMenuDivider(),
+                        CNPullDownMenuSubmenu(
+                          title: 'Attachment View',
+                          icon: CNSymbol('paperclip'),
+                          items: [
+                            CNPullDownMenuItem(
+                              label: 'Gallery View',
+                              icon: CNSymbol('square.grid.2x2'),
+                            ),
+                            CNPullDownMenuItem(
+                              label: 'List View',
+                              icon: CNSymbol('list.bullet'),
+                            ),
+                          ],
                         ),
                         CNPullDownMenuItem(
                           label: 'Duplicate',
@@ -416,7 +438,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     // Label-style pull-down button
                     BaseCNPullDownButton(
                       buttonLabel: 'Edit Photo',
-                      items: [
+                      items: const [
                         CNPullDownMenuItem(
                           label: 'Rotate Left',
                           icon: CNSymbol('rotate.left'),
@@ -452,6 +474,236 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   '• Dividers for organization\n'
                   '• Destructive action styling\n'
                   '• Separate callbacks for inline vs menu items',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
+            title: 'BaseCNPullDownButtonAnchor (NEW!)',
+            child: Column(
+              children: [
+                const Text(
+                  'Pull-down button anchored to CNButton with custom styling',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Icon-style pull-down button anchor with gray style
+                    BaseCNPullDownButtonAnchor.icon(
+                      buttonIcon: const CNSymbol('ellipsis.circle'),
+                      buttonStyle: CNButtonStyle.gray,
+                      size: 44,
+                      items: const [
+                        CNPullDownMenuItem(
+                          label: 'Settings',
+                          icon: CNSymbol('gear'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'Help',
+                          icon: CNSymbol('questionmark.circle'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'About',
+                          icon: CNSymbol('info.circle'),
+                        ),
+                        CNPullDownMenuDivider(),
+                        CNPullDownMenuItem(
+                          label: 'Delete',
+                          icon: CNSymbol('trash'),
+                          isDestructive: true,
+                        ),
+                      ],
+                      onSelected: (index) {
+                        setState(() {
+                          switch (index) {
+                            case 0:
+                              _lastAction = 'Settings selected';
+                              break;
+                            case 1:
+                              _lastAction = 'Help selected';
+                              break;
+                            case 2:
+                              _lastAction = 'About selected';
+                              break;
+                            case 3:
+                              _lastAction = 'Delete selected';
+                              break;
+                          }
+                        });
+                      },
+                    ),
+                    
+                    // Icon-style with tinted button style
+                    BaseCNPullDownButtonAnchor.icon(
+                      buttonIcon: const CNSymbol('star.fill'),
+                      buttonStyle: CNButtonStyle.tinted,
+                      tint: CupertinoColors.systemYellow,
+                      size: 44,
+                      menuTitle: 'Favorites',
+                      items: const [
+                        CNPullDownMenuItem(
+                          label: 'Add to Favorites',
+                          icon: CNSymbol('star'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'View Favorites',
+                          icon: CNSymbol('list.star'),
+                        ),
+                        CNPullDownMenuDivider(),
+                        CNPullDownMenuItem(
+                          label: 'Clear Favorites',
+                          icon: CNSymbol('trash'),
+                          isDestructive: true,
+                        ),
+                      ],
+                      onSelected: (index) {
+                        final actions = ['Add to Favorites', 'View Favorites', 'Clear Favorites'];
+                        setState(() => _lastAction = 'Favorite: ${actions[index]}');
+                      },
+                    ),
+                    
+                    // Icon-style with filled button style
+                    BaseCNPullDownButtonAnchor.icon(
+                      buttonIcon: const CNSymbol('square.and.arrow.up'),
+                      buttonStyle: CNButtonStyle.filled,
+                      size: 44,
+                      items: const [
+                        CNPullDownMenuItem(
+                          label: 'Share Link',
+                          icon: CNSymbol('link'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'Copy',
+                          icon: CNSymbol('doc.on.doc'),
+                        ),
+                        CNPullDownMenuItem(
+                          label: 'Save',
+                          icon: CNSymbol('square.and.arrow.down'),
+                        ),
+                      ],
+                      onSelected: (index) {
+                        final actions = ['Share Link', 'Copy', 'Save'];
+                        setState(() => _lastAction = 'Share: ${actions[index]}');
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Anchors pull-down menu to CNButton styles\n'
+                  '• Supports all CNButtonStyle options (plain, gray, tinted, filled, bordered, glass)\n'
+                  '• Custom tint colors for themed buttons\n'
+                  '• Optional menu title displayed at top of menu\n'
+                  '• Icon-only buttons with customizable size\n'
+                  '• Alignment control for menu positioning',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
+            title: 'BaseCNPopupButton (NEW!)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS popup button for selecting from a list of options',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Popup button with plain style
+                    Expanded(
+                      child: BaseCNPopupButton(
+                        width: 200,
+                        height: 24,
+                        options: _filterOptions,
+                        selectedIndex: _filterIndex1,
+                        onSelected: (index) {
+                          print('Plain button tapped: $index'); // Debug
+                          setState(() => _filterIndex1 = index);
+                          _set('Plain: ${_filterOptions[index]}');
+                        },
+                        buttonStyle: CNButtonStyle.plain,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    
+                    // Popup button with tinted style
+                    Expanded(
+                      child: BaseCNPopupButton(
+                        width: 200,
+                        options: _filterOptions,
+                        selectedIndex: _filterIndex2,
+                        onSelected: (index) {
+                          print('Tinted button tapped: $index'); // Debug
+                          setState(() => _filterIndex2 = index);
+                          _set('Tinted: ${_filterOptions[index]}');
+                        },
+                        buttonStyle: CNButtonStyle.tinted,
+                        tint: CupertinoColors.systemBlue,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    
+                    // Popup button with gray style and prefix
+                    Expanded(
+                      child: BaseCNPopupButton(
+                        width:200,
+                        options: _filterOptions,
+                        selectedIndex: _filterIndex3,
+                        onSelected: (index) {
+                          print('Gray button tapped: $index'); // Debug
+                          setState(() => _filterIndex3 = index);
+                          _set('Gray: ${_filterOptions[index]}');
+                        },
+                        buttonStyle: CNButtonStyle.gray,
+                        prefix: 'Show:',
+                        height: 36,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 66),
+                // Popup button with bordered style and custom width
+                Center(
+                  child: BaseCNPopupButton(
+                    options: const ['Small', 'Medium', 'Large', 'Extra Large'],
+                    selectedIndex: 1,
+                    onSelected: (index) {
+                      final sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
+                      _set('Size: ${sizes[index]}');
+                    },
+                    buttonStyle: CNButtonStyle.bordered,
+                    prefix: 'Size:',
+                    width: 200,
+                    height: 40,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Selected: Plain=${_filterOptions[_filterIndex1]}, Tinted=${_filterOptions[_filterIndex2]}, Gray=${_filterOptions[_filterIndex3]}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Native iOS popup button (UIButton with popup menu)\n'
+                  '• Displays selected option on button label\n'
+                  '• Supports all CNButtonStyle options\n'
+                  '• Optional prefix text (e.g., "Show:", "Filter:")\n'
+                  '• Custom dimensions (width and height)\n'
+                  '• Custom tint colors for themed buttons\n'
+                  '• Divider support between options',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],

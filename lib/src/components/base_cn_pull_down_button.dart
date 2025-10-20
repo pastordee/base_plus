@@ -21,7 +21,7 @@ export 'package:cupertino_native/cupertino_native.dart'
 
 /// Base wrapper for CNPullDownButton with cross-platform support
 /// 
-/// Provides native iOS pull-down button with inline actions and menu items.
+/// Provides native iOS pull-down button with inline actions, menu items, and submenus.
 /// Falls back to Material PopupMenuButton on other platforms.
 /// 
 /// Uses CNPullDownButton from cupertino_native on iOS, and PopupMenuButton on Android/other platforms.
@@ -30,11 +30,12 @@ export 'package:cupertino_native/cupertino_native.dart'
 /// - Native iOS pull-down button (UIButton with pull-down menu)
 /// - Inline action buttons (horizontal row of buttons at top of menu)
 /// - Regular menu items with icons and labels
+/// - Submenus with nested menu items (CNPullDownMenuSubmenu)
 /// - Dividers for visual organization
 /// - Destructive action styling
-/// - Material Design popup menu fallback
+/// - Material Design popup menu fallback with submenu support
 /// 
-/// Example usage:
+/// Example usage with submenu:
 /// ```dart
 /// BaseCNPullDownButton.icon(
 ///   buttonIcon: CNSymbol('ellipsis.circle', size: 24),
@@ -59,6 +60,22 @@ export 'package:cupertino_native/cupertino_native.dart'
 ///       label: 'Save',
 ///       icon: CNSymbol('square.and.arrow.down'),
 ///     ),
+///     // Submenu with nested items
+///     CNPullDownMenuSubmenu(
+///       title: 'Attachment View',
+///       icon: CNSymbol('paperclip'),
+///       items: [
+///         CNPullDownMenuItem(
+///           label: 'Gallery View',
+///           icon: CNSymbol('square.grid.2x2'),
+///         ),
+///         CNPullDownMenuItem(
+///           label: 'List View',
+///           icon: CNSymbol('list.bullet'),
+///         ),
+///       ],
+///     ),
+///     CNPullDownMenuDivider(),
 ///     CNPullDownMenuItem(
 ///       label: 'Delete',
 ///       icon: CNSymbol('trash'),
@@ -149,44 +166,9 @@ class BaseCNPullDownButton extends BaseStatelessWidget {
 
   @override
   Widget buildByMaterial(BuildContext context) {
-    // Extract regular menu items (skip inline actions and dividers for Material fallback)
-    final menuItems = <PopupMenuEntry<int>>[];
-    int menuItemIndex = 0;
-    
-    for (final item in items) {
-      if (item is CNPullDownMenuItem) {
-        menuItems.add(
-          PopupMenuItem<int>(
-            value: menuItemIndex++,
-            child: Row(
-              children: [
-                if (item.icon != null) ...[
-                  Icon(
-                    _getIconData(item.icon!.name),
-                    size: 20,
-                    color: item.isDestructive 
-                      ? Theme.of(context).colorScheme.error 
-                      : null,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    color: item.isDestructive 
-                      ? Theme.of(context).colorScheme.error 
-                      : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      } else if (item is CNPullDownMenuDivider) {
-        menuItems.add(const PopupMenuDivider());
-      }
-      // Skip CNPullDownMenuInlineActions for Material fallback
-    }
+    // Build menu items with submenu support for Material fallback
+    final menuItemIndex = _MenuItemIndexCounter();
+    final menuItems = _buildMaterialMenuItems(context, items, menuItemIndex);
 
     if (_isIconButton && buttonIcon != null) {
       return PopupMenuButton<int>(
@@ -217,6 +199,101 @@ class BaseCNPullDownButton extends BaseStatelessWidget {
       );
     }
     return const SizedBox.shrink();
+  }
+
+  /// Recursively builds Material menu items from CNPullDownMenuEntry list
+  /// Supports submenus, regular items, and dividers
+  List<PopupMenuEntry<int>> _buildMaterialMenuItems(
+    BuildContext context,
+    List<CNPullDownMenuEntry> entries,
+    _MenuItemIndexCounter indexCounter,
+  ) {
+    final menuItems = <PopupMenuEntry<int>>[];
+    
+    for (final entry in entries) {
+      if (entry is CNPullDownMenuItem) {
+        menuItems.add(
+          PopupMenuItem<int>(
+            value: indexCounter.next(),
+            child: Row(
+              children: [
+                if (entry.icon != null) ...[
+                  Icon(
+                    _getIconData(entry.icon!.name),
+                    size: 20,
+                    color: entry.isDestructive 
+                      ? Theme.of(context).colorScheme.error 
+                      : null,
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Text(
+                  entry.label,
+                  style: TextStyle(
+                    color: entry.isDestructive 
+                      ? Theme.of(context).colorScheme.error 
+                      : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else if (entry is CNPullDownMenuSubmenu) {
+        // Create a submenu using PopupMenuButton nested inside PopupMenuItem
+        menuItems.add(
+          PopupMenuItem<int>(
+            enabled: false, // Disable selection on the parent item
+            padding: EdgeInsets.zero,
+            child: PopupMenuButton<int>(
+              offset: const Offset(0, 0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    if (entry.icon != null) ...[
+                      Icon(
+                        _getIconData(entry.icon!.name),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(entry.title),
+                          if (entry.subtitle != null)
+                            Text(
+                              entry.subtitle!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_right, size: 20),
+                  ],
+                ),
+              ),
+              itemBuilder: (context) => _buildMaterialMenuItems(
+                context,
+                entry.items,
+                indexCounter,
+              ),
+              onSelected: (index) => onSelected?.call(index),
+            ),
+          ),
+        );
+      } else if (entry is CNPullDownMenuDivider) {
+        menuItems.add(const PopupMenuDivider());
+      }
+      // Skip CNPullDownMenuInlineActions for Material fallback
+    }
+    
+    return menuItems;
   }
 
   // Helper to map SF Symbol names to Material icons
@@ -270,8 +347,23 @@ class BaseCNPullDownButton extends BaseStatelessWidget {
         return Icons.check;
       case 'xmark':
         return Icons.close;
+      case 'paperclip':
+        return Icons.attach_file;
+      case 'square.grid.2x2':
+        return Icons.grid_view;
+      case 'list.bullet':
+        return Icons.list;
       default:
         return Icons.circle;
     }
   }
+}
+
+/// Helper class to track menu item indices across recursive submenu building
+class _MenuItemIndexCounter {
+  int _index = 0;
+  
+  int next() => _index++;
+  
+  int get current => _index;
 }
