@@ -54,6 +54,7 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
     Key? key,
     required this.child,
     this.onKeyboardHeightChanged,
+    this.onKeyboardVisibilityChanged,
     this.enableInteractiveDismissal = true,
     this.keyboardToolbar,
     this.dismissOnTap = true,
@@ -67,6 +68,9 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
 
   /// Callback for keyboard height changes
   final ValueChanged<double>? onKeyboardHeightChanged;
+
+  /// Callback for keyboard visibility changes
+  final ValueChanged<bool>? onKeyboardVisibilityChanged;
 
   /// Whether to enable interactive dismissal with gestures
   final bool enableInteractiveDismissal;
@@ -87,6 +91,7 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
   Widget buildByCupertino(BuildContext context) {
     return _KeyboardHeightReader(
       onKeyboardHeightChanged: onKeyboardHeightChanged,
+      onKeyboardVisibilityChanged: onKeyboardVisibilityChanged,
       enableInteractiveDismissal: enableInteractiveDismissal,
       keyboardToolbar: keyboardToolbar,
       dismissOnTap: dismissOnTap,
@@ -100,6 +105,7 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
   Widget buildByMaterial(BuildContext context) {
     return _CupertinoInteractiveKeyboardMaterial(
       onKeyboardHeightChanged: onKeyboardHeightChanged,
+      onKeyboardVisibilityChanged: onKeyboardVisibilityChanged,
       enableInteractiveDismissal: enableInteractiveDismissal,
       keyboardToolbar: keyboardToolbar,
       dismissOnTap: dismissOnTap,
@@ -116,6 +122,7 @@ class _KeyboardHeightReader extends StatefulWidget {
   const _KeyboardHeightReader({
     required this.child,
     this.onKeyboardHeightChanged,
+    this.onKeyboardVisibilityChanged,
     this.enableInteractiveDismissal = true,
     this.keyboardToolbar,
     this.dismissOnTap = true,
@@ -125,6 +132,7 @@ class _KeyboardHeightReader extends StatefulWidget {
 
   final Widget child;
   final ValueChanged<double>? onKeyboardHeightChanged;
+  final ValueChanged<bool>? onKeyboardVisibilityChanged;
   final bool enableInteractiveDismissal;
   final Widget? keyboardToolbar;
   final bool dismissOnTap;
@@ -168,6 +176,11 @@ class _KeyboardHeightReaderState extends State<_KeyboardHeightReader> with Widge
     if (isVisible != _isKeyboardVisible) {
       setState(() {
         _isKeyboardVisible = isVisible;
+      });
+      
+      // Report visibility change
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onKeyboardVisibilityChanged?.call(isVisible);
       });
       
       // Report keyboard height based on visibility
@@ -226,6 +239,7 @@ class _CupertinoInteractiveKeyboardMaterial extends StatefulWidget {
   const _CupertinoInteractiveKeyboardMaterial({
     required this.child,
     this.onKeyboardHeightChanged,
+    this.onKeyboardVisibilityChanged,
     this.enableInteractiveDismissal = true,
     this.keyboardToolbar,
     this.dismissOnTap = true,
@@ -235,6 +249,7 @@ class _CupertinoInteractiveKeyboardMaterial extends StatefulWidget {
 
   final Widget child;
   final ValueChanged<double>? onKeyboardHeightChanged;
+  final ValueChanged<bool>? onKeyboardVisibilityChanged;
   final bool enableInteractiveDismissal;
   final Widget? keyboardToolbar;
   final bool dismissOnTap;
@@ -291,11 +306,19 @@ class _CupertinoInteractiveKeyboardMaterialState extends State<_CupertinoInterac
     final newKeyboardHeight = mediaQuery.viewInsets.bottom;
     
     if (newKeyboardHeight != _keyboardHeight) {
+      final wasVisible = _isKeyboardVisible;
+      
       setState(() {
         _keyboardHeight = newKeyboardHeight;
         _isKeyboardVisible = _keyboardHeight > 0;
       });
       
+      // Report visibility change if it changed
+      if (wasVisible != _isKeyboardVisible) {
+        widget.onKeyboardVisibilityChanged?.call(_isKeyboardVisible);
+      }
+      
+      // Report height change
       widget.onKeyboardHeightChanged?.call(_keyboardHeight);
       
       if (_isKeyboardVisible) {
@@ -369,6 +392,7 @@ class CupertinoInteractiveKeyboard extends StatelessWidget {
     Key? key,
     required this.child,
     this.onKeyboardHeightChanged,
+    this.onKeyboardVisibilityChanged,
     this.enableInteractiveDismissal = true,
     this.keyboardToolbar,
     this.dismissOnTap = true,
@@ -381,6 +405,9 @@ class CupertinoInteractiveKeyboard extends StatelessWidget {
 
   /// Callback for keyboard height changes
   final ValueChanged<double>? onKeyboardHeightChanged;
+
+  /// Callback for keyboard visibility changes
+  final ValueChanged<bool>? onKeyboardVisibilityChanged;
 
   /// Whether to enable interactive dismissal with gestures
   final bool enableInteractiveDismissal;
@@ -401,6 +428,7 @@ class CupertinoInteractiveKeyboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseCupertinoInteractiveKeyboard(
       onKeyboardHeightChanged: onKeyboardHeightChanged,
+      onKeyboardVisibilityChanged: onKeyboardVisibilityChanged,
       enableInteractiveDismissal: enableInteractiveDismissal,
       keyboardToolbar: keyboardToolbar,
       dismissOnTap: dismissOnTap,

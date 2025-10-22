@@ -63,12 +63,11 @@ class _CupertinoInteractiveKeyboardDemoState extends State<CupertinoInteractiveK
               enableInteractiveDismissal: _enableInteractiveDismissal,
               dismissOnTap: _enableTapToDismiss,
               keyboardToolbar: _showKeyboardToolbar ? _buildKeyboardToolbar() : null,
-              onKeyboardHeightChanged: (double height) {
-                setState(() {
-                  _keyboardHeight = height;
-                });
-                _updateAction('Keyboard height: ${height.toStringAsFixed(1)}px');
-                print('Keyboard height: ${height.toStringAsFixed(1)}px');
+             onKeyboardVisibilityChanged: (isVisible) {
+                print('Keyboard is ${isVisible ? 'visible' : 'hidden'}');
+              },
+              onKeyboardHeightChanged: (height) {
+                print('Keyboard height: $height');
               },
               animationDuration: const Duration(milliseconds: 300),
               animationCurve: Curves.easeInOutCubic,
@@ -682,7 +681,13 @@ class _CupertinoInteractiveKeyboardVariationsDemoState extends State<CupertinoIn
             child: BaseCupertinoInteractiveKeyboard(
               key: ValueKey(_selectedToolbarStyle), // Force rebuild when toolbar style changes
               enableInteractiveDismissal: true,
-              dismissOnTap: true,
+              onKeyboardVisibilityChanged: (isVisible) {
+                print('Keyboard is ${isVisible ? 'visible' : 'hidden'}');
+              },
+              onKeyboardHeightChanged: (height) {
+                print('Keyboard height: $height');
+              },
+                          dismissOnTap: true,
               keyboardToolbar: _buildSelectedToolbar(),
               child: ListView(
                 padding: const EdgeInsets.all(16),
