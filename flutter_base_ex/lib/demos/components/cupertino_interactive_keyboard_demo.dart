@@ -59,14 +59,16 @@ class _CupertinoInteractiveKeyboardDemoState extends State<CupertinoInteractiveK
           
           Expanded(
             child: BaseCupertinoInteractiveKeyboard(
+             
               enableInteractiveDismissal: _enableInteractiveDismissal,
               dismissOnTap: _enableTapToDismiss,
               keyboardToolbar: _showKeyboardToolbar ? _buildKeyboardToolbar() : null,
-              onKeyboardHeightChanged: (height) {
+              onKeyboardHeightChanged: (double height) {
                 setState(() {
                   _keyboardHeight = height;
                 });
                 _updateAction('Keyboard height: ${height.toStringAsFixed(1)}px');
+                print('Keyboard height: ${height.toStringAsFixed(1)}px');
               },
               animationDuration: const Duration(milliseconds: 300),
               animationCurve: Curves.easeInOutCubic,
@@ -678,6 +680,7 @@ class _CupertinoInteractiveKeyboardVariationsDemoState extends State<CupertinoIn
           
           Expanded(
             child: BaseCupertinoInteractiveKeyboard(
+              key: ValueKey(_selectedToolbarStyle), // Force rebuild when toolbar style changes
               enableInteractiveDismissal: true,
               dismissOnTap: true,
               keyboardToolbar: _buildSelectedToolbar(),
@@ -815,10 +818,21 @@ class _CupertinoInteractiveKeyboardVariationsDemoState extends State<CupertinoIn
             },
             groupValue: _selectedToolbarStyle,
             onValueChanged: (value) {
+              // Dismiss keyboard first to allow the new toolbar to be attached
+              FocusScope.of(context).unfocus();
               setState(() {
                 _selectedToolbarStyle = value;
               });
             },
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Note: Keyboard will dismiss when changing toolbar style. Tap a text field to see the new toolbar.',
+            style: TextStyle(
+              fontSize: 12,
+              color: CupertinoColors.systemGrey,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),

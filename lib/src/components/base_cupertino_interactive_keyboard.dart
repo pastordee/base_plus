@@ -85,7 +85,7 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    return _CupertinoInteractiveKeyboardCupertino(
+    return _KeyboardHeightReader(
       onKeyboardHeightChanged: onKeyboardHeightChanged,
       enableInteractiveDismissal: enableInteractiveDismissal,
       keyboardToolbar: keyboardToolbar,
@@ -110,9 +110,10 @@ class BaseCupertinoInteractiveKeyboard extends BaseStatelessWidget {
   }
 }
 
-/// Cupertino implementation with native iOS interactive keyboard using the actual package
-class _CupertinoInteractiveKeyboardCupertino extends StatefulWidget {
-  const _CupertinoInteractiveKeyboardCupertino({
+/// Wrapper widget that uses keyboard visibility callback from the package
+/// to track keyboard state (no MediaQuery needed)
+class _KeyboardHeightReader extends StatefulWidget {
+  const _KeyboardHeightReader({
     required this.child,
     this.onKeyboardHeightChanged,
     this.enableInteractiveDismissal = true,
@@ -131,60 +132,74 @@ class _CupertinoInteractiveKeyboardCupertino extends StatefulWidget {
   final Curve animationCurve;
 
   @override
-  State<_CupertinoInteractiveKeyboardCupertino> createState() => 
-      _CupertinoInteractiveKeyboardCupertinoState();
+  State<_KeyboardHeightReader> createState() => _KeyboardHeightReaderState();
 }
 
-class _CupertinoInteractiveKeyboardCupertinoState extends State<_CupertinoInteractiveKeyboardCupertino> {
-  double _keyboardHeight = 0;
+class _KeyboardHeightReaderState extends State<_KeyboardHeightReader> with WidgetsBindingObserver {
   bool _isKeyboardVisible = false;
-  
+  // Estimated keyboard height for iOS (typical value)
+  static const double _estimatedKeyboardHeight = 336.0;
+
   @override
   void initState() {
     super.initState();
-    
-    // Listen to keyboard changes
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    // Trigger rebuild when metrics change
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateKeyboardHeight();
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
-  void _updateKeyboardHeight() {
-    final mediaQuery = MediaQuery.of(context);
-    final newKeyboardHeight = mediaQuery.viewInsets.bottom;
+  void _handleKeyboardVisibilityChanged(bool isVisible) {
+    print('[KeyboardVisibility] Keyboard visibility changed: $isVisible');
     
-    if (newKeyboardHeight != _keyboardHeight) {
+    if (isVisible != _isKeyboardVisible) {
       setState(() {
-        _keyboardHeight = newKeyboardHeight;
-        _isKeyboardVisible = _keyboardHeight > 0;
+        _isKeyboardVisible = isVisible;
       });
       
-      widget.onKeyboardHeightChanged?.call(_keyboardHeight);
+      // Report keyboard height based on visibility
+      final height = isVisible ? _estimatedKeyboardHeight : 0.0;
+      print('[KeyboardVisibility] Reporting keyboard height: $height');
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onKeyboardHeightChanged?.call(height);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _updateKeyboardHeight();
-    
     Widget content = widget.child;
     
-    // Use the actual CupertinoInteractiveKeyboard from the package
+    // Use the actual CupertinoInteractiveKeyboard from the package (v0.0.2+1)
     if (widget.enableInteractiveDismissal) {
       content = cik.CupertinoInteractiveKeyboard(
+        onKeyboardVisibilityChanged: _handleKeyboardVisibilityChanged,
         child: content,
       );
     }
     
     // Add input accessory if keyboard toolbar is provided and keyboard is visible
-    if (widget.keyboardToolbar != null) {
+    if (widget.keyboardToolbar != null && _isKeyboardVisible) {
       content = Column(
         children: [
           Expanded(child: content),
-          if (_isKeyboardVisible)
-            cik.CupertinoInputAccessory(
-              child: widget.keyboardToolbar!,
-            ),
+          cik.CupertinoInputAccessory(
+            child: widget.keyboardToolbar!,
+          ),
         ],
       );
     }
@@ -232,7 +247,7 @@ class _CupertinoInteractiveKeyboardMaterial extends StatefulWidget {
 }
 
 class _CupertinoInteractiveKeyboardMaterialState extends State<_CupertinoInteractiveKeyboardMaterial>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _animationController;
   
   double _keyboardHeight = 0;
@@ -241,6 +256,7 @@ class _CupertinoInteractiveKeyboardMaterialState extends State<_CupertinoInterac
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     
     _animationController = AnimationController(
       duration: widget.animationDuration,
@@ -255,8 +271,19 @@ class _CupertinoInteractiveKeyboardMaterialState extends State<_CupertinoInterac
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    // Called whenever the metrics (including keyboard height) change
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _updateKeyboardHeight();
+      }
+    });
   }
 
   void _updateKeyboardHeight() {
@@ -281,7 +308,6 @@ class _CupertinoInteractiveKeyboardMaterialState extends State<_CupertinoInterac
 
   @override
   Widget build(BuildContext context) {
-    _updateKeyboardHeight();
     
     Widget content = widget.child;
     

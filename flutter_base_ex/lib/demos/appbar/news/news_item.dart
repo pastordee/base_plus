@@ -185,6 +185,11 @@ class _NewsItemState extends State<NewsItem> with AutomaticKeepAliveClientMixin 
         child: child,
       ),
       onTap: () {
+        // Create a new WebViewController for this page
+        final webViewController = WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.disabled)
+          ..loadRequest(Uri.parse(widget.news['url']));
+        
         BaseRoute<void>(
           builder: (_) => BaseScaffold(
             appBar: BaseAppBar(
@@ -198,9 +203,8 @@ class _NewsItemState extends State<NewsItem> with AutomaticKeepAliveClientMixin 
               transitionBetweenRoutes: false,
             ),
             safeAreaTop: true,
-            body: WebView(
-              initialUrl: widget.news['url'],
-              javascriptMode: JavascriptMode.disabled,
+            body: WebViewWidget(
+              controller: webViewController,
             ),
           ),
           fullscreenGackGesture: false,
