@@ -27,8 +27,11 @@ class BaseToolbarAction {
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
-  }) : _isFixedSpace = false,
+  }) : popupMenuItems = null,
+       onPopupMenuSelected = null,
+       _isFixedSpace = false,
        _isFlexibleSpace = false,
+       _usePopupMenuButton = false,
        _spaceWidth = null,
        assert(icon != null || label != null, 'Either icon or label must be provided');
 
@@ -39,8 +42,11 @@ class BaseToolbarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        popupMenuItems = null,
+        onPopupMenuSelected = null,
         _isFixedSpace = true,
-        _isFlexibleSpace = false;
+        _isFlexibleSpace = false,
+        _usePopupMenuButton = false;
 
   const BaseToolbarAction._flexibleSpace()
       : icon = null,
@@ -49,9 +55,27 @@ class BaseToolbarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        popupMenuItems = null,
+        onPopupMenuSelected = null,
         _isFixedSpace = false,
         _isFlexibleSpace = true,
+        _usePopupMenuButton = false,
         _spaceWidth = null;
+
+  const BaseToolbarAction._popupMenu({
+    required this.icon,
+    required this.label,
+    required this.popupMenuItems,
+    required this.onPopupMenuSelected,
+    this.padding,
+    this.labelSize = 15,
+    this.iconSize = 16,
+    bool usePopupMenuButton = false,
+  }) : onPressed = null,
+       _isFixedSpace = false,
+       _isFlexibleSpace = false,
+       _usePopupMenuButton = usePopupMenuButton,
+       _spaceWidth = null;
 
   /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
   final CNSymbol? icon;
@@ -71,11 +95,20 @@ class BaseToolbarAction {
   /// Icon size (iOS only)
   final double? iconSize;
 
+  /// Popup menu items to display when the action is pressed
+  final List<CNPopupMenuEntry>? popupMenuItems;
+
+  /// Called when a popup menu item is selected
+  final ValueChanged<int>? onPopupMenuSelected;
+
   /// Internal flag for fixed space action
   final bool _isFixedSpace;
 
   /// Internal flag for flexible space action
   final bool _isFlexibleSpace;
+
+  /// Internal flag for popup menu button usage
+  final bool _usePopupMenuButton;
 
   /// Internal space width
   final double? _spaceWidth;
@@ -88,6 +121,50 @@ class BaseToolbarAction {
   /// Creates a flexible space action
   factory BaseToolbarAction.flexibleSpace() {
     return const BaseToolbarAction._flexibleSpace();
+  }
+
+  /// Creates a toolbar action with a popup menu
+  factory BaseToolbarAction.popupMenu({
+    CNSymbol? icon,
+    String? label,
+    required List<CNPopupMenuEntry> popupMenuItems,
+    required ValueChanged<int> onPopupMenuSelected,
+    double? padding,
+    double? labelSize = 15,
+    double? iconSize = 16,
+  }) {
+    return BaseToolbarAction._popupMenu(
+      icon: icon,
+      label: label,
+      popupMenuItems: popupMenuItems,
+      onPopupMenuSelected: onPopupMenuSelected,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+      usePopupMenuButton: false,
+    );
+  }
+
+  /// Creates a toolbar action with a CNPopupMenuButton
+  factory BaseToolbarAction.popupMenuButton({
+    CNSymbol? icon,
+    String? label,
+    required List<CNPopupMenuEntry> popupMenuItems,
+    required ValueChanged<int> onPopupMenuSelected,
+    double? padding,
+    double? labelSize = 15,
+    double? iconSize = 16,
+  }) {
+    return BaseToolbarAction._popupMenu(
+      icon: icon,
+      label: label,
+      popupMenuItems: popupMenuItems,
+      onPopupMenuSelected: onPopupMenuSelected,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+      usePopupMenuButton: true,
+    );
   }
 
   /// Check if this is a fixed space action
@@ -107,6 +184,31 @@ class BaseToolbarAction {
     if (_isFlexibleSpace) {
       return CNToolbarAction.flexibleSpace();
     }
+    // Handle popup menu actions
+    if (popupMenuItems != null && onPopupMenuSelected != null) {
+      if (_usePopupMenuButton) {
+        return CNToolbarAction.popupMenuButton(
+          icon: icon,
+          label: label,
+          popupMenuItems: popupMenuItems!,
+          onPopupMenuSelected: onPopupMenuSelected!,
+          padding: padding,
+          labelSize: labelSize,
+          iconSize: iconSize,
+        );
+      } else {
+        return CNToolbarAction.popupMenu(
+          icon: icon,
+          label: label,
+          popupMenuItems: popupMenuItems!,
+          onPopupMenuSelected: onPopupMenuSelected!,
+          padding: padding,
+          labelSize: labelSize,
+          iconSize: iconSize,
+        );
+      }
+    }
+    // Regular action
     return CNToolbarAction(
       icon: icon,
       label: label,

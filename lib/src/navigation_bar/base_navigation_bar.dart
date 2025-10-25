@@ -20,8 +20,11 @@ class BaseNavigationBarAction {
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
-  }) : _isFixedSpace = false,
+  }) : popupMenuItems = null,
+       onPopupMenuSelected = null,
+       _isFixedSpace = false,
        _isFlexibleSpace = false,
+       _usePopupMenuButton = false,
        _spaceWidth = null,
        assert(icon != null || label != null, 'Either icon or label must be provided');
 
@@ -32,8 +35,11 @@ class BaseNavigationBarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        popupMenuItems = null,
+        onPopupMenuSelected = null,
         _isFixedSpace = true,
-        _isFlexibleSpace = false;
+        _isFlexibleSpace = false,
+        _usePopupMenuButton = false;
 
   const BaseNavigationBarAction._flexibleSpace()
       : icon = null,
@@ -42,9 +48,27 @@ class BaseNavigationBarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        popupMenuItems = null,
+        onPopupMenuSelected = null,
         _isFixedSpace = false,
         _isFlexibleSpace = true,
+        _usePopupMenuButton = false,
         _spaceWidth = null;
+
+  const BaseNavigationBarAction._popupMenu({
+    required this.icon,
+    required this.label,
+    required this.popupMenuItems,
+    required this.onPopupMenuSelected,
+    this.padding,
+    this.labelSize = 15,
+    this.iconSize = 16,
+    bool usePopupMenuButton = false,
+  }) : onPressed = null,
+       _isFixedSpace = false,
+       _isFlexibleSpace = false,
+       _usePopupMenuButton = usePopupMenuButton,
+       _spaceWidth = null;
 
   /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
   final CNSymbol? icon;
@@ -64,11 +88,20 @@ class BaseNavigationBarAction {
   /// Icon size (iOS only)
   final double? iconSize;
 
+  /// Popup menu items to display when the action is pressed
+  final List<CNPopupMenuEntry>? popupMenuItems;
+
+  /// Called when a popup menu item is selected
+  final ValueChanged<int>? onPopupMenuSelected;
+
   /// Internal flag for fixed space action
   final bool _isFixedSpace;
 
   /// Internal flag for flexible space action
   final bool _isFlexibleSpace;
+
+  /// Internal flag for popup menu button usage
+  final bool _usePopupMenuButton;
 
   /// Internal space width
   final double? _spaceWidth;
@@ -81,6 +114,50 @@ class BaseNavigationBarAction {
   /// Creates a flexible space action
   factory BaseNavigationBarAction.flexibleSpace() {
     return const BaseNavigationBarAction._flexibleSpace();
+  }
+
+  /// Creates a navigation bar action with a popup menu
+  factory BaseNavigationBarAction.popupMenu({
+    CNSymbol? icon,
+    String? label,
+    required List<CNPopupMenuEntry> popupMenuItems,
+    required ValueChanged<int> onPopupMenuSelected,
+    double? padding,
+    double? labelSize = 15,
+    double? iconSize = 16,
+  }) {
+    return BaseNavigationBarAction._popupMenu(
+      icon: icon,
+      label: label,
+      popupMenuItems: popupMenuItems,
+      onPopupMenuSelected: onPopupMenuSelected,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+      usePopupMenuButton: false,
+    );
+  }
+
+  /// Creates a navigation bar action with a CNPopupMenuButton
+  factory BaseNavigationBarAction.popupMenuButton({
+    CNSymbol? icon,
+    String? label,
+    required List<CNPopupMenuEntry> popupMenuItems,
+    required ValueChanged<int> onPopupMenuSelected,
+    double? padding,
+    double? labelSize = 15,
+    double? iconSize = 16,
+  }) {
+    return BaseNavigationBarAction._popupMenu(
+      icon: icon,
+      label: label,
+      popupMenuItems: popupMenuItems,
+      onPopupMenuSelected: onPopupMenuSelected,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+      usePopupMenuButton: true,
+    );
   }
 
   /// Check if this is a fixed space action
@@ -100,6 +177,31 @@ class BaseNavigationBarAction {
     if (_isFlexibleSpace) {
       return CNNavigationBarAction.flexibleSpace();
     }
+    // Handle popup menu actions
+    if (popupMenuItems != null && onPopupMenuSelected != null) {
+      if (_usePopupMenuButton) {
+        return CNNavigationBarAction.popupMenuButton(
+          icon: icon,
+          label: label,
+          popupMenuItems: popupMenuItems!,
+          onPopupMenuSelected: onPopupMenuSelected!,
+          padding: padding,
+          labelSize: labelSize,
+          iconSize: iconSize,
+        );
+      } else {
+        return CNNavigationBarAction.popupMenu(
+          icon: icon,
+          label: label,
+          popupMenuItems: popupMenuItems!,
+          onPopupMenuSelected: onPopupMenuSelected!,
+          padding: padding,
+          labelSize: labelSize,
+          iconSize: iconSize,
+        );
+      }
+    }
+    // Regular action
     return CNNavigationBarAction(
       icon: icon,
       label: label,
