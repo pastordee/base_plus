@@ -261,7 +261,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
 
   // Basic Sheets
   Future<void> _showSettingsSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Settings',
       message: 'Configure your app preferences',
@@ -284,7 +284,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showActionsSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Photo Actions',
       items: [
@@ -306,7 +306,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showLargeSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'More Options',
       message: 'Choose from all available options',
@@ -335,7 +335,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
 
   // Nonmodal Sheets
   Future<void> _showFormatSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Format',
       items: [
@@ -358,7 +358,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showToolsPalette() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Drawing Tools',
       items: [
@@ -382,7 +382,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
 
   // Custom Header Sheets
   Future<void> _showCustomHeaderSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.showWithCustomHeader(
+    final selectedIndex = await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Custom Header',
       headerTitleSize: 18,
@@ -405,7 +405,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showPreferencesSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.showWithCustomHeader(
+    final selectedIndex = await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Preferences',
       headerTitleSize: 20,
@@ -433,7 +433,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
 
   // Advanced Features
   Future<void> _showCustomHeightSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Custom Height',
       message: 'This sheet is exactly 280 points tall',
@@ -455,7 +455,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showMultipleDetentsSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Resizable Sheet',
       message: 'Drag to resize between medium and large',
@@ -479,7 +479,7 @@ class _CNNativeSheetDemoState extends State<CNNativeSheetDemo> {
   }
 
   Future<void> _showStyledSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Styled Sheet',
       message: 'Custom colors and styling',
@@ -631,7 +631,7 @@ class _CNNativeSheetVariationsDemoState extends State<CNNativeSheetVariationsDem
   }
 
   Future<void> _showPhotosStyleSheet() async {
-    await BaseCNNativeSheet.show(
+    await BaseNativeSheet.show(
       context: context,
       title: 'Share Photo',
       items: [
@@ -650,7 +650,7 @@ class _CNNativeSheetVariationsDemoState extends State<CNNativeSheetVariationsDem
   }
 
   Future<void> _showNotesStyleSheet() async {
-    await BaseCNNativeSheet.showWithCustomHeader(
+    await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Format',
       headerTitleSize: 20,
@@ -671,7 +671,7 @@ class _CNNativeSheetVariationsDemoState extends State<CNNativeSheetVariationsDem
   }
 
   Future<void> _showMapsStyleSheet() async {
-    await BaseCNNativeSheet.show(
+    await BaseNativeSheet.show(
       context: context,
       title: 'Apple Park',
       message: 'Cupertino, CA',
@@ -689,7 +689,7 @@ class _CNNativeSheetVariationsDemoState extends State<CNNativeSheetVariationsDem
   }
 
   Future<void> _showFilesStyleSheet() async {
-    await BaseCNNativeSheet.show(
+    await BaseNativeSheet.show(
       context: context,
       title: 'Document.pdf',
       items: [
@@ -708,7 +708,7 @@ class _CNNativeSheetVariationsDemoState extends State<CNNativeSheetVariationsDem
   }
 
   Future<void> _showSettingsStyleSheet() async {
-    await BaseCNNativeSheet.showWithCustomHeader(
+    await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Display & Brightness',
       headerTitleSize: 18,

@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import '../base_param.dart';
 import '../alert/base_alert.dart';
 
-// Re-export CNAlertAction and CNAlertActionStyle for convenience
-export '../alert/base_alert.dart' show CNAlertAction, CNAlertActionStyle;
+// Re-export Base* classes (new public API) and CN* classes (for backward compatibility)
+export '../alert/base_alert.dart' show BaseAlertAction, BaseAlertActionStyle, CNAlertAction, CNAlertActionStyle;
 
 /// @Deprecated - Use BaseAlert instead
 /// 
 /// BaseCNAlert has been renamed to BaseAlert for consistency.
 /// BaseAlert provides the same native iOS UIAlertController rendering
 /// via platform channels and Material AlertDialog fallback.
+/// 
+/// Additionally, the public API now uses BaseAlertAction instead of CNAlertAction.
 /// 
 /// Migration:
 /// ```dart
@@ -19,7 +21,10 @@ export '../alert/base_alert.dart' show CNAlertAction, CNAlertActionStyle;
 ///   context: context,
 ///   title: 'Delete',
 ///   message: 'Are you sure?',
-///   actions: [...],
+///   actions: [
+///     CNAlertAction(title: 'Cancel', style: CNAlertActionStyle.cancel),
+///     CNAlertAction(title: 'Delete', style: CNAlertActionStyle.destructive),
+///   ],
 /// )
 /// 
 /// // New
@@ -27,12 +32,18 @@ export '../alert/base_alert.dart' show CNAlertAction, CNAlertActionStyle;
 ///   context: context,
 ///   title: 'Delete',
 ///   message: 'Are you sure?',
-///   actions: [...],
+///   actions: [
+///     BaseAlertAction(title: 'Cancel', style: BaseAlertActionStyle.cancel),
+///     BaseAlertAction(title: 'Delete', style: BaseAlertActionStyle.destructive),
+///   ],
 /// )
 /// ```
 /// 
-/// The API is identical - just rename the class from BaseCNAlert to BaseAlert.
-@Deprecated('Use BaseAlert instead. BaseCNAlert will be removed in a future version.')
+/// Rename classes:
+/// - BaseCNAlert → BaseAlert
+/// - CNAlertAction → BaseAlertAction
+/// - CNAlertActionStyle → BaseAlertActionStyle
+@Deprecated('Use BaseAlert with BaseAlertAction instead. BaseCNAlert will be removed in a future version.')
 class BaseCNAlert {
   /// Shows a native alert dialog.
   static Future<int?> show({
@@ -44,15 +55,34 @@ class BaseCNAlert {
     BaseParam? cupertino,
     BaseParam? material,
   }) async {
+    // Convert CNAlertAction to BaseAlertAction
+    final baseActions = actions.map((action) => BaseAlertAction(
+      title: action.title,
+      style: _convertStyle(action.style),
+      onPressed: action.onPressed,
+    )).toList();
+    
     return await BaseAlert.show(
       context: context,
       title: title,
       message: message,
-      actions: actions,
+      actions: baseActions,
       preferredActionIndex: preferredActionIndex,
       cupertino: cupertino,
       material: material,
     );
+  }
+  
+  /// Convert CNAlertActionStyle to BaseAlertActionStyle
+  static BaseAlertActionStyle _convertStyle(CNAlertActionStyle style) {
+    switch (style) {
+      case CNAlertActionStyle.defaultStyle:
+        return BaseAlertActionStyle.defaultStyle;
+      case CNAlertActionStyle.cancel:
+        return BaseAlertActionStyle.cancel;
+      case CNAlertActionStyle.destructive:
+        return BaseAlertActionStyle.destructive;
+    }
   }
 
   /// Shows an informational alert with a single OK button.

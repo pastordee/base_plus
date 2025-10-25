@@ -92,7 +92,7 @@ class _SearchToolbarDemoState extends State<SearchToolbarDemo> {
         // Search Toolbar Example
         BaseToolbar.search(
           leading: [
-            CNToolbarAction(
+            BaseToolbarAction(
               icon: CNSymbol('star.fill'),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +102,7 @@ class _SearchToolbarDemoState extends State<SearchToolbarDemo> {
             ),
           ],
           trailing: [
-            CNToolbarAction(
+            BaseToolbarAction(
               label: 'Cancel',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -110,7 +110,7 @@ class _SearchToolbarDemoState extends State<SearchToolbarDemo> {
                 );
               },
             ),
-            CNToolbarAction(
+            BaseToolbarAction(
               icon: CNSymbol('ellipsis.circle'),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -182,15 +182,15 @@ class _SearchNavigationBarDemoState extends State<SearchNavigationBarDemo> {
     return Column(
       children: [
         // Search Navigation Bar Example
-        BaseCNNavigationBar.search(
+        BaseNavigationBar.search(
           leading: [
-            CNNavigationBarAction(
+            BaseNavigationBarAction(
               label: 'Back',
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
           trailing: [
-            CNNavigationBarAction(
+            BaseNavigationBarAction(
               icon: CNSymbol('plus'),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -198,8 +198,8 @@ class _SearchNavigationBarDemoState extends State<SearchNavigationBarDemo> {
                 );
               },
             ),
-            CNNavigationBarAction.fixedSpace(8),
-            CNNavigationBarAction(
+            BaseNavigationBarAction.fixedSpace(8),
+            BaseNavigationBarAction(
               icon: CNSymbol('ellipsis.circle'),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(

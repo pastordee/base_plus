@@ -1,23 +1,25 @@
 library base_widgets;
 
-// Re-export cupertino_native classes for convenience
+// Re-export commonly used cupertino_native classes
+// CNSymbol - Used for SF Symbols in public API (icons on all platforms)
+// CNSearchConfig - Used for search configuration
+// CNSheetDetent, CNSheetItem, etc. - Used in BaseNativeSheet (will be refactored later)
 export 'package:cupertino_native/cupertino_native.dart'
     show
-        CNPullDownButton,
-        CNPullDownMenuItem,
-        CNPullDownMenuDivider,
-        CNPullDownMenuInlineActions,
-        CNPullDownInlineAction,
-        CNPullDownMenuEntry,
-        CNPullDownMenuSubmenu,
+        CNSymbol,
+        CNSearchConfig,
         CNSheetDetent,
         CNSheetItem,
         CNSheetItemRow,
         CNSheetInlineAction,
         CNSheetInlineActions;
+
+// Action Sheet - Public API uses BaseActionSheetAction
 export 'src/action_sheet/base_action_sheet.dart';
-export 'src/action_sheet/base_action_sheet_action.dart';
+export 'src/action_sheet/base_action_sheet_action.dart' hide BaseActionSheetAction;
 export 'src/action_sheet/base_cn_action_sheet.dart';
+
+// Alert - Public API uses BaseAlertAction
 export 'src/alert/base_alert.dart';
 export 'src/app/base_app.dart';
 export 'src/appbar/base_app_bar.dart';
@@ -29,11 +31,7 @@ export 'src/button/base_button.dart';
 export 'src/button/base_icon_button.dart';
 export 'src/components/base_cn_bottom_toolbar.dart';
 export 'src/components/base_cn_icon.dart';
-export 'src/components/base_cn_native_sheet.dart';
-export 'src/components/base_cn_navigation_bar.dart';
-export 'src/components/base_cn_popup_button.dart';
 export 'src/components/base_cn_pull_down_button.dart';
-export 'src/components/base_cn_pull_down_button_anchor.dart';
 export 'src/components/base_cn_search_bar.dart';
 export 'src/components/base_cn_toolbar.dart';
 export 'src/components/base_cupertino_interactive_keyboard.dart';

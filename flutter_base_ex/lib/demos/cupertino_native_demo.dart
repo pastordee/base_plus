@@ -492,7 +492,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // Icon-style pull-down button anchor with gray style
-                    BaseCNPullDownButtonAnchor.icon(
+                    BasePullDownButtonAnchor.icon(
                       buttonIcon: const CNSymbol('ellipsis.circle'),
                       buttonStyle: CNButtonStyle.gray,
                       size: 44,
@@ -537,7 +537,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     ),
                     
                     // Icon-style with tinted button style
-                    BaseCNPullDownButtonAnchor.icon(
+                    BasePullDownButtonAnchor.icon(
                       buttonIcon: const CNSymbol('star.fill'),
                       buttonStyle: CNButtonStyle.tinted,
                       tint: CupertinoColors.systemYellow,
@@ -566,7 +566,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     ),
                     
                     // Icon-style with filled button style
-                    BaseCNPullDownButtonAnchor.icon(
+                    BasePullDownButtonAnchor.icon(
                       buttonIcon: const CNSymbol('square.and.arrow.up'),
                       buttonStyle: CNButtonStyle.filled,
                       size: 44,
@@ -838,7 +838,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     border: Border.all(color: Colors.grey.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: BaseCNSearchBar(
+                  child: BaseSearchBar(
                     placeholder: 'Shows, Movies, and More',
                     showsCancelButton: true,
                     showsScopeBar: true,
@@ -925,7 +925,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
 
   // Native Sheet Methods
   Future<void> _showNativeSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Settings',
       message: 'Configure your app preferences',
@@ -947,7 +947,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   }
 
   Future<void> _showNonmodalSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.show(
+    final selectedIndex = await BaseNativeSheet.show(
       context: context,
       title: 'Format',
       items: [
@@ -969,7 +969,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   }
 
   Future<void> _showCustomHeaderSheet() async {
-    final selectedIndex = await BaseCNNativeSheet.showWithCustomHeader(
+    final selectedIndex = await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Custom Header',
       headerTitleSize: 18,
@@ -992,7 +992,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   }
 
   void _showFormatSheet() {
-    BaseCNNativeSheet.showWithCustomHeader(
+    BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Format',
       subtitle: 'Text Formatting Options',
@@ -1137,27 +1137,10 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
   BaseToolbarAlignment _middleAlignment = BaseToolbarAlignment.center;
   // CNToolbarMiddleAlignment _middleAlignment = CNToolbarMiddleAlignment.center;
   bool _isSearchExpanded = false;
-  String _searchText = '';
 
-    // Remember the toolbar state before search expansion
+  // Remember the toolbar state before search expansion
   bool _lastTransparentState = true;
   BaseToolbarAlignment _lastMiddleAlignment = BaseToolbarAlignment.center;
-
-  void _showAlert(BuildContext context, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Action'),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1239,67 +1222,42 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               child: BaseToolbar(
                 middleAlignment: _middleAlignment,
                 leading: [
-                  CNToolbarAction(
+                  BaseToolbarAction(
+                    // iconSize: 15,
                     icon: const CNSymbol('chevron.left'),
-                    iconSize: 15,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
-                  CNToolbarAction(
+                  BaseToolbarAction.fixedSpace(1),
+                  BaseToolbarAction(
                     label: 'Share',
-                    labelSize: 14,
-                    padding:2,
+                    padding: 5,
                     onPressed: () => print('Share tapped'),
                   ),
                 ],
                 middle: [
-                  CNToolbarAction(
-                    icon: const CNSymbol('pencil', size: 20),
-                    iconSize: 20,
+                  BaseToolbarAction(
+                    iconSize: 15,
+                    icon: const CNSymbol('pencil',),
                     onPressed: () => print('Edit tapped'),
                   ),
-                  CNToolbarAction(
-                    icon: const CNSymbol('trash', size: 20),
-                    iconSize: 20,
+                  BaseToolbarAction(
+                    iconSize: 15,
+                    icon: const CNSymbol('trash',),
                     onPressed: () => print('Delete tapped'),
                   ),
                 ],
                 trailing: [
-                  CNToolbarAction(
+                   BaseToolbarAction.fixedSpace(2),
+                  BaseToolbarAction(
+                    padding: 12,
                     label: 'Settings',
-                    labelSize: 10,
-                    padding: 3,
+                    labelSize: 15,
                     onPressed: () => print('Settings tapped'),
                   ),
-                  const CNToolbarAction.fixedSpace(5),
-                  CNToolbarAction.popupMenu(
-                    icon: const CNSymbol('paintbrush'),
-                    iconSize: 16,
-                    popupMenuItems: const [
-                      CNPopupMenuItem(
-                        label: 'Red',
-                        icon: CNSymbol('circle.fill'),
-                      ),
-                      CNPopupMenuItem(
-                        label: 'Blue',
-                        icon: CNSymbol('circle.fill'),
-                      ),
-                      CNPopupMenuItem(
-                        label: 'Green',
-                        icon: CNSymbol('circle.fill'),
-                      ),
-                    ],
-                    onPopupMenuSelected: (index) {
-                      print('Popup menu selected: $index'); // Debug output
-                      final colors = ['Red', 'Blue', 'Green'];
-                      if (index < colors.length) {
-                        _showAlert(context, 'Color: ${colors[index]}');
-                      }
-                    },
-                  ),
-                  const CNToolbarAction.flexibleSpace(),
-                  CNToolbarAction(
-                    icon: const CNSymbol('plus', size: 20),
-                    iconSize: 15,
+                  BaseToolbarAction.fixedSpace(2),
+                  BaseToolbarAction(
+                    // iconSize: 10,
+                    icon: const CNSymbol('plus',),
                     onPressed: () => print('Add tapped'),
                   ),
                 ],
@@ -1341,7 +1299,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               height: 44,
               child: BaseToolbar(
                 trailing: [
-                  CNToolbarAction(
+                  BaseToolbarAction(
                     icon: CNSymbol('plus', size: 22),
                     onPressed: () {
                       // Return to normal toolbar state
@@ -1349,7 +1307,6 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                         _isSearchExpanded = false;
                         _isTransparent = _lastTransparentState;
                         _middleAlignment = _lastMiddleAlignment;
-                        _searchText = '';
                       });
                     },
                   ),
@@ -1361,11 +1318,10 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
             const SizedBox(width: 0),
             // Expanded search bar
             Expanded(
-              child: BaseCNSearchBar(
+              child: BaseSearchBar(
                 placeholder: 'Search',
                 showsCancelButton: true,
                 onTextChanged: (text) {
-                  setState(() => _searchText = text);
                   print('Searching: $text');
                 },
                 onSearchButtonClicked: (text) {
@@ -1376,7 +1332,6 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                     _isSearchExpanded = false;
                     _isTransparent = _lastTransparentState;
                     _middleAlignment = _lastMiddleAlignment;
-                    _searchText = '';
                   });
                 },
                 height: 40,
@@ -1393,28 +1348,26 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
       child: BaseToolbar(
         middleAlignment: _middleAlignment,
         leading: [
-          CNToolbarAction(
+          BaseToolbarAction(
             label: 'Cancel',
-            labelSize: 12,
-            padding: 3,
+            padding: 12,
             onPressed: () => print('Cancel tapped'),
           ),
         ],
         middle: [
-          CNToolbarAction(
-            icon: CNSymbol('pencil', size: 40),
-            onPressed: () => print('Edit tapped'),
+          BaseToolbarAction(
+            iconSize: 10,
+            icon: CNSymbol('pencil', size: 10),
+            onPressed: () => print('Edit tapped', ),
           ),
-          const CNToolbarAction.fixedSpace(12),
-          CNToolbarAction(
-            icon: CNSymbol('trash', size: 40),
+          BaseToolbarAction(
+            icon: CNSymbol('trash', size: 4),
             onPressed: () => print('Delete tapped'),
           ),
         ],
         trailing: [
-          CNToolbarAction(
+          BaseToolbarAction(
             icon: CNSymbol('magnifyingglass'),
-            iconSize: 15,
             onPressed: () {
               setState(() {
                 // Save current state before expanding search
@@ -1424,10 +1377,9 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               });
             },
           ),
-          CNToolbarAction(
+          BaseToolbarAction(
             label: 'Done',
-            labelSize: 15,
-            padding: 3,
+            padding: 12,
             onPressed: () => print('Done tapped'),
           ),
         ],
@@ -1451,22 +1403,6 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
   bool _showLargeTitle = false;
   double _titleSize = 18.0;
   bool _enableTitleTap = true;
-
-  void _showAlert(BuildContext context, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Navigation Action'),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1688,18 +1624,17 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
             top: 5,
             child: SafeArea(
               bottom: false,
-              child:BaseCNNavigationBar(
+              child:BaseNavigationBar(
                   leading: [
-                    CNNavigationBarAction(
-                      icon: CNSymbol('chevron.left'),
-                      iconSize: 10,
+                    BaseNavigationBarAction(
+                      icon: const CNSymbol('chevron.left'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                     ),
-                    CNNavigationBarAction(
+                    BaseNavigationBarAction.fixedSpace(8),
+                    BaseNavigationBarAction(
                       label: 'Back',
-                      padding: 2,
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -1723,42 +1658,55 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                     );
                   } : null,
                   trailing: [
-                    CNNavigationBarAction(
-                      icon: CNSymbol('gear'),
-                      iconSize: 15,
+                    BaseNavigationBarAction(
+                      icon: const CNSymbol('gear'),
+                      // iconSize: 12,
                       onPressed: () {
                         print('Settings tapped');
                       },
                     ),
-                    CNNavigationBarAction.popupMenu(
+                    BaseNavigationBarAction(
                       icon: const CNSymbol('ellipsis.circle'),
-                      iconSize: 16,
-                      popupMenuItems: const [
-                        CNPopupMenuItem(
-                          label: 'Copy',
-                          icon: CNSymbol('doc.on.doc'),
-                        ),
-                        CNPopupMenuItem(
-                          label: 'Paste',
-                          icon: CNSymbol('doc.on.clipboard'),
-                        ),
-                        CNPopupMenuDivider(),
-                        CNPopupMenuItem(
-                          label: 'Delete',
-                          icon: CNSymbol('trash'),
-                        ),
-                      ],
-                      onPopupMenuSelected: (index) {
-                        print('Navigation popup menu selected: $index'); // Debug output
-                        final actions = ['Copy', 'Paste', 'Delete'];
-                        if (index < actions.length) {
-                          _showAlert(context, 'Action: ${actions[index]}');
-                        }
+                      onPressed: () {
+                        showCupertinoDialog(
+                          context: context,
+                          builder: (context) => CupertinoAlertDialog(
+                            title: const Text('Menu'),
+                            content: const Text('Copy, Paste, or Delete'),
+                            actions: [
+                              CupertinoDialogAction(
+                                child: const Text('Copy'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  print('Copy selected');
+                                },
+                              ),
+                              CupertinoDialogAction(
+                                child: const Text('Paste'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  print('Paste selected');
+                                },
+                              ),
+                              CupertinoDialogAction(
+                                isDestructiveAction: true,
+                                child: const Text('Delete'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  print('Delete selected');
+                                },
+                              ),
+                              CupertinoDialogAction(
+                                child: const Text('Cancel'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
-                    CNNavigationBarAction(
-                      icon: CNSymbol('plus'),
-                      iconSize: 15,
+                    BaseNavigationBarAction(
+                      icon: const CNSymbol('plus'),
                       onPressed: () {
                         print('Add tapped');
                       },

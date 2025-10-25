@@ -101,14 +101,14 @@ class _CNAlertDemoState extends State<CNAlertDemo> {
   }
 
   Future<void> _showBasicAlert() async {
-    final result = await BaseCNAlert.show(
+    final result = await BaseAlert.show(
       context: context,
       title: 'Hello',
       message: 'This is a basic alert message.',
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'OK',
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'OK pressed in basic alert';
@@ -178,41 +178,41 @@ class _CNAlertDemoState extends State<CNAlertDemo> {
   }
 
   Future<void> _showMultipleActionsAlert() async {
-    final result = await BaseCNAlert.show(
+    final result = await BaseAlert.show(
       context: context,
       title: 'Choose Action',
       message: 'What would you like to do with this file?',
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Cancel',
-          style: CNAlertActionStyle.cancel,
+          style: BaseAlertActionStyle.cancel,
           onPressed: () {
             setState(() {
               _lastResult = 'Action cancelled';
             });
           },
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Copy',
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'File copied';
             });
           },
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Move',
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'File moved';
             });
           },
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Delete',
-          style: CNAlertActionStyle.destructive,
+          style: BaseAlertActionStyle.destructive,
           onPressed: () {
             setState(() {
               _lastResult = 'File deleted';
@@ -231,23 +231,23 @@ class _CNAlertDemoState extends State<CNAlertDemo> {
   }
 
   Future<void> _showCustomAlert() async {
-    final result = await BaseCNAlert.show(
+    final result = await BaseAlert.show(
       context: context,
       title: 'Update Available',
       message: 'A new version of the app is available. Would you like to update now?',
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Later',
-          style: CNAlertActionStyle.cancel,
+          style: BaseAlertActionStyle.cancel,
           onPressed: () {
             setState(() {
               _lastResult = 'Update postponed';
             });
           },
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Update Now',
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Update started';

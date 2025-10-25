@@ -4,6 +4,117 @@ import 'package:cupertino_native/cupertino_native.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
+/// Cross-platform navigation bar action
+/// 
+/// Represents an action button in the navigation bar with icon and/or label.
+/// Also supports spacing actions for layout control.
+/// 
+/// Automatically converts to platform-specific formats:
+/// - iOS: Uses CNNavigationBarAction with SF Symbols
+/// - Material: Uses IconButton/TextButton with Material icons
+class BaseNavigationBarAction {
+  const BaseNavigationBarAction({
+    this.icon,
+    this.label,
+    this.onPressed,
+    this.padding,
+    this.labelSize = 15,
+    this.iconSize = 16,
+  }) : _isFixedSpace = false,
+       _isFlexibleSpace = false,
+       _spaceWidth = null,
+       assert(icon != null || label != null, 'Either icon or label must be provided');
+
+  const BaseNavigationBarAction._fixedSpace(this._spaceWidth)
+      : icon = null,
+        label = null,
+        onPressed = null,
+        padding = null,
+        labelSize = null,
+        iconSize = null,
+        _isFixedSpace = true,
+        _isFlexibleSpace = false;
+
+  const BaseNavigationBarAction._flexibleSpace()
+      : icon = null,
+        label = null,
+        onPressed = null,
+        padding = null,
+        labelSize = null,
+        iconSize = null,
+        _isFixedSpace = false,
+        _isFlexibleSpace = true,
+        _spaceWidth = null;
+
+  /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
+  final CNSymbol? icon;
+
+  /// Optional text label
+  final String? label;
+
+  /// Callback when action is pressed
+  final VoidCallback? onPressed;
+
+  /// Padding around the action (iOS only)
+  final double? padding;
+
+  /// Label text size (iOS only)
+  final double? labelSize;
+
+  /// Icon size (iOS only)
+  final double? iconSize;
+
+  /// Internal flag for fixed space action
+  final bool _isFixedSpace;
+
+  /// Internal flag for flexible space action
+  final bool _isFlexibleSpace;
+
+  /// Internal space width
+  final double? _spaceWidth;
+
+  /// Creates a fixed space action
+  factory BaseNavigationBarAction.fixedSpace(double width) {
+    return BaseNavigationBarAction._fixedSpace(width);
+  }
+
+  /// Creates a flexible space action
+  factory BaseNavigationBarAction.flexibleSpace() {
+    return const BaseNavigationBarAction._flexibleSpace();
+  }
+
+  /// Check if this is a fixed space action
+  bool get isFixedSpace => _isFixedSpace;
+
+  /// Check if this is a flexible space action
+  bool get isFlexibleSpace => _isFlexibleSpace;
+
+  /// Get the space width (for fixed space actions)
+  double? get spaceWidth => _spaceWidth;
+
+  /// Convert to CNNavigationBarAction for iOS implementation
+  CNNavigationBarAction toCNNavigationBarAction() {
+    if (_isFixedSpace) {
+      return CNNavigationBarAction.fixedSpace(_spaceWidth ?? 8);
+    }
+    if (_isFlexibleSpace) {
+      return CNNavigationBarAction.flexibleSpace();
+    }
+    return CNNavigationBarAction(
+      icon: icon,
+      label: label,
+      onPressed: onPressed,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+    );
+  }
+}
+
+/// Internal: CNNavigationBarAction from cupertino_native package
+/// Used only for iOS platform channel communication
+/// Public API should use BaseNavigationBarAction instead
+
 /// BaseNavigationBar - Cross-platform navigation bar with native iOS support
 /// 
 /// Uses CNNavigationBar (Cupertino Native) for iOS - provides native iOS navigation bar
@@ -21,27 +132,28 @@ import '../base_stateless_widget.dart';
 /// - Transparency with blur effects
 /// - Search functionality via factory constructor
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
+/// - Automatic platform-specific conversion of actions
 /// 
 /// Example:
 /// ```dart
 /// BaseNavigationBar(
 ///   leading: [
-///     CNNavigationBarAction(
+///     BaseNavigationBarAction(
 ///       icon: CNSymbol('chevron.left'),
 ///       onPressed: () => Navigator.pop(context),
 ///     ),
-///     CNNavigationBarAction(
+///     BaseNavigationBarAction(
 ///       label: 'Back',
 ///       onPressed: () => Navigator.pop(context),
 ///     ),
 ///   ],
 ///   title: 'Navigation Bar',
 ///   trailing: [
-///     CNNavigationBarAction(
+///     BaseNavigationBarAction(
 ///       icon: CNSymbol('gear'),
 ///       onPressed: () => print('Settings'),
 ///     ),
-///     CNNavigationBarAction(
+///     BaseNavigationBarAction(
 ///       icon: CNSymbol('plus'),
 ///       onPressed: () => print('Add'),
 ///     ),
@@ -56,10 +168,10 @@ import '../base_stateless_widget.dart';
 /// ```dart
 /// BaseNavigationBar.search(
 ///   leading: [
-///     CNNavigationBarAction(icon: CNSymbol('chevron.left'), onPressed: () {}),
+///     BaseNavigationBarAction(icon: CNSymbol('chevron.left'), onPressed: () {}),
 ///   ],
 ///   trailing: [
-///     CNNavigationBarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
+///     BaseNavigationBarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
 ///   ],
 ///   searchConfig: CNSearchConfig(
 ///     placeholder: 'Search',
@@ -70,11 +182,11 @@ import '../base_stateless_widget.dart';
 /// ```
 /// 
 /// Available action types:
-/// - `CNNavigationBarAction()` - Regular action with icon/label
-/// - `CNNavigationBarAction.fixedSpace(5)` - Fixed spacing
-/// - `CNNavigationBarAction.flexibleSpace()` - Flexible spacing
+/// - `BaseNavigationBarAction()` - Regular action with icon/label
+/// - `BaseNavigationBarAction.fixedSpace(5)` - Fixed spacing
+/// - `BaseNavigationBarAction.flexibleSpace()` - Flexible spacing
 /// 
-/// Updated: 2024.10.25 - Renamed from BaseCNNavigationBar for consistency
+/// Updated: 2024.10.25 - Refactored to use BaseNavigationBarAction in public API
 class BaseNavigationBar extends BaseStatelessWidget {
   const BaseNavigationBar({
     Key? key,
@@ -94,8 +206,8 @@ class BaseNavigationBar extends BaseStatelessWidget {
   /// Factory constructor for search-enabled navigation bar
   const BaseNavigationBar.search({
     Key? key,
-    List<CNNavigationBarAction>? leading,
-    List<CNNavigationBarAction>? trailing,
+    List<BaseNavigationBarAction>? leading,
+    List<BaseNavigationBarAction>? trailing,
     required CNSearchConfig searchConfig,
     Color? tint,
     bool transparent = false,
@@ -119,13 +231,13 @@ class BaseNavigationBar extends BaseStatelessWidget {
        );
 
   /// Leading navigation actions
-  final List<CNNavigationBarAction>? leading;
+  final List<BaseNavigationBarAction>? leading;
 
   /// Navigation bar title
   final String? title;
 
   /// Trailing navigation actions
-  final List<CNNavigationBarAction>? trailing;
+  final List<BaseNavigationBarAction>? trailing;
 
   /// Tint color for icons and text
   final Color? tint;
@@ -150,12 +262,27 @@ class BaseNavigationBar extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
+    final leadingActions = valueOf('leading', leading);
+    final trailingActions = valueOf('trailing', trailing);
+    
+    List<CNNavigationBarAction>? cnLeading;
+    List<CNNavigationBarAction>? cnTrailing;
+    
+    if (leadingActions != null) {
+      cnLeading = (leadingActions as List).map((action) => (action as BaseNavigationBarAction).toCNNavigationBarAction()).toList();
+    }
+    
+    if (trailingActions != null) {
+      cnTrailing = (trailingActions as List).map((action) => (action as BaseNavigationBarAction).toCNNavigationBarAction()).toList();
+    }
+    
     // Check if this is a search navigation bar
     final searchConf = valueOf('searchConfig', searchConfig);
     if (searchConf != null) {
       return CNNavigationBar.search(
-        leading: valueOf('leading', leading),
-        trailing: valueOf('trailing', trailing),
+        leading: cnLeading,
+        trailing: cnTrailing,
         searchConfig: searchConf,
         tint: valueOf('tint', tint),
         transparent: valueOf('transparent', transparent),
@@ -167,9 +294,9 @@ class BaseNavigationBar extends BaseStatelessWidget {
     }
 
     return CNNavigationBar(
-      leading: valueOf('leading', leading),
+      leading: cnLeading,
       title: valueOf('title', title),
-      trailing: valueOf('trailing', trailing),
+      trailing: cnTrailing,
       tint: valueOf('tint', tint),
       transparent: valueOf('transparent', transparent),
       largeTitle: valueOf('largeTitle', largeTitle),
@@ -353,16 +480,15 @@ class BaseNavigationBar extends BaseStatelessWidget {
     );
   }
 
-  List<Widget> _buildMaterialActions(List<CNNavigationBarAction> actions, Color iconColor) {
+  List<Widget> _buildMaterialActions(List<BaseNavigationBarAction> actions, Color iconColor) {
     return actions.map((action) {
       // Handle special action types
-      if (action.runtimeType.toString().contains('FixedSpace')) {
-        // This is a fixed space action - extract width if possible
-        // For now, default to 8px spacing
-        return const SizedBox(width: 8);
+      if (action.isFixedSpace) {
+        // This is a fixed space action
+        return SizedBox(width: action.spaceWidth ?? 8);
       }
       
-      if (action.runtimeType.toString().contains('FlexibleSpace')) {
+      if (action.isFlexibleSpace) {
         // This is a flexible space action
         return const Expanded(child: SizedBox());
       }

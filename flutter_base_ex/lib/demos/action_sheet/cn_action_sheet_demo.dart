@@ -107,18 +107,18 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
       title: 'Choose an Option',
       message: 'Select one of the available options below.',
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Option 1',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Option 1 selected';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Option 2',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Option 2 selected';
@@ -126,9 +126,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
           },
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: 'Cancel',
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
         onPressed: () {
           setState(() {
             _lastResult = 'Basic action sheet cancelled';
@@ -171,9 +171,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
       title: 'Remove Account',
       message: 'This will permanently remove your account and all associated data.',
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Remove Account',
-          style: CNActionSheetButtonStyle.destructive,
+          style: BaseActionSheetActionStyle.destructive,
           onPressed: () {
             setState(() {
               _lastResult = 'Account removed';
@@ -181,9 +181,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
           },
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: 'Cancel',
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
         onPressed: () {
           setState(() {
             _lastResult = 'Account removal cancelled';
@@ -205,36 +205,36 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
       title: 'File Options',
       message: 'What would you like to do with this file?',
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Delete File',
-          style: CNActionSheetButtonStyle.destructive,
+          style: BaseActionSheetActionStyle.destructive,
           onPressed: () {
             setState(() {
               _lastResult = 'File deleted';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Share File',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'File shared';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Duplicate File',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'File duplicated';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Rename File',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'File renamed';
@@ -242,9 +242,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
           },
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: 'Cancel',
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
         onPressed: () {
           setState(() {
             _lastResult = 'File actions cancelled';
@@ -265,36 +265,36 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
       context: context,
       title: 'Photo Options',
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Delete Photo',
-          style: CNActionSheetButtonStyle.destructive,
+          style: BaseActionSheetActionStyle.destructive,
           onPressed: () {
             setState(() {
               _lastResult = 'Photo deleted';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Edit Photo',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Photo editor opened';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Share Photo',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Photo shared';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Add to Album',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Photo added to album';
@@ -302,9 +302,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
           },
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: 'Cancel',
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
         onPressed: () {
           setState(() {
             _lastResult = 'Photo actions cancelled';
@@ -326,27 +326,27 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
       title: 'Document Actions',
       message: 'Choose an action for "My Document.pdf"',
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Open in External App',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Document opened in external app';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Export Copy',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Document copy exported';
             });
           },
         ),
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: 'Print Document',
-          style: CNActionSheetButtonStyle.defaultStyle,
+          style: BaseActionSheetActionStyle.defaultStyle,
           onPressed: () {
             setState(() {
               _lastResult = 'Document sent to printer';
@@ -354,9 +354,9 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
           },
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: 'Cancel',
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
         onPressed: () {
           setState(() {
             _lastResult = 'Document actions cancelled';

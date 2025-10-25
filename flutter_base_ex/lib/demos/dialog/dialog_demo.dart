@@ -17,18 +17,18 @@ class DialogDemo extends StatelessWidget {
       title: const Text('CNAlert - Native iOS'),
       page: const AlertDialogDemo(),
       onTop: (BuildContext context) async {
-        await BaseCNAlert.show(
+        await BaseAlert.show(
           context: context,
           title: 'Delete Photo',
           message: 'Are you sure you want to delete this photo? This action cannot be undone.',
           actions: [
-            CNAlertAction(
+            BaseAlertAction(
               title: 'Cancel',
-              style: CNAlertActionStyle.cancel,
+              style: BaseAlertActionStyle.cancel,
             ),
-            CNAlertAction(
+            BaseAlertAction(
               title: 'Delete',
-              style: CNAlertActionStyle.destructive,
+              style: BaseAlertActionStyle.destructive,
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Photo deleted')),
@@ -43,7 +43,7 @@ class DialogDemo extends StatelessWidget {
       title: const Text('CNAlert - Confirmation'),
       page: const AlertDialogDemo(),
       onTop: (BuildContext context) async {
-        final confirmed = await BaseCNAlert.showConfirmation(
+        final confirmed = await BaseAlert.showConfirmation(
           context: context,
           title: 'Save Changes',
           message: 'Do you want to save your changes before leaving?',
@@ -77,7 +77,7 @@ class DialogDemo extends StatelessWidget {
       title: const Text('CNAlert - Info'),
       page: const AlertDialogDemo(),
       onTop: (BuildContext context) async {
-        await BaseCNAlert.showInfo(
+        await BaseAlert.showInfo(
           context: context,
           title: 'Welcome',
           message: 'This is a native iOS alert using cupertino_native package.',

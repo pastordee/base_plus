@@ -47,18 +47,18 @@ class ActionSheetDemo extends StatelessWidget {
                       title: 'Choose an Option',
                       message: 'Select one of the available options below.',
                       actions: [
-                        const CNActionSheetAction(
+                        const BaseActionSheetAction(
                           title: 'Option 1',
-                          style: CNActionSheetButtonStyle.defaultStyle,
+                          style: BaseActionSheetActionStyle.defaultStyle,
                         ),
-                        const CNActionSheetAction(
+                        const BaseActionSheetAction(
                           title: 'Option 2',
-                          style: CNActionSheetButtonStyle.defaultStyle,
+                          style: BaseActionSheetActionStyle.defaultStyle,
                         ),
                       ],
-                      cancelAction: const CNActionSheetAction(
+                      cancelAction: const BaseActionSheetAction(
                         title: 'Cancel',
-                        style: CNActionSheetButtonStyle.cancel,
+                        style: BaseActionSheetActionStyle.cancel,
                       ),
                     );
                   },
@@ -110,12 +110,12 @@ class ActionSheetDemo extends StatelessWidget {
           '  title: \'Title\',\n'
           '  message: \'Message\',\n'
           '  actions: [\n'
-          '    CNActionSheetAction(\n'
+          '    BaseActionSheetAction(\n'
           '      title: \'Action\',\n'
           '      onPressed: () { },\n'
           '    ),\n'
           '  ],\n'
-          '  cancelAction: CNActionSheetAction(\n'
+          '  cancelAction: BaseActionSheetAction(\n'
           '    title: \'Cancel\',\n'
           '  ),\n'
           ');',

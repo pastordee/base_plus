@@ -11,6 +11,117 @@ enum BaseToolbarAlignment {
   trailing,
 }
 
+/// Cross-platform toolbar action
+/// 
+/// Represents an action button in the toolbar with icon and/or label.
+/// Also supports spacing actions for layout control.
+/// 
+/// Automatically converts to platform-specific formats:
+/// - iOS: Uses CNToolbarAction with SF Symbols
+/// - Material: Uses IconButton/TextButton with Material icons
+class BaseToolbarAction {
+  const BaseToolbarAction({
+    this.icon,
+    this.label,
+    this.onPressed,
+    this.padding,
+    this.labelSize = 15,
+    this.iconSize = 16,
+  }) : _isFixedSpace = false,
+       _isFlexibleSpace = false,
+       _spaceWidth = null,
+       assert(icon != null || label != null, 'Either icon or label must be provided');
+
+  const BaseToolbarAction._fixedSpace(this._spaceWidth)
+      : icon = null,
+        label = null,
+        onPressed = null,
+        padding = null,
+        labelSize = null,
+        iconSize = null,
+        _isFixedSpace = true,
+        _isFlexibleSpace = false;
+
+  const BaseToolbarAction._flexibleSpace()
+      : icon = null,
+        label = null,
+        onPressed = null,
+        padding = null,
+        labelSize = null,
+        iconSize = null,
+        _isFixedSpace = false,
+        _isFlexibleSpace = true,
+        _spaceWidth = null;
+
+  /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
+  final CNSymbol? icon;
+
+  /// Optional text label
+  final String? label;
+
+  /// Callback when action is pressed
+  final VoidCallback? onPressed;
+
+  /// Padding around the action (iOS only)
+  final double? padding;
+
+  /// Label text size (iOS only)
+  final double? labelSize;
+
+  /// Icon size (iOS only)
+  final double? iconSize;
+
+  /// Internal flag for fixed space action
+  final bool _isFixedSpace;
+
+  /// Internal flag for flexible space action
+  final bool _isFlexibleSpace;
+
+  /// Internal space width
+  final double? _spaceWidth;
+
+  /// Creates a fixed space action
+  factory BaseToolbarAction.fixedSpace(double width) {
+    return BaseToolbarAction._fixedSpace(width);
+  }
+
+  /// Creates a flexible space action
+  factory BaseToolbarAction.flexibleSpace() {
+    return const BaseToolbarAction._flexibleSpace();
+  }
+
+  /// Check if this is a fixed space action
+  bool get isFixedSpace => _isFixedSpace;
+
+  /// Check if this is a flexible space action
+  bool get isFlexibleSpace => _isFlexibleSpace;
+
+  /// Get the space width (for fixed space actions)
+  double? get spaceWidth => _spaceWidth;
+
+  /// Convert to CNToolbarAction for iOS implementation
+  CNToolbarAction toCNToolbarAction() {
+    if (_isFixedSpace) {
+      return CNToolbarAction.fixedSpace(_spaceWidth ?? 8);
+    }
+    if (_isFlexibleSpace) {
+      return CNToolbarAction.flexibleSpace();
+    }
+    return CNToolbarAction(
+      icon: icon,
+      label: label,
+      onPressed: onPressed,
+      padding: padding,
+      labelSize: labelSize,
+      iconSize: iconSize,
+    );
+  }
+}
+
+/// Internal: CNToolbarAction from cupertino_native package
+/// Used only for iOS platform channel communication
+/// Public API should use BaseToolbarAction instead
+
 /// BaseToolbar - Cross-platform toolbar with native iOS support
 /// 
 /// Uses CNToolbar (Cupertino Native) for iOS - provides true native iOS appearance
@@ -26,24 +137,25 @@ enum BaseToolbarAlignment {
 /// - Flexible leading, middle, and trailing actions
 /// - Search functionality with expandable search field
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
+/// - Automatic platform-specific conversion of actions
 /// 
 /// Example:
 /// ```dart
 /// BaseToolbar(
 ///   leading: [
-///     CNToolbarAction(
+///     BaseToolbarAction(
 ///       icon: CNSymbol('chevron.left'),
 ///       onPressed: () => Navigator.pop(context),
 ///     ),
 ///   ],
 ///   middle: [
-///     CNToolbarAction(
+///     BaseToolbarAction(
 ///       icon: CNSymbol('pencil', size: 40),
 ///       onPressed: () => print('Edit'),
 ///     ),
 ///   ],
 ///   trailing: [
-///     CNToolbarAction(
+///     BaseToolbarAction(
 ///       icon: CNSymbol('gear'),
 ///       onPressed: () => print('Settings'),
 ///     ),
@@ -55,10 +167,10 @@ enum BaseToolbarAlignment {
 /// ```dart
 /// BaseToolbar.search(
 ///   leading: [
-///     CNToolbarAction(icon: CNSymbol('star.fill'), onPressed: () {}),
+///     BaseToolbarAction(icon: CNSymbol('star.fill'), onPressed: () {}),
 ///   ],
 ///   trailing: [
-///     CNToolbarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
+///     BaseToolbarAction(icon: CNSymbol('ellipsis.circle'), onPressed: () {}),
 ///   ],
 ///   searchConfig: CNSearchConfig(
 ///     placeholder: 'Search',
@@ -69,7 +181,7 @@ enum BaseToolbarAlignment {
 /// )
 /// ```
 /// 
-/// Updated: 2024.10.25 - Renamed from BaseCNToolbar for consistency
+/// Updated: 2024.10.25 - Refactored to use BaseToolbarAction in public API
 class BaseToolbar extends BaseStatelessWidget {
   const BaseToolbar({
     Key? key,
@@ -91,8 +203,8 @@ class BaseToolbar extends BaseStatelessWidget {
   /// Factory constructor for search-enabled toolbar
   const BaseToolbar.search({
     Key? key,
-    List<CNToolbarAction>? leading,
-    List<CNToolbarAction>? trailing,
+    List<BaseToolbarAction>? leading,
+    List<BaseToolbarAction>? trailing,
     required CNSearchConfig searchConfig,
     CNSymbol? contextIcon,
     Color? tint,
@@ -116,13 +228,13 @@ class BaseToolbar extends BaseStatelessWidget {
        );
 
   /// Leading toolbar actions (typically back button, share)
-  final List<CNToolbarAction>? leading;
+  final List<BaseToolbarAction>? leading;
 
   /// Middle toolbar actions (main actions)
-  final List<CNToolbarAction>? middle;
+  final List<BaseToolbarAction>? middle;
 
   /// Trailing toolbar actions (typically settings, more)
-  final List<CNToolbarAction>? trailing;
+  final List<BaseToolbarAction>? trailing;
 
   /// Optional title text
   final String? title;
@@ -156,12 +268,33 @@ class BaseToolbar extends BaseStatelessWidget {
     // Convert our alignment to CNToolbarMiddleAlignment
     final alignment = _toCNToolbarAlignment(valueOf('middleAlignment', middleAlignment));
     
+    // Convert BaseToolbarAction to CNToolbarAction for iOS
+    final leadingActions = valueOf('leading', leading);
+    final middleActions = valueOf('middle', middle);
+    final trailingActions = valueOf('trailing', trailing);
+    
+    List<CNToolbarAction>? cnLeading;
+    List<CNToolbarAction>? cnMiddle;
+    List<CNToolbarAction>? cnTrailing;
+    
+    if (leadingActions != null) {
+      cnLeading = (leadingActions as List).map((action) => (action as BaseToolbarAction).toCNToolbarAction()).toList();
+    }
+    
+    if (middleActions != null) {
+      cnMiddle = (middleActions as List).map((action) => (action as BaseToolbarAction).toCNToolbarAction()).toList();
+    }
+    
+    if (trailingActions != null) {
+      cnTrailing = (trailingActions as List).map((action) => (action as BaseToolbarAction).toCNToolbarAction()).toList();
+    }
+    
     // Check if this is a search toolbar
     final searchConf = valueOf('searchConfig', searchConfig);
     if (searchConf != null) {
       return CNToolbar.search(
-        leading: valueOf('leading', leading),
-        trailing: valueOf('trailing', trailing),
+        leading: cnLeading,
+        trailing: cnTrailing,
         searchConfig: searchConf,
         contextIcon: valueOf('contextIcon', contextIcon),
         tint: valueOf('tint', tint),
@@ -172,9 +305,9 @@ class BaseToolbar extends BaseStatelessWidget {
     }
     
     return CNToolbar(
-      leading: valueOf('leading', leading),
-      middle: valueOf('middle', middle),
-      trailing: valueOf('trailing', trailing),
+      leading: cnLeading,
+      middle: cnMiddle,
+      trailing: cnTrailing,
       tint: valueOf('tint', tint),
       transparent: valueOf('transparent', transparent),
       height: valueOf('height', height),
@@ -341,10 +474,21 @@ class BaseToolbar extends BaseStatelessWidget {
     }
   }
   List<Widget> _buildMaterialActions(
-    List<CNToolbarAction> actions,
+    List<BaseToolbarAction> actions,
     Color tintColor,
   ) {
     return actions.map((action) {
+      // Handle special action types
+      if (action.isFixedSpace) {
+        // This is a fixed space action
+        return SizedBox(width: action.spaceWidth ?? 8);
+      }
+      
+      if (action.isFlexibleSpace) {
+        // This is a flexible space action
+        return const Expanded(child: SizedBox());
+      }
+      
       // Extract icon from CNSymbol if possible
       IconData? iconData;
       if (action.icon != null) {

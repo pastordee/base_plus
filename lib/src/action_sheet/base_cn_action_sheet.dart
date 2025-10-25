@@ -5,7 +5,63 @@ import 'package:flutter/services.dart';
 
 import '../base_param.dart';
 
-/// Button style for action sheet actions
+/// Action style for action sheet actions (cross-platform)
+enum BaseActionSheetActionStyle {
+  /// Default style
+  defaultStyle,
+
+  /// Cancel style (bold text, typically at bottom)
+  cancel,
+
+  /// Destructive style (red text, typically at top)
+  destructive,
+}
+
+/// Represents a single action in an action sheet (cross-platform data model)
+/// 
+/// This is the primary class to use when creating action sheet actions.
+/// It will be automatically converted to platform-specific implementations:
+/// - iOS/macOS: Native UIAlertController actions via platform channels
+/// - Android/Other: Material Design ListTile in bottom sheet
+class BaseActionSheetAction {
+  /// The title of the action
+  final String title;
+
+  /// The style of the action
+  final BaseActionSheetActionStyle style;
+
+  /// Callback when the action is tapped
+  final VoidCallback? onPressed;
+
+  const BaseActionSheetAction({
+    required this.title,
+    this.style = BaseActionSheetActionStyle.defaultStyle,
+    this.onPressed,
+  });
+
+  /// Converts to CNActionSheetAction for iOS native implementation
+  CNActionSheetAction toCNActionSheetAction() {
+    return CNActionSheetAction(
+      title: title,
+      style: _convertToCNStyle(style),
+      onPressed: onPressed,
+    );
+  }
+
+  /// Converts BaseActionSheetActionStyle to CNActionSheetButtonStyle
+  static CNActionSheetButtonStyle _convertToCNStyle(BaseActionSheetActionStyle style) {
+    switch (style) {
+      case BaseActionSheetActionStyle.defaultStyle:
+        return CNActionSheetButtonStyle.defaultStyle;
+      case BaseActionSheetActionStyle.cancel:
+        return CNActionSheetButtonStyle.cancel;
+      case BaseActionSheetActionStyle.destructive:
+        return CNActionSheetButtonStyle.destructive;
+    }
+  }
+}
+
+/// iOS-specific action sheet button style (internal use only)
 enum CNActionSheetButtonStyle {
   /// Default style
   defaultStyle,
@@ -17,7 +73,10 @@ enum CNActionSheetButtonStyle {
   destructive,
 }
 
-/// Represents a single action in an action sheet
+/// iOS-specific action sheet action (internal use only)
+/// 
+/// This class is used internally for iOS native implementation.
+/// External code should use [BaseActionSheetAction] instead.
 class CNActionSheetAction {
   /// The title of the action
   final String title;
@@ -49,9 +108,6 @@ class CNActionSheetAction {
 /// bottom sheets on other platforms. Uses the cupertino_native package for authentic
 /// native iOS action sheet experience.
 /// 
-/// **CN = Cupertino Native** - This is the primary action sheet implementation that uses
-/// native iOS APIs for the most authentic experience.
-/// 
 /// Features:
 /// - **Native iOS action sheets** with platform-specific styling
 /// - Material Design bottom sheet fallback for non-iOS platforms  
@@ -59,6 +115,7 @@ class CNActionSheetAction {
 /// - Support for action styles (default, cancel, destructive)
 /// - Cancel button handling
 /// - Follows Apple HIG guidelines for action sheets
+/// - Automatic platform-specific conversion of actions
 /// 
 /// Apple HIG best practices:
 /// - Use action sheets to offer choices related to an intentional action
@@ -69,6 +126,8 @@ class CNActionSheetAction {
 /// - Place Cancel button at the bottom
 /// - Avoid letting action sheets scroll (too many buttons)
 /// 
+/// Updated: 2024.10.25
+/// 
 /// Example:
 /// ```dart
 /// BaseActionSheet.show(
@@ -76,19 +135,19 @@ class CNActionSheetAction {
 ///   title: 'Delete Draft?',
 ///   message: 'This action cannot be undone.',
 ///   actions: [
-///     CNActionSheetAction(
+///     BaseActionSheetAction(
 ///       title: 'Delete Draft',
-///       style: CNActionSheetButtonStyle.destructive,
+///       style: BaseActionSheetActionStyle.destructive,
 ///       onPressed: () => deleteDraft(),
 ///     ),
-///     CNActionSheetAction(
+///     BaseActionSheetAction(
 ///       title: 'Save Draft',
 ///       onPressed: () => saveDraft(),
 ///     ),
 ///   ],
-///   cancelAction: CNActionSheetAction(
+///   cancelAction: BaseActionSheetAction(
 ///     title: 'Cancel',
-///     style: CNActionSheetButtonStyle.cancel,
+///     style: BaseActionSheetActionStyle.cancel,
 ///   ),
 /// );
 /// ```
@@ -110,8 +169,8 @@ class BaseActionSheet {
     required BuildContext context,
     String? title,
     String? message,
-    required List<CNActionSheetAction> actions,
-    CNActionSheetAction? cancelAction,
+    required List<BaseActionSheetAction> actions,
+    BaseActionSheetAction? cancelAction,
     BaseParam? cupertino,
     BaseParam? material,
   }) async {
@@ -123,11 +182,15 @@ class BaseActionSheet {
     final useCupertino = _shouldUseCupertino(context, cupertino, material);
 
     if (useCupertino) {
+      // Convert BaseActionSheetAction to CNActionSheetAction for iOS
+      final cnActions = actions.map((action) => action.toCNActionSheetAction()).toList();
+      final cnCancelAction = cancelAction?.toCNActionSheetAction();
+      
       return await _showCupertinoNativeActionSheet(
         title: title,
         message: message,
-        actions: actions,
-        cancelAction: cancelAction,
+        actions: cnActions,
+        cancelAction: cnCancelAction,
       );
     } else {
       return await _showMaterialBottomSheet(
@@ -204,8 +267,8 @@ class BaseActionSheet {
     required BuildContext context,
     String? title,
     String? message,
-    required List<CNActionSheetAction> actions,
-    CNActionSheetAction? cancelAction,
+    required List<BaseActionSheetAction> actions,
+    BaseActionSheetAction? cancelAction,
   }) async {
     final result = await showModalBottomSheet<int>(
       context: context,
@@ -260,7 +323,7 @@ class BaseActionSheet {
                     action.title,
                     style: TextStyle(
                       color: _getMaterialColorForStyle(context, action.style),
-                      fontWeight: action.style == CNActionSheetButtonStyle.cancel 
+                      fontWeight: action.style == BaseActionSheetActionStyle.cancel 
                         ? FontWeight.w600 
                         : FontWeight.normal,
                     ),
@@ -299,14 +362,14 @@ class BaseActionSheet {
   }
 
   /// Gets the appropriate color for Material action based on action style
-  static Color? _getMaterialColorForStyle(BuildContext context, CNActionSheetButtonStyle style) {
+  static Color? _getMaterialColorForStyle(BuildContext context, BaseActionSheetActionStyle style) {
     final theme = Theme.of(context);
     switch (style) {
-      case CNActionSheetButtonStyle.cancel:
+      case BaseActionSheetActionStyle.cancel:
         return theme.colorScheme.primary;
-      case CNActionSheetButtonStyle.destructive:
+      case BaseActionSheetActionStyle.destructive:
         return theme.colorScheme.error;
-      case CNActionSheetButtonStyle.defaultStyle:
+      case BaseActionSheetActionStyle.defaultStyle:
         return null;
     }
   }
@@ -351,15 +414,15 @@ class BaseActionSheet {
       title: title,
       message: message,
       actions: [
-        CNActionSheetAction(
+        BaseActionSheetAction(
           title: confirmTitle,
-          style: CNActionSheetButtonStyle.destructive,
+          style: BaseActionSheetActionStyle.destructive,
           onPressed: onConfirm,
         ),
       ],
-      cancelAction: CNActionSheetAction(
+      cancelAction: BaseActionSheetAction(
         title: cancelTitle,
-        style: CNActionSheetButtonStyle.cancel,
+        style: BaseActionSheetActionStyle.cancel,
       ),
       cupertino: cupertino,
       material: material,
@@ -385,8 +448,8 @@ class BaseCNActionSheet {
     required BuildContext context,
     String? title,
     String? message,
-    required List<CNActionSheetAction> actions,
-    CNActionSheetAction? cancelAction,
+    required List<BaseActionSheetAction> actions,
+    BaseActionSheetAction? cancelAction,
     BaseParam? cupertino,
     BaseParam? material,
   }) async {
@@ -430,6 +493,9 @@ class BaseCNActionSheet {
 /// 
 /// This maintains the original API while delegating to BaseActionSheet
 /// for actual implementation.
+/// 
+/// Note: This still uses CNActionSheetAction for backward compatibility,
+/// but internally converts to BaseActionSheetAction.
 @Deprecated('Use BaseActionSheet instead')
 class CNActionSheet {
   /// Shows a native iOS action sheet
@@ -440,12 +506,27 @@ class CNActionSheet {
     required List<CNActionSheetAction> actions,
     CNActionSheetAction? cancelAction,
   }) async {
-    return await BaseCNActionSheet.show(
+    // Convert CNActionSheetAction to BaseActionSheetAction
+    final baseActions = actions.map((action) => BaseActionSheetAction(
+      title: action.title,
+      style: _convertToBaseStyle(action.style),
+      onPressed: action.onPressed,
+    )).toList();
+    
+    final baseCancelAction = cancelAction != null 
+      ? BaseActionSheetAction(
+          title: cancelAction.title,
+          style: _convertToBaseStyle(cancelAction.style),
+          onPressed: cancelAction.onPressed,
+        )
+      : null;
+    
+    return await BaseActionSheet.show(
       context: context,
       title: title,
       message: message,
-      actions: actions,
-      cancelAction: cancelAction,
+      actions: baseActions,
+      cancelAction: baseCancelAction,
     );
   }
 
@@ -467,5 +548,17 @@ class CNActionSheet {
       cancelTitle: cancelTitle,
       onConfirm: onConfirm,
     );
+  }
+  
+  /// Converts CNActionSheetButtonStyle to BaseActionSheetActionStyle
+  static BaseActionSheetActionStyle _convertToBaseStyle(CNActionSheetButtonStyle style) {
+    switch (style) {
+      case CNActionSheetButtonStyle.defaultStyle:
+        return BaseActionSheetActionStyle.defaultStyle;
+      case CNActionSheetButtonStyle.cancel:
+        return BaseActionSheetActionStyle.cancel;
+      case CNActionSheetButtonStyle.destructive:
+        return BaseActionSheetActionStyle.destructive;
+    }
   }
 }

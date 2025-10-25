@@ -6,18 +6,110 @@ import 'package:cupertino_native/cupertino_native.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-// Re-export cupertino_native classes for convenience
-export 'package:cupertino_native/cupertino_native.dart'
-    show
-        CNPullDownButton,
-        CNPullDownMenuItem,
-        CNPullDownMenuDivider,
-        CNPullDownMenuInlineActions,
-        CNPullDownInlineAction,
-        CNPullDownMenuEntry,
-        CNPullDownMenuSubmenu,
-        CNSymbol,
-        CNButtonStyle;
+/// Abstract base class for all pull-down menu entries
+/// Used for type safety in menu construction
+abstract class BasePullDownMenuEntry {
+  const BasePullDownMenuEntry();
+  
+  /// Convert to CNPullDownMenuEntry for iOS implementation
+  CNPullDownMenuEntry toCNPullDownMenuEntry();
+}
+
+/// Regular menu item with icon, label, and optional callback
+class BasePullDownMenuItem extends BasePullDownMenuEntry {
+  const BasePullDownMenuItem({
+    required this.label,
+    this.icon,
+    this.isDestructive = false,
+  });
+
+  final String label;
+  final CNSymbol? icon;
+  final bool isDestructive;
+
+  @override
+  CNPullDownMenuEntry toCNPullDownMenuEntry() {
+    return CNPullDownMenuItem(
+      label: label,
+      icon: icon,
+      isDestructive: isDestructive,
+    );
+  }
+}
+
+/// Menu divider for visual separation
+class BasePullDownMenuDivider extends BasePullDownMenuEntry {
+  const BasePullDownMenuDivider();
+
+  @override
+  CNPullDownMenuEntry toCNPullDownMenuEntry() {
+    return CNPullDownMenuDivider();
+  }
+}
+
+/// Inline action for horizontal button row at top of menu
+class BasePullDownInlineAction {
+  const BasePullDownInlineAction({
+    required this.label,
+    this.icon,
+  });
+
+  final String label;
+  final CNSymbol? icon;
+
+  /// Convert to CNPullDownInlineAction for iOS implementation
+  CNPullDownInlineAction toCNPullDownInlineAction() {
+    return CNPullDownInlineAction(
+      label: label,
+      icon: icon ?? CNSymbol('circle'), // Provide default if null
+    );
+  }
+}
+
+/// Container for inline actions (horizontal row of buttons)
+class BasePullDownMenuInlineActions extends BasePullDownMenuEntry {
+  const BasePullDownMenuInlineActions({
+    required this.actions,
+  });
+
+  final List<BasePullDownInlineAction> actions;
+
+  @override
+  CNPullDownMenuEntry toCNPullDownMenuEntry() {
+    return CNPullDownMenuInlineActions(
+      actions: actions.map((action) => action.toCNPullDownInlineAction()).toList(),
+    );
+  }
+}
+
+/// Submenu with nested menu items
+class BasePullDownMenuSubmenu extends BasePullDownMenuEntry {
+  const BasePullDownMenuSubmenu({
+    required this.title,
+    this.subtitle,
+    this.icon,
+    required this.items,
+  });
+
+  final String title;
+  final String? subtitle;
+  final CNSymbol? icon;
+  final List<BasePullDownMenuEntry> items;
+
+  @override
+  CNPullDownMenuEntry toCNPullDownMenuEntry() {
+    return CNPullDownMenuSubmenu(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      items: items.map((item) => item.toCNPullDownMenuEntry()).toList(),
+    );
+  }
+}
+
+/// Internal: CN* classes from cupertino_native package
+/// Used only for iOS platform channel communication
+/// Public API should use Base* classes instead
 
 /// BasePullDownButton - Cross-platform pull-down button with native iOS support
 /// 
@@ -33,10 +125,11 @@ export 'package:cupertino_native/cupertino_native.dart'
 /// - Material Design popup menu with submenu support for Android
 /// - Inline action buttons (horizontal row of buttons at top of menu)
 /// - Regular menu items with icons and labels
-/// - Submenus with nested menu items (CNPullDownMenuSubmenu)
+/// - Submenus with nested menu items (BasePullDownMenuSubmenu)
 /// - Dividers for visual organization
 /// - Destructive action styling
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
+/// - Automatic platform-specific conversion of menu entries
 /// 
 /// Example usage with submenu:
 /// ```dart
@@ -45,41 +138,41 @@ export 'package:cupertino_native/cupertino_native.dart'
 ///   size: 44,
 ///   items: [
 ///     // Inline actions row
-///     CNPullDownMenuInlineActions(
+///     BasePullDownMenuInlineActions(
 ///       actions: [
-///         CNPullDownInlineAction(
+///         BasePullDownInlineAction(
 ///           label: 'Crop',
 ///           icon: CNSymbol('crop', size: 24),
 ///         ),
-///         CNPullDownInlineAction(
+///         BasePullDownInlineAction(
 ///           label: 'Filter',
 ///           icon: CNSymbol('camera.filters', size: 24),
 ///         ),
 ///       ],
 ///     ),
-///     CNPullDownMenuDivider(),
+///     BasePullDownMenuDivider(),
 ///     // Regular menu items
-///     CNPullDownMenuItem(
+///     BasePullDownMenuItem(
 ///       label: 'Save',
 ///       icon: CNSymbol('square.and.arrow.down'),
 ///     ),
 ///     // Submenu with nested items
-///     CNPullDownMenuSubmenu(
+///     BasePullDownMenuSubmenu(
 ///       title: 'Attachment View',
 ///       icon: CNSymbol('paperclip'),
 ///       items: [
-///         CNPullDownMenuItem(
+///         BasePullDownMenuItem(
 ///           label: 'Gallery View',
 ///           icon: CNSymbol('square.grid.2x2'),
 ///         ),
-///         CNPullDownMenuItem(
+///         BasePullDownMenuItem(
 ///           label: 'List View',
 ///           icon: CNSymbol('list.bullet'),
 ///         ),
 ///       ],
 ///     ),
-///     CNPullDownMenuDivider(),
-///     CNPullDownMenuItem(
+///     BasePullDownMenuDivider(),
+///     BasePullDownMenuItem(
 ///       label: 'Delete',
 ///       icon: CNSymbol('trash'),
 ///       isDestructive: true,
@@ -94,7 +187,7 @@ export 'package:cupertino_native/cupertino_native.dart'
 /// )
 /// ```
 /// 
-/// Updated: 2024.10.25 - Renamed from BaseCNPullDownButton for consistency
+/// Updated: 2024.10.25 - Refactored to use Base* menu entry classes in public API
 class BasePullDownButton extends BaseStatelessWidget {
   const BasePullDownButton({
     Key? key,
@@ -132,9 +225,10 @@ class BasePullDownButton extends BaseStatelessWidget {
   /// Size of the button
   final double size;
 
-  /// List of menu items and inline actions from cupertino_native
-  /// Can contain CNPullDownMenuItem, CNPullDownMenuDivider, or CNPullDownMenuInlineActions
-  final List<CNPullDownMenuEntry> items;
+  /// List of menu items and inline actions
+  /// Can contain BasePullDownMenuItem, BasePullDownMenuDivider, 
+  /// BasePullDownMenuInlineActions, or BasePullDownMenuSubmenu
+  final List<BasePullDownMenuEntry> items;
 
   /// Called when a regular menu item is selected
   final ValueChanged<int>? onSelected;
@@ -149,19 +243,22 @@ class BasePullDownButton extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    // Use CNPullDownButton directly from cupertino_native
+    // Convert BasePullDownMenuEntry to CNPullDownMenuEntry for iOS
+    final cnItems = items.map((item) => item.toCNPullDownMenuEntry()).toList();
+    
+    // Use CNPullDownButton from cupertino_native
     if (_isIconButton && buttonIcon != null) {
       return CNPullDownButton.icon(
         buttonIcon: buttonIcon!,
         size: size,
-        items: items,
+        items: cnItems,
         onSelected: onSelected ?? (_) {},
         onInlineActionSelected: onInlineActionSelected,
       );
     } else if (buttonLabel != null) {
       return CNPullDownButton(
         buttonLabel: buttonLabel!,
-        items: items,
+        items: cnItems,
         onSelected: onSelected ?? (_) {},
         onInlineActionSelected: onInlineActionSelected,
       );
@@ -206,17 +303,17 @@ class BasePullDownButton extends BaseStatelessWidget {
     return const SizedBox.shrink();
   }
 
-  /// Recursively builds Material menu items from CNPullDownMenuEntry list
+  /// Recursively builds Material menu items from BasePullDownMenuEntry list
   /// Supports submenus, regular items, and dividers
   List<PopupMenuEntry<int>> _buildMaterialMenuItems(
     BuildContext context,
-    List<CNPullDownMenuEntry> entries,
+    List<BasePullDownMenuEntry> entries,
     _MenuItemIndexCounter indexCounter,
   ) {
     final menuItems = <PopupMenuEntry<int>>[];
     
     for (final entry in entries) {
-      if (entry is CNPullDownMenuItem) {
+      if (entry is BasePullDownMenuItem) {
         menuItems.add(
           PopupMenuItem<int>(
             value: indexCounter.next(),
@@ -244,7 +341,7 @@ class BasePullDownButton extends BaseStatelessWidget {
             ),
           ),
         );
-      } else if (entry is CNPullDownMenuSubmenu) {
+      } else if (entry is BasePullDownMenuSubmenu) {
         // Create a submenu using PopupMenuButton nested inside PopupMenuItem
         menuItems.add(
           PopupMenuItem<int>(
@@ -292,10 +389,10 @@ class BasePullDownButton extends BaseStatelessWidget {
             ),
           ),
         );
-      } else if (entry is CNPullDownMenuDivider) {
+      } else if (entry is BasePullDownMenuDivider) {
         menuItems.add(const PopupMenuDivider());
       }
-      // Skip CNPullDownMenuInlineActions for Material fallback
+      // Skip BasePullDownMenuInlineActions for Material fallback
     }
     
     return menuItems;

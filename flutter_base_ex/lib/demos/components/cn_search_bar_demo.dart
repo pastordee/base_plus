@@ -75,7 +75,7 @@ class _CNSearchBarDemoState extends State<CNSearchBarDemo> {
       body: Column(
         children: [
           // Main search bar with scope filtering
-          BaseCNSearchBar(
+          BaseSearchBar(
             placeholder: 'Shows, Movies, and More',
             showsCancelButton: true,
             showsScopeBar: true,
@@ -260,7 +260,7 @@ class _CNSearchBarVariationsDemoState extends State<CNSearchBarVariationsDemo> {
           _buildSection(
             'Default Style',
             'Standard iOS search bar with basic functionality',
-            BaseCNSearchBar(
+            BaseSearchBar(
               placeholder: 'Search messages',
               showsCancelButton: true,
               searchBarStyle: CNSearchBarStyle.defaultStyle,
@@ -276,7 +276,7 @@ class _CNSearchBarVariationsDemoState extends State<CNSearchBarVariationsDemo> {
           _buildSection(
             'Prominent Style',
             'Enhanced search bar with prominent visual treatment',
-            BaseCNSearchBar(
+            BaseSearchBar(
               placeholder: 'Search photos',
               showsCancelButton: true,
               showsBookmarkButton: true,
@@ -298,7 +298,7 @@ class _CNSearchBarVariationsDemoState extends State<CNSearchBarVariationsDemo> {
           _buildSection(
             'Minimal Style',
             'Streamlined search bar with minimal visual elements',
-            BaseCNSearchBar(
+            BaseSearchBar(
               placeholder: 'Quick search',
               searchBarStyle: CNSearchBarStyle.minimal,
               keyboardType: CNKeyboardType.webSearch,
@@ -314,7 +314,7 @@ class _CNSearchBarVariationsDemoState extends State<CNSearchBarVariationsDemo> {
           _buildSection(
             'Advanced Features',
             'Search bar with scope filtering and custom keyboard',
-            BaseCNSearchBar(
+            BaseSearchBar(
               placeholder: 'Search contacts',
               prompt: 'Find people in your network',
               showsCancelButton: true,

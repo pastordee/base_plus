@@ -5,7 +5,64 @@ import 'package:flutter/services.dart';
 
 import '../base_param.dart';
 
-/// Style for alert buttons.
+/// Action style for alert actions (cross-platform)
+enum BaseAlertActionStyle {
+  /// Default style for standard actions.
+  defaultStyle,
+
+  /// Style for cancel actions (bold text).
+  cancel,
+
+  /// Style for destructive actions (red text).
+  destructive,
+}
+
+/// Represents an action button in an alert (cross-platform data model)
+/// 
+/// This is the primary class to use when creating alert actions.
+/// It will be automatically converted to platform-specific implementations:
+/// - iOS/macOS: Native UIAlertController actions via platform channels
+/// - Android/Other: Material Design TextButton in AlertDialog
+class BaseAlertAction {
+  /// The title displayed on the button.
+  final String title;
+
+  /// The style of the button.
+  final BaseAlertActionStyle style;
+
+  /// Callback when the button is tapped.
+  final VoidCallback? onPressed;
+
+  /// Creates an alert action.
+  const BaseAlertAction({
+    required this.title,
+    this.style = BaseAlertActionStyle.defaultStyle,
+    this.onPressed,
+  });
+
+  /// Converts to CNAlertAction for iOS native implementation
+  CNAlertAction toCNAlertAction() {
+    return CNAlertAction(
+      title: title,
+      style: _convertToCNStyle(style),
+      onPressed: onPressed,
+    );
+  }
+
+  /// Converts BaseAlertActionStyle to CNAlertActionStyle
+  static CNAlertActionStyle _convertToCNStyle(BaseAlertActionStyle style) {
+    switch (style) {
+      case BaseAlertActionStyle.defaultStyle:
+        return CNAlertActionStyle.defaultStyle;
+      case BaseAlertActionStyle.cancel:
+        return CNAlertActionStyle.cancel;
+      case BaseAlertActionStyle.destructive:
+        return CNAlertActionStyle.destructive;
+    }
+  }
+}
+
+/// iOS-specific alert action style (internal use only)
 enum CNAlertActionStyle {
   /// Default style for standard actions.
   defaultStyle,
@@ -17,7 +74,10 @@ enum CNAlertActionStyle {
   destructive,
 }
 
-/// Represents an action button in an alert.
+/// iOS-specific alert action (internal use only)
+/// 
+/// This class is used internally for iOS native implementation.
+/// External code should use [BaseAlertAction] instead.
 class CNAlertAction {
   /// The title displayed on the button.
   final String title;
@@ -57,6 +117,7 @@ class CNAlertAction {
 /// - Support for action styles (default, cancel, destructive)
 /// - Preferred action highlighting
 /// - Convenience methods for common alert patterns
+/// - Automatic platform-specific conversion of actions
 /// 
 /// Example:
 /// ```dart
@@ -65,13 +126,13 @@ class CNAlertAction {
 ///   title: 'Delete Photo',
 ///   message: 'Are you sure you want to delete this photo?',
 ///   actions: [
-///     CNAlertAction(
+///     BaseAlertAction(
 ///       title: 'Cancel',
-///       style: CNAlertActionStyle.cancel,
+///       style: BaseAlertActionStyle.cancel,
 ///     ),
-///     CNAlertAction(
+///     BaseAlertAction(
 ///       title: 'Delete',
-///       style: CNAlertActionStyle.destructive,
+///       style: BaseAlertActionStyle.destructive,
 ///       onPressed: () {
 ///         // Perform delete action
 ///       },
@@ -100,7 +161,7 @@ class BaseAlert {
     required BuildContext context,
     required String title,
     String? message,
-    required List<CNAlertAction> actions,
+    required List<BaseAlertAction> actions,
     int? preferredActionIndex,
     BaseParam? cupertino,
     BaseParam? material,
@@ -118,10 +179,13 @@ class BaseAlert {
     final bool useCupertino = _shouldUseCupertino(context, cupertino, material);
 
     if (useCupertino) {
+      // Convert BaseAlertAction to CNAlertAction for iOS
+      final cnActions = actions.map((action) => action.toCNAlertAction()).toList();
+      
       return _showCupertinoNativeAlert(
         title: title,
         message: message,
-        actions: actions,
+        actions: cnActions,
         preferredActionIndex: preferredActionIndex,
       );
     } else {
@@ -167,7 +231,7 @@ class BaseAlert {
     required BuildContext context,
     required String title,
     String? message,
-    required List<CNAlertAction> actions,
+    required List<BaseAlertAction> actions,
     int? preferredActionIndex,
   }) async {
     final result = await showDialog<int>(
@@ -191,7 +255,7 @@ class BaseAlert {
               child: Text(
                 action.title,
                 style: TextStyle(
-                  fontWeight: action.style == CNAlertActionStyle.cancel 
+                  fontWeight: action.style == BaseAlertActionStyle.cancel 
                     ? FontWeight.bold 
                     : FontWeight.normal,
                 ),
@@ -206,14 +270,14 @@ class BaseAlert {
   }
 
   /// Gets the appropriate color for Material button based on action style
-  static Color? _getMaterialColorForStyle(BuildContext context, CNAlertActionStyle style) {
+  static Color? _getMaterialColorForStyle(BuildContext context, BaseAlertActionStyle style) {
     final theme = Theme.of(context);
     switch (style) {
-      case CNAlertActionStyle.cancel:
+      case BaseAlertActionStyle.cancel:
         return theme.colorScheme.primary;
-      case CNAlertActionStyle.destructive:
+      case BaseAlertActionStyle.destructive:
         return theme.colorScheme.error;
-      case CNAlertActionStyle.defaultStyle:
+      case BaseAlertActionStyle.defaultStyle:
         return null;
     }
   }
@@ -242,9 +306,9 @@ class BaseAlert {
       title: title,
       message: message,
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'OK',
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
         ),
       ],
       cupertino: cupertino,
@@ -267,13 +331,13 @@ class BaseAlert {
       title: title,
       message: message,
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Cancel',
-          style: CNAlertActionStyle.cancel,
+          style: BaseAlertActionStyle.cancel,
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: confirmTitle,
-          style: CNAlertActionStyle.defaultStyle,
+          style: BaseAlertActionStyle.defaultStyle,
           onPressed: onConfirm,
         ),
       ],
@@ -300,13 +364,13 @@ class BaseAlert {
       title: title,
       message: message,
       actions: [
-        CNAlertAction(
+        BaseAlertAction(
           title: 'Cancel',
-          style: CNAlertActionStyle.cancel,
+          style: BaseAlertActionStyle.cancel,
         ),
-        CNAlertAction(
+        BaseAlertAction(
           title: destructiveTitle,
-          style: CNAlertActionStyle.destructive,
+          style: BaseAlertActionStyle.destructive,
           onPressed: onDestroy,
         ),
       ],
@@ -325,8 +389,11 @@ class NavigationService {
 
 /// Legacy CNAlert class for backward compatibility
 /// 
-/// This maintains the original API while delegating to BaseCNAlert
+/// This maintains the original API while delegating to BaseAlert
 /// for actual implementation.
+/// 
+/// Note: This still uses CNAlertAction for backward compatibility,
+/// but internally converts to BaseAlertAction.
 class CNAlert {
 
   /// Shows a native alert dialog.
@@ -341,11 +408,18 @@ class CNAlert {
       throw StateError('No navigator context available. Make sure NavigationService.navigatorKey is set in your MaterialApp.');
     }
 
+    // Convert CNAlertAction to BaseAlertAction
+    final baseActions = actions.map((action) => BaseAlertAction(
+      title: action.title,
+      style: _convertToBaseStyle(action.style),
+      onPressed: action.onPressed,
+    )).toList();
+
     return await BaseAlert.show(
       context: context,
       title: title,
       message: message,
-      actions: actions,
+      actions: baseActions,
       preferredActionIndex: preferredActionIndex,
     );
   }
@@ -407,5 +481,17 @@ class CNAlert {
       destructiveTitle: destructiveTitle,
       onDestroy: onDestroy,
     );
+  }
+  
+  /// Converts CNAlertActionStyle to BaseAlertActionStyle
+  static BaseAlertActionStyle _convertToBaseStyle(CNAlertActionStyle style) {
+    switch (style) {
+      case CNAlertActionStyle.defaultStyle:
+        return BaseAlertActionStyle.defaultStyle;
+      case CNAlertActionStyle.cancel:
+        return BaseAlertActionStyle.cancel;
+      case CNAlertActionStyle.destructive:
+        return BaseAlertActionStyle.destructive;
+    }
   }
 }
