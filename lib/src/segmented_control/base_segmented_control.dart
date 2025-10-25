@@ -4,21 +4,33 @@ import 'package:cupertino_native/cupertino_native.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-/// BaseCNSegmentedControl - Native iOS segmented control using CNSegmentedControl
+/// BaseSegmentedControl - Cross-platform segmented control with native iOS support
 /// 
-/// Provides enhanced segmented control with native iOS appearance
-/// Falls back to Material SegmentedButton on Android
+/// Uses CNSegmentedControl (Cupertino Native) for iOS - provides true native iOS appearance
+/// with built-in liquid glass effects and native rendering.
+/// Uses Material SegmentedButton for Android and other platforms.
+/// 
+/// *** use cupertino = { forceUseMaterial: true } force use SegmentedButton on iOS
+/// *** use material = { forceUseCupertino: true } force use CNSegmentedControl on Android
+///
+/// Features:
+/// - Native iOS segmented control via CNSegmentedControl (cupertino_native package)
+/// - Material Design SegmentedButton for Android
+/// - Consistent API across platforms
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// 
 /// Example:
 /// ```dart
-/// BaseCNSegmentedControl(
+/// BaseSegmentedControl(
 ///   labels: const ['One', 'Two', 'Three'],
 ///   selectedIndex: _selectedIndex,
 ///   onValueChanged: (i) => setState(() => _selectedIndex = i),
 /// )
 /// ```
-class BaseCNSegmentedControl extends BaseStatelessWidget {
-  const BaseCNSegmentedControl({
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNSegmentedControl for consistency
+class BaseSegmentedControl extends BaseStatelessWidget {
+  const BaseSegmentedControl({
     Key? key,
     required this.labels,
     required this.selectedIndex,

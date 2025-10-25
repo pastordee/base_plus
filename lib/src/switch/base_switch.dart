@@ -1,20 +1,36 @@
-import 'package:flutter/cupertino.dart' show CupertinoSwitch;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-/// BaseSwitch
-/// use CupertinoSwitch by cupertino
-/// *** use cupertino = { forceUseMaterial: true } force use Switch
-/// use Switch by material
-/// *** use material = { forceUseCupertino: true } force use CupertinoSwitch
+/// BaseSwitch - Cross-platform switch with native iOS support
+/// 
+/// Uses CNSwitch (Cupertino Native) for iOS - provides true native iOS appearance
+/// with built-in liquid glass effects and native rendering.
+/// Uses Material Switch for Android and other platforms.
+/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material Switch on iOS
+/// *** use material = { forceUseCupertino: true } force use CNSwitch on Android
 ///
-/// CupertinoSwitch: 2021.03.12
-/// Switch: 2021.03.31
-/// modify 2021.06.25 by flutter 2.2.2
+/// Features:
+/// - Native iOS switch via CNSwitch (cupertino_native package)
+/// - Material Design switch for Android
+/// - Consistent API across platforms
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
+/// 
+/// Example:
+/// ```dart
+/// BaseSwitch(
+///   value: _switchValue,
+///   onChanged: (v) => setState(() => _switchValue = v),
+///   activeColor: Colors.pink,
+/// )
+/// ```
+/// 
+/// Updated: 2024.10.25 - Integrated CNSwitch for native iOS rendering
 class BaseSwitch extends BaseStatelessWidget {
   const BaseSwitch({
     Key? key,
@@ -130,12 +146,10 @@ class BaseSwitch extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    return CupertinoSwitch(
-      value: valueOf('value', value),
+    return CNSwitch(
+      value: valueOf('value', value) ?? false,
+      color: valueOf('activeColor', activeColor),
       onChanged: valueOf('onChanged', onChanged),
-      activeColor: valueOf('activeColor', activeColor),
-      trackColor: valueOf('cupertinoTrackColor', cupertinoTrackColor),
-      dragStartBehavior: valueOf('dragStartBehavior', dragStartBehavior),
     );
   }
 

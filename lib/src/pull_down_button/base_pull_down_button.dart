@@ -19,25 +19,28 @@ export 'package:cupertino_native/cupertino_native.dart'
         CNSymbol,
         CNButtonStyle;
 
-/// Base wrapper for CNPullDownButton with cross-platform support
+/// BasePullDownButton - Cross-platform pull-down button with native iOS support
 /// 
-/// Provides native iOS pull-down button with inline actions, menu items, and submenus.
-/// Falls back to Material PopupMenuButton on other platforms.
+/// Uses CNPullDownButton (Cupertino Native) for iOS - provides native iOS pull-down button  
+/// with inline actions, menu items, and submenus via UIButton with UIMenu.
+/// Uses PopupMenuButton (Material) for Android with submenu support.
 /// 
-/// Uses CNPullDownButton from cupertino_native on iOS, and PopupMenuButton on Android/other platforms.
-/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material popup on iOS
+/// *** use material = { forceUseCupertino: true } force use CNPullDownButton on Android
+///
 /// Features:
-/// - Native iOS pull-down button (UIButton with pull-down menu)
+/// - Native iOS pull-down button via CNPullDownButton (cupertino_native package)
+/// - Material Design popup menu with submenu support for Android
 /// - Inline action buttons (horizontal row of buttons at top of menu)
 /// - Regular menu items with icons and labels
 /// - Submenus with nested menu items (CNPullDownMenuSubmenu)
 /// - Dividers for visual organization
 /// - Destructive action styling
-/// - Material Design popup menu fallback with submenu support
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// 
 /// Example usage with submenu:
 /// ```dart
-/// BaseCNPullDownButton.icon(
+/// BasePullDownButton.icon(
 ///   buttonIcon: CNSymbol('ellipsis.circle', size: 24),
 ///   size: 44,
 ///   items: [
@@ -90,8 +93,10 @@ export 'package:cupertino_native/cupertino_native.dart'
 ///   },
 /// )
 /// ```
-class BaseCNPullDownButton extends BaseStatelessWidget {
-  const BaseCNPullDownButton({
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNPullDownButton for consistency
+class BasePullDownButton extends BaseStatelessWidget {
+  const BasePullDownButton({
     Key? key,
     required this.items,
     this.onSelected,
@@ -105,7 +110,7 @@ class BaseCNPullDownButton extends BaseStatelessWidget {
         super(key: key, baseParam: baseParam);
 
   /// Creates an icon-style pull-down button
-  const BaseCNPullDownButton.icon({
+  const BasePullDownButton.icon({
     Key? key,
     required this.buttonIcon,
     this.size = 44.0,

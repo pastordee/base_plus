@@ -150,20 +150,24 @@ enum CNSpellCheckingType {
   yes,
 }
 
-/// Base wrapper for CNSearchBar with cross-platform support
+/// BaseSearchBar - Cross-platform search bar with native iOS support
 /// 
-/// Provides native iOS UISearchBar with fallback to Material Design
-/// search functionality on other platforms. Uses the cupertino_native package for true
-/// native iOS search bar experience when available.
+/// Uses native iOS UISearchBar via platform channels for iOS - provides authentic
+/// iOS search experience with scope bars and advanced keyboard configuration.
+/// Uses Material Design SearchBar for Android and other platforms.
 /// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material search on iOS
+/// *** use material = { forceUseCupertino: true } force use native iOS search on Android
+///
 /// Features:
-/// - Native iOS UISearchBar rendering
-/// - Material Design search field fallback
+/// - Native iOS UISearchBar rendering via platform channels
+/// - Material Design SearchBar for Android
 /// - Consistent API across platforms
 /// - Apple HIG compliant search behavior
 /// - Scope bar support for filtering
 /// - Advanced keyboard and input configuration
 /// - Authentic iOS styling and animations
+/// - Cancel button with native iOS behavior
 /// 
 /// Apple HIG implementation:
 /// - Descriptive placeholder text support
@@ -175,7 +179,7 @@ enum CNSpellCheckingType {
 /// 
 /// Example:
 /// ```dart
-/// BaseCNSearchBar(
+/// BaseSearchBar(
 ///   placeholder: 'Shows, Movies, and More',
 ///   showsCancelButton: true,
 ///   showsScopeBar: true,
@@ -185,9 +189,11 @@ enum CNSpellCheckingType {
 ///   onSearchButtonClicked: (text) => submitSearch(text),
 /// )
 /// ```
-class BaseCNSearchBar extends BaseStatelessWidget {
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNSearchBar for consistency
+class BaseSearchBar extends BaseStatelessWidget {
   /// Creates a native iOS search bar.
-  const BaseCNSearchBar({
+  const BaseSearchBar({
     Key? key,
     this.placeholder,
     this.text,
@@ -911,7 +917,7 @@ class CNSearchBar extends StatefulWidget {
 class _CNSearchBarState extends State<CNSearchBar> {
   @override
   Widget build(BuildContext context) {
-    return BaseCNSearchBar(
+    return BaseSearchBar(
       placeholder: widget.placeholder,
       text: widget.text,
       prompt: widget.prompt,

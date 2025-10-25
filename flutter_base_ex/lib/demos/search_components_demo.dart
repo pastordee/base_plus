@@ -90,7 +90,7 @@ class _SearchToolbarDemoState extends State<SearchToolbarDemo> {
     return Column(
       children: [
         // Search Toolbar Example
-        BaseCNToolbar.search(
+        BaseToolbar.search(
           leading: [
             CNToolbarAction(
               icon: CNSymbol('star.fill'),

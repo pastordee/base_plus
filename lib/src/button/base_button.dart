@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble, ImageFilter;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart' show CupertinoButton, ShapeBorder, CupertinoColors;
 import 'package:flutter/material.dart';
@@ -85,13 +85,12 @@ class BaseButton extends BaseStatelessWidget {
     this.elevatedButton = false,
     this.filledTonalButton = false,
 
-    /// iOS 26 Liquid Glass button effects
-    this.liquidGlassEffect = false,
-    this.liquidGlassBlurIntensity = 15.0,
-    this.liquidGlassOpacity = 0.8,
+    /// Enhanced haptic feedback for iOS interactions
+    /// CNButton components automatically include liquid glass effects
     this.adaptiveHaptics = true,
     
     /// CNButton (cupertino_native) properties
+    /// Use CNButton for native iOS buttons with built-in liquid glass effects
     this.useCNButton = false,
     this.cnButtonStyle,
     this.shrinkWrap = false,
@@ -129,9 +128,6 @@ class BaseButton extends BaseStatelessWidget {
     bool textButton,
     bool outlinedButton,
     bool elevatedButton,
-    bool liquidGlassEffect,
-    double liquidGlassBlurIntensity,
-    double liquidGlassOpacity,
     bool adaptiveHaptics,
     bool useCNButton,
     CNButtonStyle? cnButtonStyle,
@@ -287,29 +283,14 @@ class BaseButton extends BaseStatelessWidget {
   /// use ElevatedButton
   final bool elevatedButton;
 
-  /// *** iOS 26 Liquid Glass Dynamic Material properties start ***
-
-  /// Enable iOS 26 Liquid Glass Dynamic Material visual effects
-  /// Implements transparency, reflections, refractions, and real-time adaptability
-  final bool liquidGlassEffect;
-
-  /// Liquid Glass Dynamic Material blur intensity (5.0 - 30.0)
-  /// Controls the backdrop blur strength with content-aware adaptation
-  final double liquidGlassBlurIntensity;
-
-  /// Liquid Glass Dynamic Material surface opacity (0.1 - 1.0)
-  /// Controls transparency and refraction depth of the glass surface
-  final double liquidGlassOpacity;
-
-  /// Enhanced haptic feedback for iOS 26 Dynamic Material interactions
-  /// Provides adaptive haptic responses based on material behavior and button type
+  /// Enhanced haptic feedback for iOS interactions
+  /// Provides adaptive haptic responses based on button type
+  /// Note: CNButton components automatically include liquid glass effects
   final bool adaptiveHaptics;
-
-  /// *** iOS 26 Liquid Glass Dynamic Material properties end ***
 
   /// *** CNButton (cupertino_native) properties start ***
 
-  /// Use CNButton from cupertino_native package (native iOS button with glass effects)
+  /// Use CNButton from cupertino_native package (native iOS button with built-in liquid glass effects)
   /// When true, uses CNButton instead of CupertinoButton on iOS
   final bool useCNButton;
 
@@ -350,11 +331,6 @@ class BaseButton extends BaseStatelessWidget {
     final double _pressedOpacity = valueOf('minSize', pressedOpacity);
     final BorderRadius? _borderRadius = valueOf('borderRadius', borderRadius);
     final AlignmentGeometry _alignment = valueOf('alignment', alignment);
-
-    // iOS 26 Liquid Glass Configuration
-    final bool _liquidGlassEffect = valueOf('liquidGlassEffect', liquidGlassEffect);
-    final double _liquidGlassBlurIntensity = valueOf('liquidGlassBlurIntensity', liquidGlassBlurIntensity);
-    final double _liquidGlassOpacity = valueOf('liquidGlassOpacity', liquidGlassOpacity);
     final bool _adaptiveHaptics = valueOf('adaptiveHaptics', adaptiveHaptics);
 
     // Enhanced onPressed with haptic feedback
@@ -394,104 +370,7 @@ class BaseButton extends BaseStatelessWidget {
       );
     }
 
-    // Apply iOS 26 Liquid Glass effects if enabled
-    if (_liquidGlassEffect && _onPressed != null) {
-      return _wrapWithLiquidGlass(button, _liquidGlassBlurIntensity, _liquidGlassOpacity, _borderRadius);
-    }
-
     return button;
-  }
-
-  /// iOS 26 Liquid Glass Dynamic Material wrapper for buttons
-  Widget _wrapWithLiquidGlass(Widget button, double blurIntensity, double opacity, BorderRadius? borderRadius) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
-        // iOS 26 Liquid Glass Dynamic Material: sophisticated optical effects
-        // Implements transparency, reflections, and refractions with real-world glass properties
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            // Primary glass surface reflection
-            Colors.white.withOpacity(opacity * 0.4),
-            // Secondary light refraction
-            Colors.white.withOpacity(opacity * 0.25),
-            // Material transparency core
-            Colors.white.withOpacity(opacity * 0.1),
-            // Content hierarchy separator
-            Colors.transparent,
-            // Glass thickness shadow
-            Colors.black.withOpacity(opacity * 0.06),
-            // Edge definition for material boundaries
-            Colors.black.withOpacity(opacity * 0.12),
-          ],
-          stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
-        ),
-        // Multi-layer shadow system for realistic glass depth and material presence
-        boxShadow: [
-          // Primary material depth shadow
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            offset: const Offset(0, 3),
-            blurRadius: 12.0,
-            spreadRadius: 0.5,
-          ),
-          // Glass surface reflection
-          BoxShadow(
-            color: Colors.white.withOpacity(opacity * 0.6),
-            offset: const Offset(0, -1),
-            blurRadius: 6.0,
-          ),
-          // Ambient material glow (unified design language)
-          BoxShadow(
-            color: Colors.blue.withOpacity(opacity * 0.08),
-            offset: const Offset(0, 0),
-            blurRadius: 20.0,
-            spreadRadius: 1.0,
-          ),
-          // Interactive state enhancement
-          BoxShadow(
-            color: Colors.white.withOpacity(opacity * 0.3),
-            offset: const Offset(-1, -1),
-            blurRadius: 4.0,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blurIntensity,
-            sigmaY: blurIntensity,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              // Additional refractive overlay for optical complexity
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(opacity * 0.15),
-                  Colors.transparent,
-                  Colors.white.withOpacity(opacity * 0.08),
-                ],
-              ),
-              // Subtle inner glow for material authenticity
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white.withOpacity(opacity * 0.2),
-                  offset: const Offset(0, 0),
-                  blurRadius: 8.0,
-                  spreadRadius: -2.0,
-                ),
-              ],
-            ),
-            child: button,
-          ),
-        ),
-      ),
-    );
   }
 
   /// Build button using CNButton from cupertino_native package
@@ -761,9 +640,6 @@ class _BaseButtonWithIcon extends BaseButton {
     bool textButton = false,
     bool outlinedButton = false,
     bool elevatedButton = false,
-    bool liquidGlassEffect = false,
-    double liquidGlassBlurIntensity = 15.0,
-    double liquidGlassOpacity = 0.8,
     bool adaptiveHaptics = true,
     bool useCNButton = false,
     CNButtonStyle? cnButtonStyle,
@@ -789,9 +665,6 @@ class _BaseButtonWithIcon extends BaseButton {
           filledTonalButton: filledTonalButton,
           outlinedButton: outlinedButton,
           elevatedButton: elevatedButton,
-          liquidGlassEffect: liquidGlassEffect,
-          liquidGlassBlurIntensity: liquidGlassBlurIntensity,
-          liquidGlassOpacity: liquidGlassOpacity,
           adaptiveHaptics: adaptiveHaptics,
           useCNButton: useCNButton,
           cnButtonStyle: cnButtonStyle,

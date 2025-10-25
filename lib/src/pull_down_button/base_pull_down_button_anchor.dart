@@ -11,26 +11,29 @@ export 'package:cupertino_native/cupertino_native.dart'
     show CNPullDownButtonAnchor, CNPullDownMenuEntry, CNPullDownMenuItem, 
          CNPullDownMenuDivider, CNSymbol, CNButtonStyle;
 
-/// Base wrapper for CNPullDownButtonAnchor with cross-platform support
+/// BasePullDownButtonAnchor - Cross-platform pull-down button with menu anchoring
 /// 
-/// Provides a native iOS pull-down button with automatic menu anchoring.
-/// The menu appears anchored to the button with an arrow pointing to it.
+/// Uses CNPullDownButtonAnchor (Cupertino Native) for iOS - provides native iOS 
+/// pull-down button with automatic menu anchoring via UIButton with UIMenu.
+/// Uses PopupMenuButton (Material) for Android.
 /// 
-/// Uses CNPullDownButtonAnchor from cupertino_native on iOS, and PopupMenuButton on Android/other platforms.
-/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material popup on iOS
+/// *** use material = { forceUseCupertino: true } force use CNPullDownButtonAnchor on Android
+///
 /// Features:
-/// - Native UIButton with UIMenu for authentic iOS behavior
+/// - Native UIButton with UIMenu for authentic iOS behavior via CNPullDownButtonAnchor
+/// - Material Design popup menu for Android
 /// - Anchors pull-down menu to CNButton styles
 /// - Supports all CNButtonStyle options (plain, gray, tinted, filled, bordered, glass)
 /// - Custom tint colors for themed buttons
 /// - Optional menu title displayed at top of menu
 /// - Icon-only buttons with customizable size
 /// - Alignment control for menu positioning
-/// - Material Design popup menu fallback
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// 
 /// Example usage:
 /// ```dart
-/// BaseCNPullDownButtonAnchor.icon(
+/// BasePullDownButtonAnchor.icon(
 ///   buttonIcon: const CNSymbol('ellipsis.circle'),
 ///   buttonStyle: CNButtonStyle.gray,
 ///   items: const [
@@ -48,9 +51,11 @@ export 'package:cupertino_native/cupertino_native.dart'
 ///   },
 /// )
 /// ```
-class BaseCNPullDownButtonAnchor extends BaseStatelessWidget {
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNPullDownButtonAnchor for consistency
+class BasePullDownButtonAnchor extends BaseStatelessWidget {
   /// Creates a text-labeled pull-down button with automatic anchoring
-  const BaseCNPullDownButtonAnchor({
+  const BasePullDownButtonAnchor({
     Key? key,
     required this.buttonLabel,
     required this.items,
@@ -67,7 +72,7 @@ class BaseCNPullDownButtonAnchor extends BaseStatelessWidget {
         super(key: key, baseParam: baseParam);
 
   /// Creates a round, icon-only pull-down button with automatic anchoring
-  const BaseCNPullDownButtonAnchor.icon({
+  const BasePullDownButtonAnchor.icon({
     Key? key,
     required this.buttonIcon,
     required this.items,

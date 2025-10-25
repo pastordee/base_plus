@@ -43,14 +43,17 @@ class CNActionSheetAction {
   }
 }
 
-/// Base wrapper for CNActionSheet with cross-platform support
+/// Base wrapper for ActionSheet with native iOS support and cross-platform compatibility
 /// 
-/// Provides native iOS action sheets with fallback to Material Design
-/// bottom sheets on other platforms. Uses the cupertino_native package for true
-/// native iOS action sheet experience when available.
+/// Provides **true native iOS action sheets** via platform channels with fallback to Material Design
+/// bottom sheets on other platforms. Uses the cupertino_native package for authentic
+/// native iOS action sheet experience.
+/// 
+/// **CN = Cupertino Native** - This is the primary action sheet implementation that uses
+/// native iOS APIs for the most authentic experience.
 /// 
 /// Features:
-/// - Native iOS action sheets with platform-specific styling
+/// - **Native iOS action sheets** with platform-specific styling
 /// - Material Design bottom sheet fallback for non-iOS platforms  
 /// - Consistent API across platforms
 /// - Support for action styles (default, cancel, destructive)
@@ -68,7 +71,7 @@ class CNActionSheetAction {
 /// 
 /// Example:
 /// ```dart
-/// BaseCNActionSheet.show(
+/// BaseActionSheet.show(
 ///   context: context,
 ///   title: 'Delete Draft?',
 ///   message: 'This action cannot be undone.',
@@ -89,7 +92,7 @@ class CNActionSheetAction {
 ///   ),
 /// );
 /// ```
-class BaseCNActionSheet {
+class BaseActionSheet {
   static const MethodChannel _channel = MethodChannel('cupertino_native_action_sheet');
 
   /// Shows a native action sheet
@@ -325,7 +328,7 @@ class BaseCNActionSheet {
   ///
   /// Example:
   /// ```dart
-  /// final confirmed = await BaseCNActionSheet.showConfirmation(
+  /// final confirmed = await BaseActionSheet.showConfirmation(
   ///   context: context,
   ///   title: 'Delete Message?',
   ///   message: 'This action cannot be undone.',
@@ -371,10 +374,63 @@ class ActionSheetNavigationService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }
 
+/// Legacy alias for backward compatibility
+/// 
+/// @deprecated Use [BaseActionSheet] directly instead
+@Deprecated('Use BaseActionSheet instead')
+class BaseCNActionSheet {
+  /// Shows a native action sheet
+  @Deprecated('Use BaseActionSheet.show instead')
+  static Future<int?> show({
+    required BuildContext context,
+    String? title,
+    String? message,
+    required List<CNActionSheetAction> actions,
+    CNActionSheetAction? cancelAction,
+    BaseParam? cupertino,
+    BaseParam? material,
+  }) async {
+    return await BaseActionSheet.show(
+      context: context,
+      title: title,
+      message: message,
+      actions: actions,
+      cancelAction: cancelAction,
+      cupertino: cupertino,
+      material: material,
+    );
+  }
+
+  /// Shows a simple confirmation action sheet with delete/cancel options
+  @Deprecated('Use BaseActionSheet.showConfirmation instead')
+  static Future<bool> showConfirmation({
+    required BuildContext context,
+    String? title,
+    String? message,
+    String confirmTitle = 'Delete',
+    String cancelTitle = 'Cancel',
+    VoidCallback? onConfirm,
+    BaseParam? cupertino,
+    BaseParam? material,
+  }) async {
+    return await BaseActionSheet.showConfirmation(
+      context: context,
+      title: title,
+      message: message,
+      confirmTitle: confirmTitle,
+      cancelTitle: cancelTitle,
+      onConfirm: onConfirm,
+      cupertino: cupertino,
+      material: material,
+    );
+  }
+}
+
 /// Legacy CNActionSheet class for backward compatibility
 /// 
-/// This maintains the original API while delegating to BaseCNActionSheet
+/// This maintains the original API while delegating to BaseActionSheet
 /// for actual implementation.
+@Deprecated('Use BaseActionSheet instead')
 class CNActionSheet {
   /// Shows a native iOS action sheet
   static Future<int?> show({
@@ -394,6 +450,7 @@ class CNActionSheet {
   }
 
   /// Shows a simple confirmation action sheet with delete/cancel options
+  @Deprecated('Use BaseActionSheet.showConfirmation instead')
   static Future<bool> showConfirmation({
     required BuildContext context,
     String? title,
@@ -402,7 +459,7 @@ class CNActionSheet {
     String cancelTitle = 'Cancel',
     VoidCallback? onConfirm,
   }) async {
-    return await BaseCNActionSheet.showConfirmation(
+    return await BaseActionSheet.showConfirmation(
       context: context,
       title: title,
       message: message,

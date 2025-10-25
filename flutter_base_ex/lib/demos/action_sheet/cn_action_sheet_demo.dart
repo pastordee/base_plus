@@ -102,7 +102,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showBasicActionSheet() async {
-    final result = await BaseCNActionSheet.show(
+    final result = await BaseActionSheet.show(
       context: context,
       title: 'Choose an Option',
       message: 'Select one of the available options below.',
@@ -145,7 +145,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showConfirmationActionSheet() async {
-    final confirmed = await BaseCNActionSheet.showConfirmation(
+    final confirmed = await BaseActionSheet.showConfirmation(
       context: context,
       title: 'Delete Draft?',
       message: 'This action cannot be undone.',
@@ -166,7 +166,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showDestructiveActionSheet() async {
-    final result = await BaseCNActionSheet.show(
+    final result = await BaseActionSheet.show(
       context: context,
       title: 'Remove Account',
       message: 'This will permanently remove your account and all associated data.',
@@ -200,7 +200,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showMultipleActionsSheet() async {
-    final result = await BaseCNActionSheet.show(
+    final result = await BaseActionSheet.show(
       context: context,
       title: 'File Options',
       message: 'What would you like to do with this file?',
@@ -261,7 +261,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showPhotoActionsSheet() async {
-    final result = await BaseCNActionSheet.show(
+    final result = await BaseActionSheet.show(
       context: context,
       title: 'Photo Options',
       actions: [
@@ -321,7 +321,7 @@ class _CNActionSheetDemoState extends State<CNActionSheetDemo> {
   }
 
   Future<void> _showDocumentActionsSheet() async {
-    final result = await BaseCNActionSheet.show(
+    final result = await BaseActionSheet.show(
       context: context,
       title: 'Document Actions',
       message: 'Choose an action for "My Document.pdf"',

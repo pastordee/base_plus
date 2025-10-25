@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 
 import 'button_demo.dart';
 import 'icon_button_demo.dart';
-import 'ios26_liquid_glass_button_demo.dart';
 
 class ButtonDemos extends StatefulWidget {
   const ButtonDemos({
@@ -69,7 +68,6 @@ class _ButtonDemosState extends State<ButtonDemos> with SingleTickerProviderStat
         children: <Widget>[
           const ButtonDemo(),
           const IconButtonDemo(),
-          iOS26LiquidGlassButtonDemo(),
         ],
       ),
     );

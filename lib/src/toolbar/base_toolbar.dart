@@ -11,14 +11,25 @@ enum BaseToolbarAlignment {
   trailing,
 }
 
-/// BaseCNToolbar - Native iOS toolbar using CNToolbar
+/// BaseToolbar - Cross-platform toolbar with native iOS support
 /// 
-/// Provides a flexible toolbar with leading, middle, and trailing actions
-/// Falls back to Material AppBar-style toolbar on Android
+/// Uses CNToolbar (Cupertino Native) for iOS - provides true native iOS appearance
+/// with built-in liquid glass effects and native rendering.
+/// Uses Material AppBar-style toolbar for Android and other platforms.
+/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material toolbar on iOS
+/// *** use material = { forceUseCupertino: true } force use CNToolbar on Android
+///
+/// Features:
+/// - Native iOS toolbar via CNToolbar (cupertino_native package)
+/// - Material Design toolbar for Android
+/// - Flexible leading, middle, and trailing actions
+/// - Search functionality with expandable search field
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// 
 /// Example:
 /// ```dart
-/// BaseCNToolbar(
+/// BaseToolbar(
 ///   leading: [
 ///     CNToolbarAction(
 ///       icon: CNSymbol('chevron.left'),
@@ -42,7 +53,7 @@ enum BaseToolbarAlignment {
 /// 
 /// For search functionality, use the factory constructor:
 /// ```dart
-/// BaseCNToolbar.search(
+/// BaseToolbar.search(
 ///   leading: [
 ///     CNToolbarAction(icon: CNSymbol('star.fill'), onPressed: () {}),
 ///   ],
@@ -57,8 +68,10 @@ enum BaseToolbarAlignment {
 ///   contextIcon: CNSymbol('apps.iphone'),
 /// )
 /// ```
-class BaseCNToolbar extends BaseStatelessWidget {
-  const BaseCNToolbar({
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNToolbar for consistency
+class BaseToolbar extends BaseStatelessWidget {
+  const BaseToolbar({
     Key? key,
     this.leading,
     this.middle,
@@ -76,7 +89,7 @@ class BaseCNToolbar extends BaseStatelessWidget {
   }) : super(key: key, baseParam: baseParam);
 
   /// Factory constructor for search-enabled toolbar
-  const BaseCNToolbar.search({
+  const BaseToolbar.search({
     Key? key,
     List<CNToolbarAction>? leading,
     List<CNToolbarAction>? trailing,

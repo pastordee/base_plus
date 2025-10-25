@@ -165,19 +165,7 @@ final List<Widget> _children = <Widget>[
     ),
     page: const ToolsDemo(),
   ),
-  const _Item(
-    icon: BaseIcon(
-      icon: Icons.water_drop,
-      size: 40,
-      color: Colors.lightBlue,
-    ),
-    title: Text(
-      'Enhanced Liquid Glass',
-      style: TextStyle(color: Colors.lightBlue),
-    ),
-    page: EnhancedLiquidGlassDemo(),
-    fullscreenGackGesture: false,
-  ),
+  
   const _Item(
     icon: BaseIcon(
       icon: Icons.apple,

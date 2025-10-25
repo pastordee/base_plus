@@ -226,7 +226,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
             title: 'CNSegmentedControl',
             child: Column(
               children: [
-                BaseCNSegmentedControl(
+                BaseSegmentedControl(
                   labels: const ['One', 'Two', 'Three'],
                   selectedIndex: _segmentedControlIndex,
                   onValueChanged: (i) {
@@ -244,11 +244,10 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
             title: 'CNSlider',
             child: Column(
               children: [
-                BaseCNSlider(
+                BaseSlider(
                   value: _sliderValue,
                   min: 0,
                   max: 100,
-                  enabled: true,
                   onChanged: (v) {
                     setState(() => _sliderValue = v);
                     _set('Slider: ${v.toStringAsFixed(1)}');
@@ -267,7 +266,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Basic Switch'),
-                    BaseCNSwitch(
+                    BaseSwitch(
                       value: _switchValue,
                       onChanged: (v) {
                         setState(() => _switchValue = v);
@@ -281,9 +280,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Colored Switch'),
-                    BaseCNSwitch(
+                    BaseSwitch(
                       value: _coloredSwitchValue,
-                      color: CupertinoColors.systemPink,
+                      // color: CupertinoColors.systemPink,
                       onChanged: (v) {
                         setState(() => _coloredSwitchValue = v);
                         _set('Colored Switch: $v');
@@ -608,7 +607,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           ),
 
           _buildSection(
-            title: 'BaseCNPopupButton (NEW!)',
+            title: 'BasePopupButton (NEW!)',
             child: Column(
               children: [
                 const Text(
@@ -622,7 +621,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   children: [
                     // Popup button with plain style
                     Expanded(
-                      child: BaseCNPopupButton(
+                      child: BasePopupButton(
                         width: 200,
                         height: 24,
                         options: _filterOptions,
@@ -639,7 +638,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     
                     // Popup button with tinted style
                     Expanded(
-                      child: BaseCNPopupButton(
+                      child: BasePopupButton(
                         width: 200,
                         options: _filterOptions,
                         selectedIndex: _filterIndex2,
@@ -656,7 +655,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     
                     // Popup button with gray style and prefix
                     Expanded(
-                      child: BaseCNPopupButton(
+                      child: BasePopupButton(
                         width:200,
                         options: _filterOptions,
                         selectedIndex: _filterIndex3,
@@ -675,7 +674,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                 const SizedBox(height: 66),
                 // Popup button with bordered style and custom width
                 Center(
-                  child: BaseCNPopupButton(
+                  child: BasePopupButton(
                     options: const ['Small', 'Medium', 'Large', 'Extra Large'],
                     selectedIndex: 1,
                     onSelected: (index) {
@@ -744,7 +743,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           ),
 
           _buildSection(
-            title: 'BaseCNToolbar (Tap to Open Demo)',
+            title: 'BaseToolbar (Tap to Open Demo)',
             child: Column(
               children: [
                 const Text(
@@ -1237,7 +1236,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
             top: 0,
             child: SafeArea(
               bottom: false,
-              child: BaseCNToolbar(
+              child: BaseToolbar(
                 middleAlignment: _middleAlignment,
                 leading: [
                   CNToolbarAction(
@@ -1340,7 +1339,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
             SizedBox(
               width: 80,
               height: 44,
-              child: BaseCNToolbar(
+              child: BaseToolbar(
                 trailing: [
                   CNToolbarAction(
                     icon: CNSymbol('plus', size: 22),
@@ -1391,7 +1390,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
   Widget _buildNormalToolbar() {
     return SafeArea(
       top: false,
-      child: BaseCNToolbar(
+      child: BaseToolbar(
         middleAlignment: _middleAlignment,
         leading: [
           CNToolbarAction(

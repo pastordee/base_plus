@@ -4,15 +4,27 @@ import 'package:cupertino_native/cupertino_native.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-/// BaseCNNavigationBar - Native iOS navigation bar using CNNavigationBar
+/// BaseNavigationBar - Cross-platform navigation bar with native iOS support
 /// 
-/// Provides a navigation bar with leading, title, and trailing actions
-/// Supports large title mode and transparency
-/// Falls back to Material AppBar on Android
+/// Uses CNNavigationBar (Cupertino Native) for iOS - provides native iOS navigation bar
+/// with large title mode, transparency, and flexible actions via UINavigationBar.
+/// Uses Material AppBar for Android.
+/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material AppBar on iOS
+/// *** use material = { forceUseCupertino: true } force use CNNavigationBar on Android
+///
+/// Features:
+/// - Native iOS UINavigationBar via CNNavigationBar (cupertino_native package)
+/// - Material Design AppBar for Android
+/// - Leading, title, and trailing actions
+/// - Large title mode support
+/// - Transparency with blur effects
+/// - Search functionality via factory constructor
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// 
 /// Example:
 /// ```dart
-/// BaseCNNavigationBar(
+/// BaseNavigationBar(
 ///   leading: [
 ///     CNNavigationBarAction(
 ///       icon: CNSymbol('chevron.left'),
@@ -23,7 +35,7 @@ import '../base_stateless_widget.dart';
 ///       onPressed: () => Navigator.pop(context),
 ///     ),
 ///   ],
-///   title: 'Native Nav Bar',
+///   title: 'Navigation Bar',
 ///   trailing: [
 ///     CNNavigationBarAction(
 ///       icon: CNSymbol('gear'),
@@ -42,7 +54,7 @@ import '../base_stateless_widget.dart';
 /// 
 /// For search functionality, use the factory constructor:
 /// ```dart
-/// BaseCNNavigationBar.search(
+/// BaseNavigationBar.search(
 ///   leading: [
 ///     CNNavigationBarAction(icon: CNSymbol('chevron.left'), onPressed: () {}),
 ///   ],
@@ -61,8 +73,10 @@ import '../base_stateless_widget.dart';
 /// - `CNNavigationBarAction()` - Regular action with icon/label
 /// - `CNNavigationBarAction.fixedSpace(5)` - Fixed spacing
 /// - `CNNavigationBarAction.flexibleSpace()` - Flexible spacing
-class BaseCNNavigationBar extends BaseStatelessWidget {
-  const BaseCNNavigationBar({
+/// 
+/// Updated: 2024.10.25 - Renamed from BaseCNNavigationBar for consistency
+class BaseNavigationBar extends BaseStatelessWidget {
+  const BaseNavigationBar({
     Key? key,
     this.leading,
     this.title,
@@ -78,7 +92,7 @@ class BaseCNNavigationBar extends BaseStatelessWidget {
   }) : super(key: key, baseParam: baseParam);
 
   /// Factory constructor for search-enabled navigation bar
-  const BaseCNNavigationBar.search({
+  const BaseNavigationBar.search({
     Key? key,
     List<CNNavigationBarAction>? leading,
     List<CNNavigationBarAction>? trailing,

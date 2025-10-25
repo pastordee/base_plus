@@ -6,17 +6,35 @@ import '../base_stateless_widget.dart';
 
 /// BaseCNIcon - Native iOS icon using SF Symbols via CNIcon
 /// 
-/// Provides a simpler API for using native SF Symbols on iOS
-/// Falls back to regular Icon on Android
+/// **DEPRECATED**: Use [BaseIconButton] instead, which now includes native SF Symbols support.
 /// 
-/// Example:
+/// [BaseIconButton] provides the same functionality with additional features:
+/// - iOS 26 Liquid Glass Dynamic Material effects
+/// - Interactive button functionality
+/// - Material 3 integration
+/// - Haptic feedback support
+/// - Better cross-platform fallback handling
+/// 
+/// Migration example:
 /// ```dart
+/// // Old (BaseCNIcon)
 /// BaseCNIcon(
 ///   symbol: 'heart.fill',
 ///   size: 24,
 ///   color: Colors.red,
 /// )
+/// 
+/// // New (BaseIconButton)
+/// BaseIconButton(
+///   symbol: 'heart.fill',
+///   iconSize: 24,
+///   color: Colors.red,
+///   onPressed: null, // or provide a callback for interactive icons
+/// )
 /// ```
+/// 
+/// @deprecated Use [BaseIconButton] with symbol parameter instead
+@Deprecated('Use BaseIconButton with symbol parameter instead')
 class BaseCNIcon extends BaseStatelessWidget {
   const BaseCNIcon({
     Key? key,

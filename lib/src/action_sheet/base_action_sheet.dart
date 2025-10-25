@@ -6,7 +6,14 @@ import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../mode/base_mode.dart';
 
-/// BaseActionSheet
+/// BaseActionSheetWidget (Deprecated - Old Widget-based Implementation)
+/// 
+/// **DEPRECATED**: This is the old Flutter widget-based implementation.
+/// The new [BaseActionSheet] uses native platform channels for better iOS experience.
+/// 
+/// This class is kept for backward compatibility but will be removed in a future version.
+/// Please migrate to the new [BaseActionSheet] with [CNActionSheetAction].
+///
 /// use CupertinoActionSheet by cupertino with iOS 16+ liquid glass effects
 /// *** use cupertino = { forceUseMaterial: true } force use Material 3 BottomSheet on cupertino.
 /// use Material 3 BottomSheet by material with modern design patterns
@@ -15,8 +22,9 @@ import '../mode/base_mode.dart';
 /// iOS 16+ CupertinoActionSheet with liquid glass effects: 2025.08.11
 /// Material 3 BottomSheet with modern design: 2025.08.11
 /// Enhanced accessibility and semantic support: 2025.08.11
-class BaseActionSheet extends BaseStatelessWidget {
-  const BaseActionSheet({
+@Deprecated('Use BaseActionSheet with CNActionSheetAction instead')
+class BaseActionSheetWidget extends BaseStatelessWidget {
+  const BaseActionSheetWidget({
     Key? key,
     this.title,
     this.message,
@@ -265,7 +273,7 @@ class BaseActionSheet extends BaseStatelessWidget {
       barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
       useRootNavigator: useRootNavigator,
-      semanticsDismissible: semanticsDismissible!,
+      semanticsDismissible: semanticsDismissible ?? barrierDismissible,
       routeSettings: routeSettings,
       builder: (BuildContext context) {
         return this;

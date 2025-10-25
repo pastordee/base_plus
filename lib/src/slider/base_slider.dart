@@ -1,19 +1,37 @@
-import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoSlider;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
-/// BaseSlider
-/// cupertino，use CupertinoSlider
-/// *** use cupertino = { forceUseMaterial: true } force use Slider
-/// material，use Slider
-/// *** use material = { forceUseCupertino: true } force use CupertinoSlider
+/// BaseSlider - Cross-platform slider with native iOS support
+/// 
+/// Uses CNSlider (Cupertino Native) for iOS - provides true native iOS appearance
+/// with built-in liquid glass effects and native rendering.
+/// Uses Material Slider for Android and other platforms.
+/// 
+/// *** use cupertino = { forceUseMaterial: true } force use Material Slider on iOS
+/// *** use material = { forceUseCupertino: true } force use CNSlider on Android
 ///
-/// CupertinoSlider: 2021.03.27
-/// Slider: 2021.03.31
-/// modify 2021.05.25 by flutter 2.2.2
+/// Features:
+/// - Native iOS slider via CNSlider (cupertino_native package)
+/// - Material Design slider for Android
+/// - Consistent API across platforms
+/// - Built-in liquid glass effects on iOS (no manual wrapper needed)
+/// - Discrete divisions and labels (Material only)
+/// 
+/// Example:
+/// ```dart
+/// BaseSlider(
+///   value: _sliderValue,
+///   min: 0,
+///   max: 100,
+///   onChanged: (v) => setState(() => _sliderValue = v),
+/// )
+/// ```
+/// 
+/// Updated: 2024.10.25 - Integrated CNSlider for native iOS rendering
 class BaseSlider extends BaseStatelessWidget {
   const BaseSlider({
     Key? key,
@@ -25,7 +43,7 @@ class BaseSlider extends BaseStatelessWidget {
     this.max = 1.0,
     this.divisions,
     this.activeColor,
-    this.thumbColor = CupertinoColors.white,
+    this.thumbColor = Colors.white,
     this.label,
     this.inactiveColor,
     this.mouseCursor,
@@ -110,16 +128,12 @@ class BaseSlider extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
-    return CupertinoSlider(
-      value: valueOf('value', value),
-      onChanged: valueOf('onChanged', onChanged),
-      onChangeStart: valueOf('onChangeStart', onChangeStart),
-      onChangeEnd: valueOf('onChangeEnd', onChangeEnd),
+    return CNSlider(
+      value: valueOf('value', value) ?? 0.0,
       min: valueOf('min', min),
       max: valueOf('max', max),
-      divisions: valueOf('divisions', divisions),
-      activeColor: valueOf('activeColor', activeColor),
-      thumbColor: valueOf('thumbColor', thumbColor),
+      enabled: onChanged != null,
+      onChanged: valueOf('onChanged', onChanged),
     );
   }
 

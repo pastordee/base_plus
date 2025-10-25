@@ -2,42 +2,70 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show MouseCursor, SystemMouseCursors;
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'dart:ui' show ImageFilter;
+import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
 /// BaseIconButton
 ///
-/// Modern cross-platform icon button with iOS 26 Liquid Glass Dynamic Material design.
-/// Implements true Liquid Glass principles with dynamic adaptability, real-time interactivity,
-/// and sophisticated optical properties optimized for icon-based interactions.
+/// Modern cross-platform icon button with native SF Symbols support via CNIcon.
+/// 
+/// **Native SF Symbols Support:**
+/// - Use `symbol` parameter for native SF Symbols on iOS (e.g., 'heart.fill', 'star')
+/// - Automatic fallback to Material Icons on Android via `icon` or `fallbackIcon`
+/// - True native rendering via CNIcon when symbol is provided
+/// - CNIcon components include built-in iOS 26 Liquid Glass effects automatically
 ///
-/// **iOS 26 Liquid Glass Dynamic Material Features:**
-/// - **Transparency & Refractions**: Multi-layer optical effects tailored for icon clarity
-/// - **Dynamic Adaptability**: Content and context-aware visual transformations
-/// - **Real-time Interactivity**: Smart haptic feedback based on icon interaction patterns
+/// **iOS 26 Features (via CNIcon):**
+/// - **Liquid Glass Design**: Built-in transparency, refractions, and depth
+/// - **Native Rendering**: True iOS platform integration
+/// - **Smart Haptic Feedback**: Adaptive haptic responses for icon interactions
 /// - **Unified Design Language**: Consistent experience across Apple platforms
-/// - **Content Hierarchy**: Optimized icon visibility with glass material separation
-/// - **Fluid Responsiveness**: Adaptive sizing and effects for touch interactions
 ///
 /// **Material 3 Integration:**
 /// - Semantic ColorScheme usage for icon colors with enhanced state layers
 /// - Modern accessibility and touch target sizing with improved elevation
 /// - Cross-platform harmony while preserving platform-specific icon behaviors
 ///
-/// use CupertinoButton by cupertino
+/// use CupertinoButton with CNIcon (native SF Symbols with built-in liquid glass) or Icon by cupertino
 /// *** use cupertino = { forceUseMaterial: true } force use IconButton on cuperitno.
 /// use IconButton by material
 /// *** use material = { forceUseCupertino: true } force use CupertinoButton on material.
 ///
-/// CupertinoButton: Updated for iOS 26 Liquid Glass Dynamic Material design patterns
+/// Examples:
+/// ```dart
+/// // Native SF Symbol on iOS
+/// BaseIconButton(
+///   symbol: 'heart.fill',
+///   color: Colors.red,
+///   onPressed: () {},
+/// )
+///
+/// // Cross-platform with fallback
+/// BaseIconButton(
+///   symbol: 'star.fill',
+///   fallbackIcon: Icons.star,
+///   color: Colors.yellow,
+///   onPressed: () {},
+/// )
+///
+/// // Standard Material Icon
+/// BaseIconButton(
+///   icon: Icons.settings,
+///   onPressed: () {},
+/// )
+/// ```
+///
+/// CupertinoButton + CNIcon: Native SF Symbols with built-in Liquid Glass effects
 /// IconButton: Updated for Material 3 (Material You)
-/// Updated: 2025.08.11 for iOS 26 Liquid Glass Dynamic Material and Material 3
+/// Updated: 2025.10.25 for native CN components with built-in liquid glass
 class BaseIconButton extends BaseStatelessWidget {
   const BaseIconButton({
     Key? key,
     this.icon,
+    this.symbol,
+    this.fallbackIcon,
     this.color,
     this.disabledColor,
     this.padding = const EdgeInsets.all(8.0),
@@ -60,10 +88,8 @@ class BaseIconButton extends BaseStatelessWidget {
     this.enableFeedback = true,
     this.constraints,
 
-    /// iOS 26 Liquid Glass icon button effects
-    this.liquidGlassEffect = false,
-    this.liquidGlassBlurIntensity = 10.0,
-    this.liquidGlassOpacity = 0.9,
+    /// Enhanced haptic feedback for icon interactions
+    /// CNIcon components automatically include liquid glass effects
     this.adaptiveHaptics = true,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
@@ -75,8 +101,18 @@ class BaseIconButton extends BaseStatelessWidget {
   /// [IconButton.padding]
   final EdgeInsetsGeometry? padding;
 
-  /// [IconData]
+  /// [IconData] - Standard Material/Cupertino icon
+  /// Use either `icon` or `symbol`, not both
   final IconData? icon;
+
+  /// SF Symbol name for native iOS icons (e.g., 'heart.fill', 'star', 'gearshape')
+  /// When provided, uses CNIcon for true native rendering on iOS
+  /// Use either `icon` or `symbol`, not both
+  final String? symbol;
+
+  /// Fallback Material icon for Android when using `symbol`
+  /// If not provided and symbol is used, will use `icon` as fallback
+  final IconData? fallbackIcon;
 
   /// [CupertinoButton.color]
   /// or
@@ -154,25 +190,10 @@ class BaseIconButton extends BaseStatelessWidget {
   /// [IconButton.constraints]
   final BoxConstraints? constraints;
 
-  /// *** iOS 26 Liquid Glass Dynamic Material properties start ***
-
-  /// Enable iOS 26 Liquid Glass Dynamic Material visual effects for icon button
-  /// Implements transparency, reflections, and refractions optimized for icon clarity
-  final bool liquidGlassEffect;
-
-  /// Liquid Glass Dynamic Material blur intensity for icon buttons (5.0 - 20.0)
-  /// Controls the backdrop blur strength with icon-optimized adaptation
-  final double liquidGlassBlurIntensity;
-
-  /// Liquid Glass Dynamic Material surface opacity for icon buttons (0.1 - 1.0)
-  /// Controls transparency and refraction depth optimized for icon visibility
-  final double liquidGlassOpacity;
-
-  /// Enhanced haptic feedback for iOS 26 Dynamic Material icon interactions
+  /// Enhanced haptic feedback for icon interactions
   /// Provides adaptive haptic responses tailored for icon-based actions
+  /// Note: CNIcon components automatically include liquid glass effects
   final bool adaptiveHaptics;
-
-  /// *** iOS 26 Liquid Glass Dynamic Material properties end ***
 
   /// *** material properties end ***
 
@@ -180,11 +201,6 @@ class BaseIconButton extends BaseStatelessWidget {
   Widget buildByCupertino(BuildContext context) {
     final Color _disabledColor = valueOf('disabledColor', disabledColor) ?? CupertinoColors.quaternarySystemFill;
     final VoidCallback? _onPressed = valueOf('onPressed', onPressed);
-
-    // iOS 26 Liquid Glass Configuration
-    final bool _liquidGlassEffect = valueOf('liquidGlassEffect', liquidGlassEffect);
-    final double _liquidGlassBlurIntensity = valueOf('liquidGlassBlurIntensity', liquidGlassBlurIntensity);
-    final double _liquidGlassOpacity = valueOf('liquidGlassOpacity', liquidGlassOpacity);
     final bool _adaptiveHaptics = valueOf('adaptiveHaptics', adaptiveHaptics);
 
     // Enhanced onPressed with haptic feedback
@@ -198,12 +214,38 @@ class BaseIconButton extends BaseStatelessWidget {
       };
     }
 
-    Widget iconButton = CupertinoButton(
-      child: Icon(
-        valueOf('icon', icon),
-        size: valueOf('iconSize', iconSize),
-        color: valueOf('color', color),
-      ),
+    // Determine which icon to use
+    Widget iconWidget;
+    final String? _symbol = valueOf('symbol', symbol);
+    final IconData? _icon = valueOf('icon', icon);
+    final double _iconSize = valueOf('iconSize', iconSize);
+    final Color? _color = valueOf('color', color);
+
+    if (_symbol != null && _symbol.isNotEmpty) {
+      // Use native SF Symbol via CNIcon (includes built-in liquid glass effects)
+      iconWidget = CNIcon(
+        symbol: CNSymbol(_symbol, size: _iconSize),
+        size: _iconSize,
+        color: _color,
+      );
+    } else if (_icon != null) {
+      // Use standard Icon
+      iconWidget = Icon(
+        _icon,
+        size: _iconSize,
+        color: _color,
+      );
+    } else {
+      // Fallback to empty icon
+      iconWidget = Icon(
+        CupertinoIcons.question_circle,
+        size: _iconSize,
+        color: _color,
+      );
+    }
+
+    return CupertinoButton(
+      child: iconWidget,
       padding: valueOf('padding', padding),
       disabledColor: _disabledColor,
       minSize: valueOf('minSize', minSize),
@@ -211,107 +253,6 @@ class BaseIconButton extends BaseStatelessWidget {
       borderRadius: valueOf('borderRadius', borderRadius),
       alignment: valueOf('alignment', alignment),
       onPressed: _enhancedOnPressed,
-    );
-
-    // Apply iOS 26 Liquid Glass effects if enabled
-    if (_liquidGlassEffect && _onPressed != null) {
-      return _wrapWithLiquidGlass(iconButton, _liquidGlassBlurIntensity, _liquidGlassOpacity);
-    }
-
-    return iconButton;
-  }
-
-  /// iOS 26 Liquid Glass Dynamic Material wrapper for icon buttons
-  Widget _wrapWithLiquidGlass(Widget iconButton, double blurIntensity, double opacity) {
-    final BorderRadius borderRadius = valueOf('borderRadius', this.borderRadius) ?? const BorderRadius.all(Radius.circular(8.0));
-    
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        // iOS 26 Liquid Glass Dynamic Material: icon-optimized optical effects
-        // Specialized for icon clarity while maintaining glass material authenticity
-        gradient: RadialGradient(
-          center: Alignment.center,
-          radius: 1.2,
-          colors: [
-            // Central icon clarity zone
-            Colors.white.withOpacity(opacity * 0.35),
-            // Glass surface reflection ring
-            Colors.white.withOpacity(opacity * 0.25),
-            // Material transparency layer
-            Colors.white.withOpacity(opacity * 0.15),
-            // Content hierarchy separator
-            Colors.transparent,
-            // Glass edge definition
-            Colors.black.withOpacity(opacity * 0.08),
-            // Outer material boundary
-            Colors.black.withOpacity(opacity * 0.12),
-          ],
-          stops: const [0.0, 0.3, 0.5, 0.7, 0.9, 1.0],
-        ),
-        // Icon-optimized shadow system for glass material presence
-        boxShadow: [
-          // Primary icon button depth
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            offset: const Offset(0, 2),
-            blurRadius: 8.0,
-            spreadRadius: 0.5,
-          ),
-          // Glass surface highlight
-          BoxShadow(
-            color: Colors.white.withOpacity(opacity * 0.7),
-            offset: const Offset(0, -0.5),
-            blurRadius: 4.0,
-          ),
-          // Ambient material glow (unified design language)
-          BoxShadow(
-            color: Colors.blue.withOpacity(opacity * 0.06),
-            offset: const Offset(0, 0),
-            blurRadius: 12.0,
-            spreadRadius: 0.5,
-          ),
-          // Interactive responsiveness indicator
-          BoxShadow(
-            color: Colors.white.withOpacity(opacity * 0.4),
-            offset: const Offset(-0.5, -0.5),
-            blurRadius: 3.0,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blurIntensity,
-            sigmaY: blurIntensity,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              // Additional refractive layer optimized for icon readability
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 0.8,
-                colors: [
-                  Colors.white.withOpacity(opacity * 0.1),
-                  Colors.transparent,
-                  Colors.white.withOpacity(opacity * 0.05),
-                ],
-              ),
-              // Subtle inner enhancement for icon clarity
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white.withOpacity(opacity * 0.25),
-                  offset: const Offset(0, 0),
-                  blurRadius: 6.0,
-                  spreadRadius: -1.5,
-                ),
-              ],
-            ),
-            child: iconButton,
-          ),
-        ),
-      ),
     );
   }
 
@@ -341,12 +282,29 @@ class BaseIconButton extends BaseStatelessWidget {
       iconColor = colorScheme.onSurface;
     }
 
+    // Determine which icon to use (fallback logic for Material)
+    IconData? iconData;
+    final String? _symbol = valueOf('symbol', symbol);
+    final IconData? _icon = valueOf('icon', icon);
+    final IconData? _fallbackIcon = valueOf('fallbackIcon', fallbackIcon);
+
+    if (_icon != null) {
+      // Use provided icon
+      iconData = _icon;
+    } else if (_symbol != null && _fallbackIcon != null) {
+      // Use fallback icon when symbol is provided on Android
+      iconData = _fallbackIcon;
+    } else if (_icon == null && _fallbackIcon == null) {
+      // If symbol is provided but no fallback, use a default icon
+      iconData = Icons.circle_outlined;
+    }
+
     return IconButton(
       iconSize: valueOf('iconSize', iconSize),
       visualDensity: valueOf('visualDensity', visualDensity),
       padding: valueOf('padding', padding),
       alignment: valueOf('alignment', alignment),
-      icon: Icon(valueOf('icon', icon), color: iconColor),
+      icon: Icon(iconData, color: iconColor),
       splashRadius: valueOf('splashRadius', splashRadius),
       color: iconColor,
       focusColor: valueOf('focusColor', focusColor) ?? (theme.useMaterial3 ? colorScheme.onSurface.withOpacity(0.12) : null),
