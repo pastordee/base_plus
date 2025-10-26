@@ -25,6 +25,7 @@ class BaseToolbarAction {
     this.icon,
     this.label,
     this.onPressed,
+    this.tint,
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
@@ -40,6 +41,7 @@ class BaseToolbarAction {
       : icon = null,
         label = null,
         onPressed = null,
+        tint = null,
         padding = null,
         labelSize = null,
         iconSize = null,
@@ -53,6 +55,7 @@ class BaseToolbarAction {
       : icon = null,
         label = null,
         onPressed = null,
+        tint = null,
         padding = null,
         labelSize = null,
         iconSize = null,
@@ -68,6 +71,7 @@ class BaseToolbarAction {
     required this.label,
     required this.popupMenuItems,
     required this.onPopupMenuSelected,
+    this.tint,
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
@@ -86,6 +90,9 @@ class BaseToolbarAction {
 
   /// Callback when action is pressed
   final VoidCallback? onPressed;
+
+  /// Custom tint color for the action
+  final Color? tint;
 
   /// Padding around the action (iOS only)
   final double? padding;
@@ -130,6 +137,7 @@ class BaseToolbarAction {
     String? label,
     required List<CNPopupMenuEntry> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
+    Color? tint,
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
@@ -139,6 +147,7 @@ class BaseToolbarAction {
       label: label,
       popupMenuItems: popupMenuItems,
       onPopupMenuSelected: onPopupMenuSelected,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -152,6 +161,7 @@ class BaseToolbarAction {
     String? label,
     required List<CNPopupMenuEntry> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
+    Color? tint,
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
@@ -161,6 +171,7 @@ class BaseToolbarAction {
       label: label,
       popupMenuItems: popupMenuItems,
       onPopupMenuSelected: onPopupMenuSelected,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -193,6 +204,7 @@ class BaseToolbarAction {
           label: label,
           popupMenuItems: popupMenuItems!,
           onPopupMenuSelected: onPopupMenuSelected!,
+          tint: tint,
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
@@ -203,6 +215,7 @@ class BaseToolbarAction {
           label: label,
           popupMenuItems: popupMenuItems!,
           onPopupMenuSelected: onPopupMenuSelected!,
+          tint: tint,
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
@@ -214,6 +227,7 @@ class BaseToolbarAction {
       icon: icon,
       label: label,
       onPressed: onPressed,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -709,6 +723,9 @@ class BaseToolbar extends BaseStatelessWidget {
         return const Expanded(child: SizedBox());
       }
       
+      // Use custom tint color if provided, otherwise use default tintColor
+      final actionColor = action.tint ?? tintColor;
+      
       // Extract icon from CNSymbol if possible
       IconData? iconData;
       if (action.icon != null) {
@@ -720,10 +737,10 @@ class BaseToolbar extends BaseStatelessWidget {
         // Button with both icon and label
         return TextButton.icon(
           onPressed: action.onPressed,
-          icon: Icon(iconData, color: tintColor, size: 20),
+          icon: Icon(iconData, color: actionColor, size: 20),
           label: Text(
             action.label!,
-            style: TextStyle(color: tintColor, fontSize: 12),
+            style: TextStyle(color: actionColor, fontSize: 12),
           ),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -736,7 +753,7 @@ class BaseToolbar extends BaseStatelessWidget {
           onPressed: action.onPressed,
           child: Text(
             action.label!,
-            style: TextStyle(color: tintColor, fontSize: 14),
+            style: TextStyle(color: actionColor, fontSize: 14),
           ),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -747,7 +764,7 @@ class BaseToolbar extends BaseStatelessWidget {
         // Icon-only button
         return IconButton(
           onPressed: action.onPressed,
-          icon: Icon(iconData, color: tintColor),
+          icon: Icon(iconData, color: actionColor),
           iconSize: action.icon?.size ?? 24,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(

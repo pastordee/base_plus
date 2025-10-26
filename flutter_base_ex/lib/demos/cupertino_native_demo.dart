@@ -1238,11 +1238,13 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                   BaseToolbarAction(
                     iconSize: 15,
                     icon: const CNSymbol('pencil',),
+                    tint: CupertinoColors.systemBlue, // Custom blue color
                     onPressed: () => print('Edit tapped'),
                   ),
                   BaseToolbarAction(
                     iconSize: 15,
                     icon: const CNSymbol('trash',),
+                    tint: CupertinoColors.systemRed, // Custom red color
                     onPressed: () => print('Delete tapped'),
                   ),
                 ],
@@ -1252,12 +1254,14 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                     padding: 12,
                     label: 'Settings',
                     labelSize: 15,
+                    tint: CupertinoColors.systemPurple, // Custom purple color
                     onPressed: () => print('Settings tapped'),
                   ),
                   BaseToolbarAction.fixedSpace(2),
                   BaseToolbarAction(
                     // iconSize: 10,
                     icon: const CNSymbol('plus',),
+                    tint: CupertinoColors.systemGreen, // Custom green color
                     onPressed: () => print('Add tapped'),
                   ),
                 ],
@@ -1431,6 +1435,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
         trailingActions: [
           BaseNavigationBarAction(
             icon: const CNSymbol('gear'),
+            tint: CupertinoColors.systemBlue, // Custom blue color
             // iconSize: 12,
             onPressed: () {
               print('Settings tapped');
@@ -1438,6 +1443,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
           ),
           BaseNavigationBarAction(
             icon: const CNSymbol('ellipsis.circle'),
+            tint: CupertinoColors.systemOrange, // Custom orange color
             onPressed: () {
               showCupertinoDialog(
                 context: context,
@@ -1478,6 +1484,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
           ),
           BaseNavigationBarAction(
             icon: const CNSymbol('plus'),
+            tint: CupertinoColors.systemGreen, // Custom green color
             onPressed: () {
               print('Add tapped');
             },

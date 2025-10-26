@@ -17,6 +17,7 @@ class BaseNavigationBarAction {
     this.icon,
     this.label,
     this.onPressed,
+    this.tint,
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
@@ -32,6 +33,7 @@ class BaseNavigationBarAction {
       : icon = null,
         label = null,
         onPressed = null,
+        tint = null,
         padding = null,
         labelSize = null,
         iconSize = null,
@@ -45,6 +47,7 @@ class BaseNavigationBarAction {
       : icon = null,
         label = null,
         onPressed = null,
+        tint = null,
         padding = null,
         labelSize = null,
         iconSize = null,
@@ -60,6 +63,7 @@ class BaseNavigationBarAction {
     required this.label,
     required this.popupMenuItems,
     required this.onPopupMenuSelected,
+    this.tint,
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
@@ -78,6 +82,9 @@ class BaseNavigationBarAction {
 
   /// Callback when action is pressed
   final VoidCallback? onPressed;
+
+  /// Custom tint color for the action
+  final Color? tint;
 
   /// Padding around the action (iOS only)
   final double? padding;
@@ -122,6 +129,7 @@ class BaseNavigationBarAction {
     String? label,
     required List<CNPopupMenuEntry> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
+    Color? tint,
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
@@ -131,6 +139,7 @@ class BaseNavigationBarAction {
       label: label,
       popupMenuItems: popupMenuItems,
       onPopupMenuSelected: onPopupMenuSelected,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -144,6 +153,7 @@ class BaseNavigationBarAction {
     String? label,
     required List<CNPopupMenuEntry> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
+    Color? tint,
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
@@ -153,6 +163,7 @@ class BaseNavigationBarAction {
       label: label,
       popupMenuItems: popupMenuItems,
       onPopupMenuSelected: onPopupMenuSelected,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -185,6 +196,7 @@ class BaseNavigationBarAction {
           label: label,
           popupMenuItems: popupMenuItems!,
           onPopupMenuSelected: onPopupMenuSelected!,
+          tint: tint,
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
@@ -195,6 +207,7 @@ class BaseNavigationBarAction {
           label: label,
           popupMenuItems: popupMenuItems!,
           onPopupMenuSelected: onPopupMenuSelected!,
+          tint: tint,
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
@@ -206,6 +219,7 @@ class BaseNavigationBarAction {
       icon: icon,
       label: label,
       onPressed: onPressed,
+      tint: tint,
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
@@ -595,6 +609,9 @@ class BaseNavigationBar extends BaseStatelessWidget {
         return const Expanded(child: SizedBox());
       }
       
+      // Use custom tint color if provided, otherwise use default iconColor
+      final actionColor = action.tint ?? iconColor;
+      
       // Regular action with icon/label
       if (action.icon != null && action.label != null) {
         // Both icon and label
@@ -604,14 +621,14 @@ class BaseNavigationBar extends BaseStatelessWidget {
             IconButton(
               onPressed: action.onPressed,
               icon: _buildMaterialIcon(action.icon!),
-              color: iconColor,
+              color: actionColor,
               iconSize: 20,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
             Text(
               action.label!,
-              style: TextStyle(color: iconColor, fontSize: 10),
+              style: TextStyle(color: actionColor, fontSize: 10),
             ),
           ],
         );
@@ -620,7 +637,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
         return IconButton(
           onPressed: action.onPressed,
           icon: _buildMaterialIcon(action.icon!),
-          color: iconColor,
+          color: actionColor,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         );
@@ -628,7 +645,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
         // Label only
         return TextButton(
           onPressed: action.onPressed,
-          child: Text(action.label!, style: TextStyle(color: iconColor)),
+          child: Text(action.label!, style: TextStyle(color: actionColor)),
         );
       }
       
