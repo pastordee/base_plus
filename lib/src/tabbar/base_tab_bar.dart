@@ -130,7 +130,7 @@ import 'base_native_tab_bar_item.dart';
 /// 
 /// Enhanced: 2024.01.20 with iOS 26 Liquid Glass Dynamic Material
 /// Enhanced: 2024.01.21 with Native iOS CNTabBar and SF Symbol integration
-class BaseTabBar extends BaseStatelessWidget {
+class BaseTabBar extends BaseStatelessWidget { 
   const BaseTabBar({
     Key? key,
     this.items,
@@ -397,6 +397,7 @@ class BaseTabBar extends BaseStatelessWidget {
   BaseTabBar copyWith({
     ValueChanged<int>? onTap,
     required int currentIndex,
+    BaseParam? baseParam,
   }) {
     return BaseTabBar(
       items: items,
@@ -437,11 +438,32 @@ class BaseTabBar extends BaseStatelessWidget {
       cnSplitSpacing: cnSplitSpacing,
       cnBackgroundOpacity: cnBackgroundOpacity,
       searchConfig: searchConfig,
+      baseParam: baseParam ?? this.baseParam,
     );
   }
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Flutter-based Cupertino implementation (backward compatible)
+    // This uses standard Flutter CupertinoTabBar without cupertino_native package
+    // Users can migrate to buildByCupertinoNative() by setting baseParam.nativeIOS = true
+    
+    final CupertinoTabBar tabBar = buildCupertinoTabBar(context);
+
+    // Apply iOS 26 Liquid Glass effects if enabled
+    // if (valueOf('enableLiquidGlass', enableLiquidGlass)) {
+    //   return _wrapWithLiquidGlass(context, tabBar);
+    // }
+
+    return tabBar;
+  }
+
+  @override
+  Widget buildByCupertinoNative(BuildContext context) {
+    // Native iOS implementation using cupertino_native package
+    // This provides true native iOS rendering with CNTabBar
+    // Enabled when baseParam.nativeIOS = true
+    
     // Use native CNTabBar if enabled and items are available
     if (valueOf('useNativeCupertinoTabBar', useNativeCupertinoTabBar)) {
       return _buildNativeCupertinoTabBar(context);
@@ -465,22 +487,29 @@ class BaseTabBar extends BaseStatelessWidget {
   Widget _buildNativeCupertinoTabBar(BuildContext context) {
     final ValueChanged<int>? onTap = valueOf('onTap', this.onTap);
     final List<BottomNavigationBarItem>? items = valueOf('items', this.items);
+    final int currentIdx = valueOf('currentIndex', currentIndex) ?? 0;
+    
+    print('🔷 _buildNativeCupertinoTabBar called - currentIndex: $currentIdx, onTap: ${onTap != null}');
     
     if (items == null || items.isEmpty) {
       // Fallback if no items
       return buildCupertinoTabBar(context);
     }
 
-    // Enhanced onTap with haptic feedback
-    ValueChanged<int>? enhancedOnTap;
-    if (onTap != null) {
-      enhancedOnTap = (int index) {
-        if (valueOf('hapticFeedback', hapticFeedback) && valueOf('adaptiveInteraction', adaptiveInteraction)) {
-          HapticFeedback.selectionClick();
-        }
+    // Enhanced onTap with haptic feedback - ensure we always have a callback
+    ValueChanged<int> enhancedOnTap = (int index) {
+      print('🔷 Tab tapped: $index');
+      if (valueOf('hapticFeedback', hapticFeedback) && valueOf('adaptiveInteraction', adaptiveInteraction)) {
+        HapticFeedback.selectionClick();
+      }
+      // Call the original onTap callback if provided
+      if (onTap != null) {
+        print('🔷 Calling original onTap');
         onTap(index);
-      };
-    }
+      } else {
+        print('🔷 WARNING: onTap is null!');
+      }
+    };
 
     // Convert BottomNavigationBarItem to CNTabBarItem (supports both SF Symbols and images)
     final List<CNTabBarItem> cnItems = items.map((item) {
@@ -556,10 +585,11 @@ class BaseTabBar extends BaseStatelessWidget {
     // Check if this is a search tab bar
     final searchConf = valueOf('searchConfig', searchConfig);
     if (searchConf != null) {
+      print('🔷 Creating search CNTabBar with currentIndex: $currentIdx');
       return CNTabBar.search(
         items: cnItems,
-        currentIndex: valueOf('currentIndex', currentIndex) ?? 0,
-        onTap: enhancedOnTap ?? (int index) {}, // Provide default no-op if null
+        currentIndex: currentIdx,
+        onTap: enhancedOnTap,
         searchConfig: searchConf,
         // CNTabBar-specific properties
         tint: valueOf('cnTint', cnTint),
@@ -573,10 +603,11 @@ class BaseTabBar extends BaseStatelessWidget {
       );
     }
 
+    print('🔷 Creating standard CNTabBar with currentIndex: $currentIdx');
     Widget tabBar = CNTabBar(
       items: cnItems,
-      currentIndex: valueOf('currentIndex', currentIndex) ?? 0,
-      onTap: enhancedOnTap ?? (int index) {}, // Provide default no-op if null
+      currentIndex: currentIdx,
+      onTap: enhancedOnTap,
       // CNTabBar-specific properties
       tint: valueOf('cnTint', cnTint),
       backgroundColor: cnBackgroundColor,

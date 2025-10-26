@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
@@ -367,6 +368,123 @@ class BaseToolbar extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Flutter-based Cupertino implementation (backward compatible)
+    // This uses standard Flutter widgets without cupertino_native package
+    // Users can migrate to buildByCupertinoNative() by setting baseParam.nativeIOS = true
+    
+    return Container(
+      height: valueOf('height', height) ?? 44.0,
+      decoration: BoxDecoration(
+        color: valueOf('backgroundColor', backgroundColor) ?? const Color(0xF0F9F9F9),
+        border: Border(
+          bottom: BorderSide(
+            color: const Color(0x4D000000),
+            width: 0.0,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Leading actions
+          if (valueOf('leading', leading) != null) ...[
+            ..._buildFlutterActions(valueOf('leading', leading)!, valueOf('tint', tint)),
+          ],
+          // Middle or title
+          if (valueOf('title', title) != null)
+            Expanded(
+              child: Center(
+                child: Text(
+                  valueOf('title', title)!,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: valueOf('tint', tint) ?? const Color(0xFF000000),
+                  ),
+                ),
+              ),
+            )
+          else if (valueOf('middle', middle) != null)
+            Expanded(
+              child: Row(
+                mainAxisAlignment: _getFlutterAlignment(valueOf('middleAlignment', middleAlignment)),
+                children: _buildFlutterActions(valueOf('middle', middle)!, valueOf('tint', tint)),
+              ),
+            )
+          else
+            const Spacer(),
+          // Trailing actions
+          if (valueOf('trailing', trailing) != null) ...[
+            ..._buildFlutterActions(valueOf('trailing', trailing)!, valueOf('tint', tint)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Build Flutter-based Cupertino-style actions (no native components)
+  List<Widget> _buildFlutterActions(List<BaseToolbarAction> actions, Color? tint) {
+    return actions.map((action) {
+      if (action.isFixedSpace) {
+        return SizedBox(width: action.spaceWidth ?? 8);
+      }
+      if (action.isFlexibleSpace) {
+        return const Expanded(child: SizedBox());
+      }
+      
+      return CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: action.onPressed,
+        child: action.icon != null
+            ? Icon(
+                _mapSFSymbolToCupertinoIcon(action.icon!.name),
+                size: action.iconSize ?? 22,
+                color: tint ?? const Color(0xFF007AFF),
+              )
+            : Text(
+                action.label ?? '',
+                style: TextStyle(
+                  fontSize: action.labelSize ?? 17,
+                  color: tint ?? const Color(0xFF007AFF),
+                ),
+              ),
+      );
+    }).toList();
+  }
+
+  /// Map SF Symbol to Flutter's Cupertino icon
+  IconData _mapSFSymbolToCupertinoIcon(String sfSymbol) {
+    final Map<String, IconData> iconMap = {
+      'chevron.left': CupertinoIcons.back,
+      'chevron.right': CupertinoIcons.forward,
+      'gear': CupertinoIcons.settings,
+      'ellipsis': CupertinoIcons.ellipsis,
+      'plus': CupertinoIcons.add,
+      'magnifyingglass': CupertinoIcons.search,
+      'pencil': CupertinoIcons.pencil,
+      'trash': CupertinoIcons.delete,
+      'star': CupertinoIcons.star,
+      'star.fill': CupertinoIcons.star_fill,
+    };
+    return iconMap[sfSymbol] ?? CupertinoIcons.circle;
+  }
+
+  /// Get Flutter alignment for middle actions
+  MainAxisAlignment _getFlutterAlignment(BaseToolbarAlignment alignment) {
+    switch (alignment) {
+      case BaseToolbarAlignment.leading:
+        return MainAxisAlignment.start;
+      case BaseToolbarAlignment.center:
+        return MainAxisAlignment.center;
+      case BaseToolbarAlignment.trailing:
+        return MainAxisAlignment.end;
+    }
+  }
+
+  @override
+  Widget buildByCupertinoNative(BuildContext context) {
+    // Native iOS implementation using cupertino_native package
+    // This provides true native iOS rendering with CNToolbar
+    // Enabled when baseParam.nativeIOS = true
     // Convert our alignment to CNToolbarMiddleAlignment
     final alignment = _toCNToolbarAlignment(valueOf('middleAlignment', middleAlignment));
     

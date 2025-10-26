@@ -5,14 +5,14 @@ import '../demo_page.dart';
 import '../demo_tile.dart';
 import 'wechat_profile.dart';
 
-/// section 文档说明
+/// Section documentation
 class SectionDemo extends StatelessWidget {
   const SectionDemo({
     Key? key,
   }) : super(key: key);
   List<DemoTile> get _demos => const <DemoTile>[
         DemoTile(
-          title: Text('仿微信我的页面'),
+          title: Text('WeChat Profile Page Imitation'),
           page: WechatProfile(),
         ),
       ];
@@ -24,8 +24,8 @@ class SectionDemo extends StatelessWidget {
       widgetName: 'BaseSection, BaseTile',
       materialDesc: 'BaseSection: use custom Container\n'
           'BaseTile: use ListTile',
-      cupertinoDesc: 'BaseSection: use costom Container\n'
-          'BaseTile: use custom InkWell, 去除水波纹效果，按住时会有200ms延迟高亮',
+      cupertinoDesc: 'BaseSection: use custom Container\n'
+          'BaseTile: use custom InkWell, removes ripple effect, has 200ms delay for highlight on press',
       demos: _demos,
     );
   }

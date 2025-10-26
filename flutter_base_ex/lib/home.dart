@@ -48,15 +48,15 @@ final List<Widget> _children = <Widget>[
     page: BottomNavigationExample(),
     fullscreenGackGesture: false,
   ),
-  const _Item(
-    icon: BaseIcon(icon: Icons.tab, size: 40, color: Colors.purple),
-    title: Text(
-      'Cross-Platform Tabs',
-      style: TextStyle(color: Colors.purple),
-    ),
-    page: BaseCrossPlatformTabScaffoldDemo(),
-    fullscreenGackGesture: false,
-  ),
+  // const _Item(
+  //   icon: BaseIcon(icon: Icons.tab, size: 40, color: Colors.purple),
+  //   title: Text(
+  //     'Cross-Platform Tabs',
+  //     style: TextStyle(color: Colors.purple),
+  //   ),
+  //   page: BaseCrossPlatformTabScaffoldDemo(),
+  //   fullscreenGackGesture: false,
+  // ),
   const _Item(
     icon: BaseIcon(icon: Icons.menu, size: 40, color: Colors.indigo),
     title: Text(
@@ -148,7 +148,7 @@ final List<Widget> _children = <Widget>[
       color: Colors.red.withBlue(150),
     ),
     title: Text(
-      'Componentes',
+      'Components',
       style: TextStyle(color: Colors.red.withBlue(150)),
     ),
     page: const ComponentesDemo(),
@@ -195,10 +195,10 @@ final List<Widget> _children = <Widget>[
 ];
 
 const Widget _tipsWidget = Text(
-  '1、Material组件相对比较完善，没经过严格的测试，后续会完善优化\n\n'
-  '2、每个组件都保留有forceUseCupertino、forceUseMaterial参数，都未经过严格测试，请慎用！！！'
-  '因为各个组件之间有关联度，如果要切换组件的整体样式，强烈建议直接切换整个app使用的平台样式（并且不在app中动态切换），而不是使用'
-  '单个组件中的forceUseCupertino、forceUseMaterial--，后续可能会删除这2参数。',
+  '1. Material components are relatively complete but have not been strictly tested. They will be improved and optimized in the future.\n\n'
+  '2. Each component retains forceUseCupertino and forceUseMaterial parameters, which have not been strictly tested. Please use with caution! '
+  'Since components are interconnected, if you want to switch the overall style of components, it is strongly recommended to switch the platform style used by the entire app directly (and not switch dynamically within the app), rather than using '
+  'forceUseCupertino or forceUseMaterial in individual components. These two parameters may be removed in the future.',
   style: TextStyle(
     fontSize: 16.0,
   ),
@@ -213,7 +213,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       appBar: BaseAppBar(
-        title: const Text('Base Example--'),
+        title: const Text('Base Example'),
         padding: const EdgeInsetsDirectional.only(start: 5.0, end: 5.0),
         baseParam: BaseParam(
           cupertino: <String, dynamic>{
@@ -303,7 +303,7 @@ class _MaterialTipsPage extends StatelessWidget {
           ),
           child: const Center(
             child: Text(
-              '特别说明',
+              'Important Notes',
               style: TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
@@ -364,7 +364,7 @@ class _TipsHeader extends StatelessWidget {
             ),
           ),
           const Text('特别说明'),
-          Container(
+          const SizedBox(
             width: 50,
           )
         ],

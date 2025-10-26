@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../demo_page.dart';
 import '../demo_tile.dart';
 
-/// Route 示例
+/// Route Demo
 class RouteDemo extends StatelessWidget {
   const RouteDemo({
     Key? key,
@@ -23,10 +23,10 @@ class RouteDemo extends StatelessWidget {
       materialDesc: 'use MaterialPageRoute',
       cupertinoDesc: 'use CupertinoPageRoute',
       parameterDesc: const <String, String>{
-        'backGestureWidth': 'Cupertino模式下有效，默认20.0，设置右滑返回时离屏幕边缘的宽度',
-        'fullscreenGackGesture': 'Cupertino模式下有效，默认false，该值设置成true时，'
-            'backGestureWidth = MediaQuery.of(context).size.width, 可以实现全屏右滑返回，且 '
-            'backGestureWidth参数失效',
+        'backGestureWidth': 'Effective in Cupertino mode, default 20.0, sets the width from screen edge for swipe-back gesture',
+        'fullscreenGackGesture': 'Effective in Cupertino mode, default false, when set to true, '
+            'backGestureWidth = MediaQuery.of(context).size.width, enables full-screen swipe-back gesture, and '
+            'backGestureWidth parameter becomes ineffective',
       },
       tips: 'Use like: \nBaseRoute<void>('
           '\n\t\t...\n).push(context);'

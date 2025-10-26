@@ -82,7 +82,7 @@ class DemoPage extends StatelessWidget {
       children.add(
         const Padding(
           padding: EdgeInsets.only(top: 10.0),
-          child: Text('特殊参数说明'),
+          child: Text('Special Parameter Descriptions'),
         ),
       );
       parameterDesc!.forEach((String key, String value) {
@@ -114,6 +114,17 @@ class DemoPage extends StatelessWidget {
     return BaseScaffold(
       navBar: title != null
           ? BaseAppBar(
+              baseParam: BaseParam(nativeIOS: true),
+              transparent: true,
+              leadingActions: [
+                BaseNavigationBarAction(
+                icon: CNSymbol('chevron.left'),
+                label: 'Back',
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+              ],
               title: Text(title!),
               transitionBetweenRoutes: false,
               trailing: trailing,
@@ -143,7 +154,7 @@ class DemoPage extends StatelessWidget {
                   return const Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 10.0),
                     child: Text(
-                      '示例',
+                      'Examples',
                       style: TextStyle(fontSize: 14.0),
                     ),
                   );

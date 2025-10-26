@@ -272,7 +272,8 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
     return BaseTabBar(
       // Enable native iOS tab bar (will use CNTabBar on iOS with SF Symbols, Material elsewhere)
       useNativeCupertinoTabBar: true,
-      items: [
+      baseParam: BaseParam(nativeIOS: true),
+      items: <BottomNavigationBarItem>[
         // Approach 1: Using convenience factory method with SF Symbols
         BottomNavigationBarItemNativeExtension.withSFSymbol(
           sfSymbolName: SFSymbols.home,
@@ -317,48 +318,6 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           label: 'Settings',
         ),
         
-        // Custom Image Examples (commented for reference):
-        // BottomNavigationBarItem(
-        //   icon: Image.asset(
-        //     'assets/custom.png',
-        //     key: const BaseCustomImageKey(
-        //       materialImage: 'assets/pray_new.png',
-        //       imageSize: 28.0,
-        //     ),
-        //   ),
-        //   label: 'Custom',
-        // ),
-        //
-        // BottomNavigationBarItemNativeExtension.withImage(
-        //   materialImage: 'assets/custom.png',
-        //   imageSize: 28.0,
-        //   label: 'Custom',
-        // ),
-        
-        // More custom image examples:
-        // BottomNavigationBarItemNativeExtension.withImage(
-        //   materialImage: 'assets/icons/custom_settings.png',
-        //   iosImage: 'assets/icons/custom_settings_ios.png', // Optional iOS-specific
-        //   imageSize: 28.0,  // iOS size in points
-        //   width: 24.0,      // Material size
-        //   height: 24.0,
-        //   label: 'Settings',
-        // ),
-        //
-        // Alternative: Manual approach with BaseCustomImageKey
-        // BottomNavigationBarItem(
-        //   icon: Image.asset(
-        //     'assets/icons/custom.png',
-        //     key: const BaseCustomImageKey(
-        //       materialImage: 'assets/icons/custom.png',
-        //       iosImage: 'assets/icons/custom_ios.png',
-        //       imageSize: 28.0,
-        //       width: 24.0,
-        //       height: 24.0,
-        //     ),
-        //   ),
-        //   label: 'Custom',
-        // ),
       ],
       currentIndex: _autoTabIndex,
       onTap: (index) {

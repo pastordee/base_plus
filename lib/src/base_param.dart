@@ -28,6 +28,7 @@ class BaseParam {
     this.disabledOnWeb = false,
     this.disabledOnOthers = false,
     this.withoutSplashOnCupertino,
+    this.nativeIOS = false,
   });
 
   /// cupertino 模式下的个性化参数
@@ -120,6 +121,12 @@ class BaseParam {
 
   /// 在cupertino模式下使用material组件是否禁用水波纹
   final bool? withoutSplashOnCupertino;
+
+  /// Enable native iOS Cupertino implementations
+  /// When true, uses buildByCupertinoNative() with cupertino_native components
+  /// When false, uses buildByCupertino() with Flutter's standard Cupertino widgets
+  /// This allows gradual migration to native implementations
+  final bool nativeIOS;
 
   dynamic valueOf(String key, dynamic value) {
     Map<String, dynamic>? _map;

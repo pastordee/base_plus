@@ -9,7 +9,7 @@ import 'ios26_liquid_glass_demo.dart';
 import 'news/news.dart';
 import 'toolbar_opacity.dart';
 
-/// AppBar 示例
+/// AppBar Demo
 class AppBarDemo extends StatelessWidget {
   const AppBarDemo({
     Key? key,
@@ -51,34 +51,34 @@ class AppBarDemo extends StatelessWidget {
     return DemoPage(
       title: 'AppBar | NavBar',
       widgetName: 'BaseAppBar',
-      materialDesc: '使用修改了源码的AppBar',
-      cupertinoDesc: '使用修改了源码的CupertinoNavigationBar',
+      materialDesc: 'Uses modified AppBar source code',
+      cupertinoDesc: 'Uses modified CupertinoNavigationBar source code',
       parameterDesc: const <String, String>{
-        'height': '自定义高度，AppBar默认56，CupertinoNavigationBar默认44。\n'
-            '可使用BaseTheme.appBarHeight全局设置',
-        'backdropFilter': 'Cupertino模式下有效，默认true，是否加入高斯模糊\n'
-            'CupertinoNavigationBar在背景色透明时会默认添加一层高斯模糊效果。'
-            '设置成false可以实现全透明导航栏\n'
-            '可使用BaseTheme.backdropFilter全局设置',
+        'height': 'Custom height, AppBar default is 56, CupertinoNavigationBar default is 44.\n'
+            'Can be set globally using BaseTheme.appBarHeight',
+        'backdropFilter': 'Effective in Cupertino mode, default true, whether to add Gaussian blur\n'
+            'CupertinoNavigationBar adds a Gaussian blur effect by default when background is transparent.'
+            'Set to false to achieve fully transparent navigation bar\n'
+            'Can be set globally using BaseTheme.backdropFilter',
         'liquidGlassBlurIntensity': 'iOS 26 Liquid Glass blur intensity (20-100 sigma)\n'
             'Controls the depth of the glass effect. Higher values create deeper blur.',
         'liquidGlassGradientOpacity': 'iOS 26 Liquid Glass gradient overlay opacity (0.0-0.5)\n'
             'Controls the strength of glass reflections and depth perception.',
         'liquidGlassDynamicBlur': 'iOS 26 Liquid Glass dynamic blur effects\n'
             'When enabled, blur intensity can respond to scroll position and interactions.',
-        'bottom': 'Cupertino模式下也有效, 如加入TabBar，会去除水波纹跟高亮效果。',
+        'bottom': 'Also effective in Cupertino mode, such as adding TabBar, will remove ripple and highlight effects.',
         'toolbarOpacity':
-            'Cupertino模式下也有效, 只是简单是设置leading，middle，trailing字体的透明度。',
-        // 'autoSetBottomColor': 'Cupertino模式下有效, 默认true，bottom自动跟随状态栏字体颜色。\n'
-        //     '可使用BaseTheme.autoSetBottomColor全局设置',
-        // 'autoSetMiddleColor': 'Cupertino模式下有效, 默认true，middle自动跟随状态栏字体颜色。\n'
-        //     '可使用BaseTheme.autoSetMiddleColor全局设置',
-        // 'autoSetLeadingColor': 'Cupertino模式下有效, 默认true，leading自动跟随状态栏字体颜色。\n'
-        //     '受autoSetTrailingColor影响\n'
-        //     '可使用BaseTheme.autoSetLeadingColor全局设置',
-        // 'autoSetTrailingColor': 'Cupertino模式下有效, 默认true，trailing自动跟随状态栏字体颜色。\n'
-        //     '受autoSetLeadingColor影响\n'
-        //     '可使用BaseTheme.autoSetTrailingColor全局设置',
+            'Also effective in Cupertino mode, simply sets the opacity of leading, middle, trailing text.',
+        // 'autoSetBottomColor': 'Effective in Cupertino mode, default true, bottom automatically follows status bar text color.\n'
+        //     'Can be set globally using BaseTheme.autoSetBottomColor',
+        // 'autoSetMiddleColor': 'Effective in Cupertino mode, default true, middle automatically follows status bar text color.\n'
+        //     'Can be set globally using BaseTheme.autoSetMiddleColor',
+        // 'autoSetLeadingColor': 'Effective in Cupertino mode, default true, leading automatically follows status bar text color.\n'
+        //     'Affected by autoSetTrailingColor\n'
+        //     'Can be set globally using BaseTheme.autoSetLeadingColor',
+        // 'autoSetTrailingColor': 'Effective in Cupertino mode, default true, trailing automatically follows status bar text color.\n'
+        //     'Affected by autoSetLeadingColor\n'
+        //     'Can be set globally using BaseTheme.autoSetTrailingColor',
       },
       demos: _demos,
     );

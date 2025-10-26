@@ -18,11 +18,42 @@ class _SateAreaDemoState extends State<SateAreaDemo> {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
+      backgroundColor: Colors.redAccent,
         appBar: BaseAppBar(
+          baseParam: BaseParam(nativeIOS: true),
+          transparent: true,
+          tint: Colors.pinkAccent,
           title: const Text('SafeArea Scaffold'),
-          backgroundColor: (const BaseColor().build(context) as Color).withAlpha(0),
-          backdropFilter: false,
-          border: null,
+          
+          leadingActions: [
+            BaseNavigationBarAction(
+              icon: CNSymbol('chevron.left'),
+              label: 'Back',
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+          ],
+          trailingActions: [
+            BaseNavigationBarAction(
+              icon: CNSymbol('ellipsis.circle'),
+              label: 'More',
+              onPressed: () {
+                print('More pressed');
+              },
+            ),
+            BaseNavigationBarAction.flexibleSpace(),
+            BaseNavigationBarAction(
+              icon: CNSymbol('ellipsis.circle'),
+              label: 'More',
+              onPressed: () {
+                print('More pressed');
+              },
+            ),
+          ],
+          // backgroundColor: (const BaseColor().build(context) as Color).withAlpha(0),
+          // backdropFilter: false,
+          // border: null,
         ),
         safeAreaTop: safeAreaTop,
         safeAreaBottom: safeAreaBottom,

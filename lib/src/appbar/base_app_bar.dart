@@ -1,18 +1,15 @@
-import 'package:flutter/cupertino.dart' hide CupertinoNavigationBar;
+import 'package:flutter/cupertino.dart' hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter/widgets.dart';
 import 'dart:ui' show ImageFilter;
-
-// iOS 26 Liquid Glass Dynamic Material Native Implementation
-// import 'package:cupertino_native/cupertino_native.dart';
-// import 'package:liquid_glass_texture/liquid_glass_texture.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../flutter/cupertino/nav_bar.dart';
 import '../flutter/material/app_bar.dart';
 import '../mode/base_mode.dart';
+import '../navigation_bar/base_navigation_bar.dart';
 import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
 
@@ -95,6 +92,11 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     this.liquidGlassBlurIntensity,
     this.liquidGlassGradientOpacity,
     this.liquidGlassDynamicBlur,
+    this.leadingActions,
+    this.trailingActions,
+    this.transparent = false,
+    this.largeTitle = false,
+    this.tint,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -295,6 +297,32 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   /// *** material properties end ***
+
+  /// *** native iOS properties start ***
+
+  /// Leading navigation actions for native iOS mode (BaseNavigationBar)
+  /// Use this when baseParam.nativeIOS is true
+  /// Accepts List<BaseNavigationBarAction> for native CNNavigationBar rendering
+  final List<BaseNavigationBarAction>? leadingActions;
+
+  /// Trailing navigation actions for native iOS mode (BaseNavigationBar)
+  /// Use this when baseParam.nativeIOS is true
+  /// Accepts List<BaseNavigationBarAction> for native CNNavigationBar rendering
+  final List<BaseNavigationBarAction>? trailingActions;
+
+  /// Whether the navigation bar should be transparent (native iOS mode)
+  /// When true, the navigation bar will have a transparent background
+  final bool transparent;
+
+  /// Whether to use large title style (native iOS mode)
+  /// When true, displays a large title in the navigation bar
+  final bool largeTitle;
+
+  /// Tint color for the navigation bar (native iOS mode)
+  /// Used for text and icons in the navigation bar
+  final Color? tint;
+
+  /// *** native iOS properties end ***
 
   @override
   Widget buildByCupertino(BuildContext context) {
@@ -516,6 +544,42 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
         ),
       ),
       child: child,
+    );
+  }
+
+  @override
+  Widget buildByCupertinoNative(BuildContext context) {
+    // Native iOS implementation using BaseNavigationBar which handles CNNavigationBar internally
+    final Widget? _titleWidget = valueOf('middle', middle) ?? valueOf('title', title);
+    
+    // Extract title text if it's a Text widget
+    String? _title;
+    if (_titleWidget is Text) {
+      _title = _titleWidget.data ?? _titleWidget.textSpan?.toPlainText();
+    }
+    
+    // Use the dedicated leadingActions and trailingActions properties
+    final List<BaseNavigationBarAction>? _leadingActions = valueOf('leadingActions', leadingActions);
+    final List<BaseNavigationBarAction>? _trailingActions = valueOf('trailingActions', trailingActions);
+    
+    final Color? _tint = valueOf('tint', tint);
+    final double? _height = valueOf('height', height);
+    final bool _transparent = valueOf('transparent', transparent);
+    final bool _largeTitle = valueOf('largeTitle', largeTitle);
+    
+    // Wrap in SafeArea to prevent rendering behind status bar/notch
+    return SafeArea(
+      bottom: false, // Don't apply to bottom, only top
+      child: BaseNavigationBar(
+        leading: _leadingActions,
+        title: _title,
+        trailing: _trailingActions,
+        tint: _tint,
+        transparent: _transparent,
+        largeTitle: _largeTitle,
+        height: _height,
+        baseParam: BaseParam(nativeIOS: true),
+      ).build(context),
     );
   }
 

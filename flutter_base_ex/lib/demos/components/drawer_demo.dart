@@ -9,7 +9,7 @@ import '../demo_tile.dart';
 
 final FocusNode _focusNode = FocusNode();
 
-/// Drawer 说明
+/// Drawer Demo
 class DrawerDemo extends StatelessWidget {
   const DrawerDemo({
     Key? key,
@@ -23,17 +23,17 @@ class DrawerDemo extends StatelessWidget {
       child: DemoPage(
         title: 'Drawer',
         widgetName: 'BaseDrawer',
-        materialDesc: '自定义Drawer',
-        cupertinoDesc: '自定义Drawer',
+        materialDesc: 'Custom Drawer',
+        cupertinoDesc: 'Custom Drawer',
         parameterDesc: const <String, String>{
-          'axisDirection': 'Drawer 向哪个方向滑出，默认 AxisDirection.right',
-          'duration': '画出动画时间，默认 300ms. ',
-          'backgroundColor': '背景颜色, 默认 Colors.black54',
+          'axisDirection': 'Direction in which Drawer slides out, default AxisDirection.right',
+          'duration': 'Animation duration for sliding out, default 300ms.',
+          'backgroundColor': 'Background color, default Colors.black54',
           'size':
-              'Drawer的大小, 当size == null && percent == null 时，size = Size.fromWidth(304)，取至Drawer默认宽度',
-          'percent': '高度/宽度的百分比，size与percent不能同时提供',
-          'allowMultipleGesture': '是否允许多手势，默认false，允许多手势时，子widget必须自己处理冲突\n'
-              '可使用allowMultipleGesture()，notAllowMultipleGesture()开启或关闭多手势，以便于解决手势冲突'
+              'Drawer size, when size == null && percent == null, size = Size.fromWidth(304), taken from default Drawer width',
+          'percent': 'Percentage of height/width, size and percent cannot be provided simultaneously',
+          'allowMultipleGesture': 'Whether to allow multiple gestures, default false, when multiple gestures are allowed, child widget must handle conflicts itself\n'
+              'You can use allowMultipleGesture(), notAllowMultipleGesture() to enable or disable multiple gestures to resolve gesture conflicts'
         },
         tips: 'Use like: \nopenBaseDrawer<void>(\n\t\t\t'
             'context: ...\n\t\t\t'
@@ -112,7 +112,7 @@ class _DemoState extends State<_Demo> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text('允许手势滑动  '),
+                const Text('Allow gesture slide  '),
                 if (isCupertinoMode)
                   Container(
                     height: 31.0,
@@ -149,7 +149,7 @@ class _DemoState extends State<_Demo> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text('允许多手势  '),
+                const Text('Allow multiple gestures  '),
                 if (isCupertinoMode)
                   Container(
                     height: 31.0,
@@ -195,7 +195,7 @@ class _DemoState extends State<_Demo> {
               horizontal: 15.0,
             ),
             child: const Text(
-              '打开Drawer',
+              'Open Drawer',
               style: _textStyle,
             ),
             color: Colors.white,
@@ -213,26 +213,26 @@ class _DemoState extends State<_Demo> {
     switch (index) {
       case 0:
         _axisDirection = AxisDirection.right;
-        _directionText = '向右';
+        _directionText = 'Right';
         _allowMutipleGesture = false;
         break;
       case 1:
         _axisDirection = AxisDirection.left;
-        _directionText = '向左';
+        _directionText = 'Left';
         _allowMutipleGesture = false;
         break;
       case 2:
         _axisDirection = AxisDirection.up;
-        _directionText = '向上';
+        _directionText = 'Up';
         break;
       case 3:
         _axisDirection = AxisDirection.down;
-        _directionText = '向下';
+        _directionText = 'Down';
         _allowMutipleGesture = false;
         break;
       default:
         _axisDirection = AxisDirection.right;
-        _directionText = '向右';
+        _directionText = 'Right';
         _allowMutipleGesture = false;
         break;
     }
@@ -345,7 +345,7 @@ class _Size extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('宽度/高度(可加%)  '),
+          const Text('Width/Height (can add %)  '),
           SizedBox(
             height: 32,
             width: 100,
@@ -389,7 +389,7 @@ class _Animate extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('动画时间(ms)  '),
+          const Text('Animation time (ms)  '),
           SizedBox(
             height: 32,
             width: 100,
@@ -433,7 +433,7 @@ class _BgColor extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('背景色(rgba)  '),
+          const Text('Background color (rgba)  '),
           SizedBox(
             height: 32,
             width: 120,
@@ -478,7 +478,7 @@ class _AxisButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('方向  '),
+          const Text('Direction  '),
           BaseButton(
             padding: const EdgeInsets.symmetric(
               vertical: 5.0,
@@ -522,10 +522,10 @@ class _AxisButton extends StatelessWidget {
                       backgroundColor: CupertinoColors.secondarySystemBackground
                           .resolveFrom(context),
                       children: const <Widget>[
-                        Text('向右'),
-                        Text('向左'),
-                        Text('向上'),
-                        Text('向下'),
+                        Text('Right'),
+                        Text('Left'),
+                        Text('Up'),
+                        Text('Down'),
                       ],
                       scrollController: _scrollController,
                       onSelectedItemChanged: (int index) {

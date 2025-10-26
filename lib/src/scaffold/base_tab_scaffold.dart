@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 
 import '../base_param.dart';
 import '../base_stateful_widget.dart';
+import '../appbar/base_app_bar.dart';
 import '../flutter/cupertino/bottom_tab_bar.dart';
 import '../flutter/cupertino/tab_scaffold.dart';
-import '../mode/base_mode.dart';
 import '../tabbar/base_tab_bar.dart';
 
 /// BaseTabScaffold
@@ -23,9 +23,10 @@ import '../tabbar/base_tab_bar.dart';
 /// CupertinoTabScaffold: 2021.04.01
 /// Scaffold: 2021.04.03
 /// modify 2021.06.25 by flutter 2.2.2
-class BaseTabScaffold extends BaseStatefulWidget {
+class BaseTabScaffold extends BaseStatefulWidget { 
   const BaseTabScaffold({
     Key? key,
+    this.appBar,
     this.backgroundColor,
     this.tabBar,
     this.tabViews,
@@ -61,6 +62,10 @@ class BaseTabScaffold extends BaseStatefulWidget {
   }) : super(key: key, baseParam: baseParam);
 
   /// *** general properties start ***
+
+  /// AppBar for the tab scaffold
+  /// Will use CNNavigationBar when nativeIOS is enabled
+  final BaseAppBar? appBar;
 
   /// [CupertinoTabScaffold.backgroundColor]
   /// or
@@ -185,17 +190,16 @@ class _BaseTabScaffoldState extends BaseState<BaseTabScaffold> {
   @override
   void initState() {
     super.initState();
-    if (isMaterialMode) {
-      final BaseTabBar tabBar = valueOf('tabBar', widget.tabBar);
-      _currentIndex = tabBar.valueOf(
-        'currentIndex',
-        tabBar.currentIndex,
-      );
+    final BaseTabBar? tabBar = widget.tabBar;
+    if (tabBar != null) {
+      _currentIndex = tabBar.currentIndex;
     }
-  }
+  }  
 
   @override
   Widget buildByCupertino(BuildContext context) {
+    // Flutter-based Cupertino implementation (backward compatible)
+    // Uses CupertinoTabScaffold with CupertinoTabBar
     final BaseTabBar? tabBar = valueOf('tabBar', widget.tabBar);
     final Color? backgroundColor = valueOf('backgroundColor', widget.backgroundColor);
     final bool? resizeToAvoidBottomInset = valueOf('resizeToAvoidBottomInset', widget.resizeToAvoidBottomInset);
@@ -203,7 +207,7 @@ class _BaseTabScaffoldState extends BaseState<BaseTabScaffold> {
     
     // Get the raw CupertinoTabBar without Liquid Glass wrapping
     final CupertinoTabBar rawTabBar = tabBar?.buildCupertinoTabBar(context) ?? 
-      CupertinoTabBar(items: [
+      CupertinoTabBar(items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
@@ -225,6 +229,116 @@ class _BaseTabScaffoldState extends BaseState<BaseTabScaffold> {
     }
     
     return scaffold;
+  }
+
+  @override
+  Widget buildByCupertinoNative(BuildContext context) {
+    // Native iOS implementation using manual scaffold construction
+    // This allows BaseTabBar to use CNTabBar when nativeIOS is enabled
+    // Similar to Material's approach but with Cupertino styling
+    
+    final BaseTabBar? tabBar = valueOf('tabBar', widget.tabBar);
+    final List<Widget>? tabViews = valueOf('tabViews', widget.tabViews);
+    final Color? backgroundColor = valueOf('backgroundColor', widget.backgroundColor);
+    final BaseAppBar? appBar = valueOf('appBar', widget.appBar);
+    
+    if (tabBar == null || tabViews == null || tabViews.isEmpty) {
+      // Fallback to standard implementation if required data is missing
+      return buildByCupertino(context);
+    }
+    
+    // Build scaffold with body and bottom navigation bar
+    // This approach allows the BaseTabBar to render natively with CNTabBar
+    // Using Stack with Positioned to overlay tab bar (like BottomNavigationExample)
+    
+    // Calculate tab bar height (standard iOS tab bar height)
+    final double tabBarHeight = 49.0 + MediaQuery.of(context).padding.bottom;
+    
+    Widget content = Stack(
+      children: [
+        // Tab content fills the screen but leaves space for tab bar
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: tabBarHeight, // Leave space for tab bar
+          child: IndexedStack(
+            index: _currentIndex, // Use state instead of reading from tabBar
+            children: tabViews.asMap().entries.map((entry) {
+              return _buildTabViewForNative(context, entry.key, entry.value);
+            }).toList(),
+          ),
+        ),
+        // Bottom tab bar overlaid at the bottom - will use CNTabBar when nativeIOS is enabled
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: tabBar.copyWith(
+            baseParam: widget.baseParam, // Pass the nativeIOS flag to tab bar
+            onTap: (int index) {
+              print('🟢 BaseTabScaffold onTap called with index: $index, current: $_currentIndex');
+              // Update scaffold state
+              setState(() {
+                _currentIndex = index;
+              });
+              print('🟢 Updated _currentIndex to: $_currentIndex');
+              // Call the original onTap callback if provided
+              if (tabBar.onTap != null) {
+                print('🟢 Calling original tabBar.onTap');
+                tabBar.onTap!(index);
+              }
+            },
+            currentIndex: _currentIndex, // Use state
+          ),
+        ),
+      ],
+    );
+    
+    // If appBar is provided, wrap content in Column with appBar on top
+    if (appBar != null) {
+      content = Column(
+        children: [
+          appBar,
+          Expanded(child: content),
+        ],
+      );
+    }
+    
+    return CupertinoPageScaffold(
+      backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', widget.resizeToAvoidBottomInset) ?? false,
+      child: content,
+    );
+  }
+  
+  /// Builds individual tab view for native implementation
+  /// Wraps content in CupertinoTabView if navigation is needed
+  Widget _buildTabViewForNative(BuildContext context, int index, Widget content) {
+    final List<String?>? restorationScopeIds = valueOf('restorationScopeIds', widget.restorationScopeIds);
+    final Map<String, WidgetBuilder>? routes = valueOf('routes', widget.routes);
+    final List<GlobalKey<NavigatorState>?>? navigatorKeys = valueOf('navigatorKeys', widget.navigatorKeys);
+    final String? defaultTitle = valueOf('defaultTitle', widget.defaultTitle);
+    final RouteFactory? onGenerateRoute = valueOf('onGenerateRoute', widget.onGenerateRoute);
+    final RouteFactory? onUnknownRoute = valueOf('onUnknownRoute', widget.onUnknownRoute);
+    final List<NavigatorObserver> navigatorObservers = valueOf('navigatorObservers', widget.navigatorObservers);
+    
+    // If routes or navigation is configured, wrap in CupertinoTabView
+    if (routes != null || navigatorKeys != null) {
+      return CupertinoTabView(
+        builder: (context) => content,
+        navigatorKey: navigatorKeys?[index],
+        defaultTitle: defaultTitle,
+        routes: routes ?? const <String, WidgetBuilder>{},
+        onGenerateRoute: onGenerateRoute,
+        onUnknownRoute: onUnknownRoute,
+        navigatorObservers: navigatorObservers,
+        restorationScopeId: restorationScopeIds?[index],
+      );
+    }
+    
+    // Otherwise return content directly
+    return content;
   }
   
   /// Builds individual tab views for CupertinoTabScaffold

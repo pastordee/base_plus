@@ -16,7 +16,7 @@ class WechatProfile extends StatelessWidget {
       size: 20,
     );
     return WillPopScope(
-      onWillPop: () => Future<bool>.value(false), // 禁用返回
+      onWillPop: () => Future<bool>.value(false), // Disable back navigation
       child: BaseScaffold(
         appBar: BaseAppBar(
           automaticallyImplyLeading: false,
@@ -41,36 +41,50 @@ class WechatProfile extends StatelessWidget {
             },
           ),
         ),
-        body: ListView.builder(
-          itemCount: 1,
-          itemBuilder: (_, __) {
-            return Column(
-              children: const <Widget>[
-                BaseSection(
-                  margin: EdgeInsets.only(top: 0.0, bottom: 15.0),
-                  divider: null,
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView.builder(
+            itemCount: 1,
+            itemBuilder: (_, __) {
+              return Container(
+                // decoration: BoxDecoration(
+                //   borderRadius: BorderRadius.circular(12.0),
+                //   color: const BaseColor(dynamicColor: CupertinoColors.opaqueSeparator).build(context),
+                // ),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                child: const Column(
                   children: <Widget>[
-                    _IdWidget(),
+                    BaseSection(
+                      margin: EdgeInsets.only(top: 0.0, bottom: 15.0),
+                      divider: null,
+                      children: <Widget>[
+                        _IdWidget(),
+                      ],
+                    ),
+                    _Pay(),
+                    BaseSection(
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      ),
+                      margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
+                      divider: BaseSectionDivider(
+                        insets: EdgeInsets.only(left: 20),
+                      ),
+                      children: <Widget>[
+                        _Collection(),
+                        _Photo(),
+                        _Card(),
+                        _Emotion(),
+                      ],
+                    ),
+                    _Settings(),
+                    _Back(),
                   ],
                 ),
-                _Pay(),
-                BaseSection(
-                  margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
-                  divider: BaseSectionDivider(
-                    insets: EdgeInsets.only(left: 20),
-                  ),
-                  children: <Widget>[
-                    _Collection(),
-                    _Photo(),
-                    _Card(),
-                    _Emotion(),
-                  ],
-                ),
-                _Settings(),
-                _Back(),
-              ],
-            );
-          },
+              );
+            },
+          ),
         ),
         baseParam: BaseParam(
           cupertino: const <String, dynamic>{
@@ -101,7 +115,7 @@ class _Back extends StatelessWidget {
         BaseTile(
           title: const Center(
             child: Text(
-              '返回',
+              'Back',
               style: _style,
             ),
           ),
@@ -133,7 +147,7 @@ class _Settings extends StatelessWidget {
           ),
           height: _tileHeight,
           title: const Text(
-            '设置',
+            'Settings',
             style: _style,
           ),
           trailing: SizedBox(
@@ -142,7 +156,7 @@ class _Settings extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: const <Widget>[
                 Text(
-                  '点我',
+                  'Click Me',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14.0,
@@ -184,7 +198,7 @@ class _Emotion extends StatelessWidget {
       ),
       height: _tileHeight,
       title: Text(
-        '表情',
+        'Emoji',
         style: _style,
       ),
       trailing: Icon(
@@ -208,7 +222,7 @@ class _Card extends StatelessWidget {
         child: Icon(IconFont.card, color: Colors.green),
       ),
       title: Text(
-        '卡包',
+        'Card Holder',
         style: _style,
       ),
       height: _tileHeight,
@@ -237,7 +251,7 @@ class _Photo extends StatelessWidget {
       ),
       height: _tileHeight,
       title: Text(
-        '相册',
+        'Album',
         style: _style,
       ),
       trailing: Icon(
@@ -256,6 +270,7 @@ class _Collection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const BaseTile(
+     
       leading: Padding(
         padding: EdgeInsets.only(right: 20.0, left: 10.0),
         child: Icon(
@@ -265,7 +280,7 @@ class _Collection extends StatelessWidget {
       ),
       height: _tileHeight,
       title: Text(
-        '收藏',
+        'Favorites',
         style: _style,
       ),
       trailing: Icon(
@@ -298,7 +313,7 @@ class _Pay extends StatelessWidget {
           ),
           height: _tileHeight,
           title: Text(
-            '支付',
+            'Payment',
             style: _style,
           ),
           trailing: Icon(

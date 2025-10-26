@@ -18,8 +18,19 @@ mixin BaseMixin {
   /// buildByCupertino之前调用
   void beforeBuildByCupertino(BuildContext context) {}
 
-  /// build on cupertino mode
+  /// buildByCupertinoNative之前调用 (native iOS implementation)
+  void beforeBuildByCupertinoNative(BuildContext context) {}
+
+  /// build on cupertino mode (Flutter implementation)
   dynamic buildByCupertino(BuildContext context);
+
+  /// build on cupertino mode with native iOS components (cupertino_native package)
+  /// This is called when baseParam.nativeIOS = true
+  /// Default implementation falls back to buildByCupertino()
+  dynamic buildByCupertinoNative(BuildContext context) {
+    // Default: fallback to standard Flutter Cupertino implementation
+    return buildByCupertino(context);
+  }
 
   /// build on material mode
   dynamic buildByMaterial(BuildContext context);
@@ -39,8 +50,15 @@ mixin BaseMixin {
     switch (_widgetBuildMode) {
       case WidgetBuildMode.cupertino:
       case WidgetBuildMode.forceUseCupertino:
-        beforeBuildByCupertino(context);
-        _dynamic = buildByCupertino(context);
+        // Check if native iOS implementation is enabled
+        final bool useNativeIOS = baseParam?.nativeIOS ?? false;
+        if (useNativeIOS) {
+          beforeBuildByCupertinoNative(context);
+          _dynamic = buildByCupertinoNative(context);
+        } else {
+          beforeBuildByCupertino(context);
+          _dynamic = buildByCupertino(context);
+        }
         break;
       case WidgetBuildMode.material:
         beforeBuildByMaterial(context);
@@ -62,10 +80,6 @@ mixin BaseMixin {
         break;
       case WidgetBuildMode.disabled:
         _dynamic = Container();
-        break;
-      default:
-        _dynamic = Container();
-        print('The currentBaseMode is = $currentBaseMode, it not support yet.');
         break;
     }
     return _dynamic;
@@ -128,11 +142,19 @@ mixin BaseMixin {
               _disabled = true;
             }
             break;
-          default:
-            if (baseParam.disabledOnOthers) {
-              _disabled = true;
-            }
-            break;
+        }
+        // Check disabledOnOthers after the switch
+        if (!_disabled && baseParam.disabledOnOthers) {
+          // Only apply disabledOnOthers if platform doesn't match any specific case
+          final isKnownPlatform = defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.fuchsia ||
+              defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.linux ||
+              defaultTargetPlatform == TargetPlatform.macOS ||
+              defaultTargetPlatform == TargetPlatform.windows;
+          if (!isKnownPlatform) {
+            _disabled = true;
+          }
         }
       }
       if (_disabled) {
