@@ -45,7 +45,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
             ),
           ),
           buttonTheme: _theme.buttonTheme.copyWith(
-            // 使FlatButton, OutlineButton，RaisedButton等按钮跟CupertinoButton一样高
+            // Make FlatButton, OutlineButton, RaisedButton have the same height as CupertinoButton
             height: 48.0,
           ),
           dialogBackgroundColor: const Color(0xFFEBEBEB),
@@ -62,7 +62,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
             ),
           ),
           buttonTheme: _darkTheme.buttonTheme.copyWith(
-            // 使FlatButton, OutlineButton，RaisedButton等按钮跟CupertinoButton一样高
+            // Make FlatButton, OutlineButton, RaisedButton have the same height as CupertinoButton
             height: 48.0,
           ),
           dialogBackgroundColor: Colors.white,

@@ -31,56 +31,43 @@ class BaseParam {
     this.nativeIOS = false,
   });
 
-  /// cupertino 模式下的个性化参数
-  /// cupertino's mode custom params
+  /// Custom params for cupertino mode
   final Map<String, dynamic>? cupertino;
 
-  /// material 模式下的个性化参数
-  /// material's mode custom params
+  /// Custom params for material mode
   final Map<String, dynamic>? material;
 
-  /// andriod 的个性化参数
-  /// andriod's custom params
+  /// Custom params for android
   final Map<String, dynamic>? android;
 
-  /// fuchsia 的个性化参数
-  /// fuchsia's custom params
+  /// Custom params for fuchsia
   final Map<String, dynamic>? fuchsia;
 
-  /// iOS 的个性化参数
-  /// iOS's custom params
+  /// Custom params for iOS
   final Map<String, dynamic>? iOS;
 
-  /// linux 的个性化参数
-  /// linux's custom params
+  /// Custom params for linux
   final Map<String, dynamic>? linux;
 
-  /// macOS 的个性化参数
-  /// macOS's custom params
+  /// Custom params for macOS
   final Map<String, dynamic>? macOS;
 
-  /// windows 的个性化参数
-  /// windows's custom params
+  /// Custom params for windows
   final Map<String, dynamic>? windows;
 
-  /// web 的个性化参数
-  /// web's custom params
+  /// Custom params for web
   final Map<String, dynamic>? web;
 
-  /// others 的个性化参数
-  /// others's custom params
+  /// Custom params for others
   final Map<String, dynamic>? others;
 
-  /// 强制使用material模式
-  /// force use material mode
+  /// Force use material mode
   final bool forceUseMaterial;
 
-  /// 强制使用cupertino模式
-  /// force use cupertino mode
+  /// Force use cupertino mode
   final bool forceUseCupertino;
 
-  /// 在material模式下禁用，使用Container()代替
-  /// on material's mode, use Container() instead
+  /// On material mode, use Container() instead
   final bool disabledOnMaterial;
 
   /// 在cupertino模式下禁用，使用Container()代替

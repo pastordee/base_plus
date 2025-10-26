@@ -9,16 +9,16 @@ import 'theme/base_theme.dart';
 
 /// Common methods
 mixin BaseMixin {
-  /// build之前调用
+  /// Called before build
   void beforeBuild(BuildContext context) {}
 
-  /// buildByMaterial之前调用
+  /// Called before buildByMaterial
   void beforeBuildByMaterial(BuildContext context) {}
 
-  /// buildByCupertino之前调用
+  /// Called before buildByCupertino
   void beforeBuildByCupertino(BuildContext context) {}
 
-  /// buildByCupertinoNative之前调用 (native iOS implementation)
+  /// Called before buildByCupertinoNative (native iOS implementation)
   void beforeBuildByCupertinoNative(BuildContext context) {}
 
   /// build on cupertino mode (Flutter implementation)
@@ -37,8 +37,8 @@ mixin BaseMixin {
 
   dynamic valueOf(String key, dynamic value);
 
-  /// 没得反射，danteng
-  /// 先取平台里的值，再从模式中取值，最后取value的值
+  /// No reflection available in Dart
+  /// First get value from platform, then from mode, finally from value itself
   dynamic valueOfBaseParam(BaseParam? baseParam, String key, dynamic value) {
     return baseParam != null ? baseParam.valueOf(key, value) ?? value : value;
   }
@@ -65,9 +65,9 @@ mixin BaseMixin {
         _dynamic = buildByMaterial(context);
         break;
       case WidgetBuildMode.forceUseMaterial:
-        // 默认套多一层 Material
+        // Default: wrap with an additional Material layer
         beforeBuildByMaterial(context);
-        // 是否禁用水波纹
+        // Whether to disable ripple effect
         final bool _withoutSplashOnCupertino = baseParam?.withoutSplashOnCupertino ?? withoutSplashOnCupertino;
         if (_withoutSplashOnCupertino) {
           _dynamic = BaseMaterialWidget.withoutSplash(
@@ -91,18 +91,18 @@ mixin BaseMixin {
       bool _disabled = false;
       if (isCupertinoMode) {
         if (baseParam.forceUseMaterial) {
-          /// 强制使用Material模式
+          /// Force use Material mode
           _widgetBuildMode = WidgetBuildMode.forceUseMaterial;
         } else {
-          /// 使用Cupertino模式
+          /// Use Cupertino mode
           _widgetBuildMode = WidgetBuildMode.cupertino;
         }
       } else if (isMaterialMode) {
         if (baseParam.forceUseCupertino) {
-          /// 强制使用Cupertino模式
+          /// Force use Cupertino mode
           _widgetBuildMode = WidgetBuildMode.forceUseCupertino;
         } else {
-          /// 使用Material模式
+          /// Use Material mode
           _widgetBuildMode = WidgetBuildMode.material;
         }
       } else {

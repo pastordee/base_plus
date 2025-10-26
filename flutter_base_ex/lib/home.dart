@@ -363,7 +363,7 @@ class _TipsHeader extends StatelessWidget {
               },
             ),
           ),
-          const Text('特别说明'),
+          const Text('Special Notes'),
           const SizedBox(
             width: 50,
           )

@@ -77,8 +77,8 @@ class BaseButton extends BaseStatelessWidget {
     this.hoverElevation,
     this.enableFeedback = true,
 
-    /// 使按钮跟CupertinoButton的一样高，只有MaterialButton有效
-    /// 其他的需修改Theme.of(context).buttonTheme.height才有效
+    /// Make button same height as CupertinoButton, only effective for MaterialButton
+    /// Others need to modify Theme.of(context).buttonTheme.height to take effect
     this.height = 48.0,
     this.textButton = false,
     this.outlinedButton = false,
@@ -312,7 +312,7 @@ class BaseButton extends BaseStatelessWidget {
     return buildByCupertinoWithChild(_child);
   }
 
-  /// 最终的构建方法，为了兼容BaseButton.icon
+  /// Final build method, for compatibility with BaseButton.icon
   Widget buildByCupertinoWithChild(Widget child) {
     assert(child != null, 'child can\'t be null.');
     
@@ -475,7 +475,7 @@ class BaseButton extends BaseStatelessWidget {
     return buildByMaterialWithChild(_child, context);
   }
 
-  /// 最终的构建方法，为了兼容BaseButton.icon
+  /// Final build method, for compatibility with BaseButton.icon
   Widget buildByMaterialWithChild(Widget child, [BuildContext? context]) {
     // Ensure only one button type is selected at a time
     final List<bool> buttonTypes = [textButton, outlinedButton, elevatedButton, filledButton, filledTonalButton];

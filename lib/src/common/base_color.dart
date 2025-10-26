@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import '../base_class.dart';
 import '../base_param.dart';
 
-/// Brightness.light, Brightness.dark 分别使用2种颜色
+/// Use different colors for Brightness.light and Brightness.dark
 ///
-/// * 使用时必须调用build(context)方法
-/// * cupertino模式下优先取dynamicColor的值
-/// * material模式下优先取color和darkColor的值
+/// * Must call build(context) method when using
+/// * In cupertino mode, dynamicColor value takes priority
+/// * In material mode, color and darkColor values take priority
 ///
 class BaseColor extends BaseClass {
   const BaseColor({
@@ -21,8 +21,8 @@ class BaseColor extends BaseClass {
   })  : assert(color != null || darkColor != null || dynamicColor != null),
         super(baseParam: baseParam);
 
-  /// 高对比，一般用于背景色
-  /// 默认Brightness.light取黑色，Brightness.dark取白色
+  /// High contrast, generally used for background color
+  /// Default: Brightness.light uses black, Brightness.dark uses white
   const BaseColor.highContrast({
     this.color,
     this.darkColor,
@@ -36,17 +36,17 @@ class BaseColor extends BaseClass {
 
   /// When brightness = Brightness.light
   ///
-  /// material 模式下先取该值
+  /// Priority value in material mode
   final Color? color;
 
   /// When brightness = Brightness.dark
   ///
-  /// material 模式下先取该值
+  /// Priority value in material mode
   final Color? darkColor;
 
   /// [CupertinoDynamicColor]
   ///
-  /// cupertino 模式下先取该值
+  /// Priority value in cupertino mode
   final CupertinoDynamicColor? dynamicColor;
 
   @override
@@ -98,9 +98,9 @@ class BaseColor extends BaseClass {
   }
 }
 
-/// 随机颜色，不支持随机范围
+/// Random color, does not support custom ranges
 class BaseRandomColor extends Color {
-  /// 同[Color.fromARGB], 参数有值则锁定该值
+  /// Same as [Color.fromARGB], if parameter has value, lock that value
   BaseRandomColor({int? a, int? r, int? g, int? b})
       : super(((((a ?? Random().nextInt(256)) & 0xff) << 24) |
                 (((r ?? Random().nextInt(256)) & 0xff) << 16) |
@@ -108,7 +108,7 @@ class BaseRandomColor extends Color {
                 (((b ?? Random().nextInt(256)) & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 同[Color.fromRGBO], 参数有值则锁定该值
+  /// Same as [Color.fromRGBO], if parameter has value, lock that value
   BaseRandomColor.fromRGBO({int? r, int? g, int? b, double? opacity})
       : super((((((opacity ?? Random().nextDouble()) * 0xff ~/ 1) & 0xff) << 24) |
                 (((r ?? Random().nextInt(256)) & 0xff) << 16) |
@@ -116,27 +116,27 @@ class BaseRandomColor extends Color {
                 (((b ?? Random().nextInt(256)) & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 固定red
+  /// Fixed red
   BaseRandomColor.withRed(int r)
       : super((((Random().nextInt(256) & 0xff) << 24) | ((r & 0xff) << 16) | ((Random().nextInt(256) & 0xff) << 8) | ((Random().nextInt(256) & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 固定blue
+  /// Fixed blue
   BaseRandomColor.withBlue(int b)
       : super((((Random().nextInt(256) & 0xff) << 24) | ((Random().nextInt(256) & 0xff) << 16) | ((Random().nextInt(256) & 0xff) << 8) | ((b & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 固定green
+  /// Fixed green
   BaseRandomColor.withGreen(int g)
       : super((((Random().nextInt(256) & 0xff) << 24) | ((Random().nextInt(256) & 0xff) << 16) | ((g & 0xff) << 8) | ((Random().nextInt(256) & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 固定alpha
+  /// Fixed alpha
   BaseRandomColor.withAlpha(int a)
       : super((((a & 0xff) << 24) | ((Random().nextInt(256) & 0xff) << 16) | ((Random().nextInt(256) & 0xff) << 8) | ((Random().nextInt(256) & 0xff) << 0)) &
             0xFFFFFFFF);
 
-  /// 固定opacity
+  /// Fixed opacity
   BaseRandomColor.withOpacity(double opacity)
       : super(((((opacity * 0xff ~/ 1) & 0xff) << 24) |
                 ((Random().nextInt(256) & 0xff) << 16) |

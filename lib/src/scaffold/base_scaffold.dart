@@ -185,11 +185,11 @@ class BaseScaffold extends BaseStatelessWidget {
     }
     
     // Check for iOS 26 Liquid Glass properties
-    if (appBar.liquidGlassBlurIntensity != null || 
-        appBar.liquidGlassGradientOpacity != null ||
-        appBar.liquidGlassDynamicBlur == true) {
-      return true;
-    }
+    // if (appBar.liquidGlassBlurIntensity != null || 
+    //     appBar.liquidGlassGradientOpacity != null ||
+    //     appBar.liquidGlassDynamicBlur == true) {
+    //   return true;
+    // }
     
     // Default to false for solid app bars
     return false;
@@ -306,9 +306,6 @@ class BaseScaffold extends BaseStatelessWidget {
         toolbarTextStyle: appBar.toolbarTextStyle,
         titleTextStyle: appBar.titleTextStyle,
         systemOverlayStyle: appBar.systemOverlayStyle,
-        liquidGlassBlurIntensity: appBar.liquidGlassBlurIntensity,
-        liquidGlassGradientOpacity: appBar.liquidGlassGradientOpacity,
-        liquidGlassDynamicBlur: appBar.liquidGlassDynamicBlur,
         baseParam: appBar.baseParam,
       );
     }

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../demo_page.dart';
 import '../demo_tile.dart';
 
-/// Scaffold 示例
+/// Scaffold Demo
 class ScaffoldDemo extends StatelessWidget {
   const ScaffoldDemo({
     Key? key,
@@ -24,12 +24,12 @@ class ScaffoldDemo extends StatelessWidget {
       materialDesc: 'use Scaffold',
       cupertinoDesc: 'CupertinoPageScaffold',
       parameterDesc: const <String, String>{
-        'safeAreaTop': 'Cupertino模式下有效，默认false。'
-            '相当于SafeArea的top，当状态栏背景色可能为透明时，'
-            '且没有用到BoxScrollView等自动设置top padding的组件时， '
-            '可以设置为true，此时页面起点在导航栏下方',
-        'safeAreaBottom': 'Cupertino模式下有效，默认false。相当于SafeArea的bottom，'
-            '设置为true可以避免页面被iphone下方的Home Indicator遮住',
+        'safeAreaTop': 'Effective in Cupertino mode, default is false. '
+            'Equivalent to SafeArea\'s top. When the status bar background may be transparent, '
+            'and no components like BoxScrollView that automatically set top padding are used, '
+            'you can set this to true, and the page will start below the navigation bar.',
+        'safeAreaBottom': 'Effective in Cupertino mode, default is false. Equivalent to SafeArea\'s bottom. '
+            'Set to true to prevent the page from being obscured by the Home Indicator at the bottom of iPhone.',
       },
       demos: _demos,
     );

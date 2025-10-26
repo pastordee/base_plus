@@ -24,9 +24,6 @@ class _iOS26LiquidGlassDemoState extends State<iOS26LiquidGlassDemo> {
       appBar: BaseAppBar(
         title: const Text('iOS 26 Liquid Glass'),
         backgroundColor: _backgroundColor,
-        liquidGlassBlurIntensity: _blurIntensity,
-        liquidGlassGradientOpacity: _gradientOpacity,
-        liquidGlassDynamicBlur: _dynamicBlur,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
