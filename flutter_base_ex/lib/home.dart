@@ -212,10 +212,13 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appBar: BaseAppBar(
+      // safeAreaBottom: true,
+      appBar: BaseAppBar( 
+        
         title: const Text('Base Example'),
         padding: const EdgeInsetsDirectional.only(start: 5.0, end: 5.0),
         baseParam: BaseParam(
+          // nativeIOS: false,
           cupertino: <String, dynamic>{
             'leading': BaseIconButton(
               icon: IconFont.info,

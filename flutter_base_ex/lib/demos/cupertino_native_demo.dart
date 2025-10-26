@@ -1406,8 +1406,87 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BaseScaffold( 
+      backgroundColor:  CupertinoColors.systemPink, 
+      // baseParam: BaseParam(nativeIOS: true),
+      appBar: BaseAppBar(
+        baseParam: BaseParam(nativeIOS: true),
+        transparent: _isTransparent,
+        tint: CupertinoColors.label,
+        leadingActions: [
+          BaseNavigationBarAction(
+            icon: const CNSymbol('chevron.left'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          BaseNavigationBarAction.fixedSpace(8),
+          BaseNavigationBarAction(
+            label: 'Back',
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+        trailingActions: [
+          BaseNavigationBarAction(
+            icon: const CNSymbol('gear'),
+            // iconSize: 12,
+            onPressed: () {
+              print('Settings tapped');
+            },
+          ),
+          BaseNavigationBarAction(
+            icon: const CNSymbol('ellipsis.circle'),
+            onPressed: () {
+              showCupertinoDialog(
+                context: context,
+                builder: (context) => CupertinoAlertDialog(
+                  title: const Text('Menu'),
+                  content: const Text('Copy, Paste, or Delete'),
+                  actions: [
+                    CupertinoDialogAction(
+                      child: const Text('Copy'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        print('Copy selected');
+                      },
+                    ),
+                    CupertinoDialogAction(
+                      child: const Text('Paste'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        print('Paste selected');
+                      },
+                    ),
+                    CupertinoDialogAction(
+                      isDestructiveAction: true,
+                      child: const Text('Delete'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        print('Delete selected');
+                      },
+                    ),
+                    CupertinoDialogAction(
+                      child: const Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          BaseNavigationBarAction(
+            icon: const CNSymbol('plus'),
+            onPressed: () {
+              print('Add tapped');
+            },
+          ),
+        ],
+        title: Text('Native Nav Bar'),
+      ),
       body: SafeArea(
+        top: false,
         bottom: false,
         child: Stack(
           children: [
@@ -1425,16 +1504,19 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                 ),
               ),
             ),
-            
+            // Positioned(
+            //   child: SizedBox(height: 80)), // Spacer for nav bar
             // Content with Navigation Bar at top
             Column(
               children: [
+                // SizedBox(height: 100),
                 // Top Navigation Bar
                 
                 
                 // Content area
                 Expanded(
                   child: ListView(
+                    
                     padding: const EdgeInsets.all(16),
                     children: [
                       Card(
@@ -1618,104 +1700,106 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
               ],
             ),
           
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 5,
-            child: SafeArea(
-              bottom: false,
-              child:BaseNavigationBar(
-                  leading: [
-                    BaseNavigationBarAction(
-                      icon: const CNSymbol('chevron.left'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    BaseNavigationBarAction.fixedSpace(8),
-                    BaseNavigationBarAction(
-                      label: 'Back',
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                  title: 'Native Nav Bar',
-                  titleSize: _titleSize,
-                  onTitlePressed: _enableTitleTap ? () {
-                    showCupertinoDialog(
-                      context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('Title Tapped!'),
-                        content: const Text('The navigation bar title was tapped. This demonstrates the onTitlePressed functionality.'),
-                        actions: [
-                          CupertinoDialogAction(
-                            child: const Text('Cool!'),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    );
-                  } : null,
-                  trailing: [
-                    BaseNavigationBarAction(
-                      icon: const CNSymbol('gear'),
-                      // iconSize: 12,
-                      onPressed: () {
-                        print('Settings tapped');
-                      },
-                    ),
-                    BaseNavigationBarAction(
-                      icon: const CNSymbol('ellipsis.circle'),
-                      onPressed: () {
-                        showCupertinoDialog(
-                          context: context,
-                          builder: (context) => CupertinoAlertDialog(
-                            title: const Text('Menu'),
-                            content: const Text('Copy, Paste, or Delete'),
-                            actions: [
-                              CupertinoDialogAction(
-                                child: const Text('Copy'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  print('Copy selected');
-                                },
-                              ),
-                              CupertinoDialogAction(
-                                child: const Text('Paste'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  print('Paste selected');
-                                },
-                              ),
-                              CupertinoDialogAction(
-                                isDestructiveAction: true,
-                                child: const Text('Delete'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  print('Delete selected');
-                                },
-                              ),
-                              CupertinoDialogAction(
-                                child: const Text('Cancel'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    BaseNavigationBarAction(
-                      icon: const CNSymbol('plus'),
-                      onPressed: () {
-                        print('Add tapped');
-                      },
-                    ),
-                  ],
-                  tint: CupertinoColors.label,
-                  transparent: _isTransparent,
-                  largeTitle: _showLargeTitle,
-                ))),
+          // Positioned(
+          //   left: 0,
+          //   right: 0,
+          //   top: 5,
+          //   child: SafeArea(
+          //     bottom: false,
+          //     child:BaseNavigationBar(
+          //         leading: [
+          //           BaseNavigationBarAction(
+          //             icon: const CNSymbol('chevron.left'),
+          //             onPressed: () {
+          //               Navigator.of(context).pop();
+          //             },
+          //           ),
+          //           BaseNavigationBarAction.fixedSpace(8),
+          //           BaseNavigationBarAction(
+          //             label: 'Back',
+          //             onPressed: () {
+          //               Navigator.of(context).pop();
+          //             },
+          //           ),
+          //         ],
+          //         title: 'Native Nav Bar',
+          //         titleSize: _titleSize,
+          //         onTitlePressed: _enableTitleTap ? () {
+          //           showCupertinoDialog(
+          //             context: context,
+          //             builder: (context) => CupertinoAlertDialog(
+          //               title: const Text('Title Tapped!'),
+          //               content: const Text('The navigation bar title was tapped. This demonstrates the onTitlePressed functionality.'),
+          //               actions: [
+          //                 CupertinoDialogAction(
+          //                   child: const Text('Cool!'),
+          //                   onPressed: () => Navigator.of(context).pop(),
+          //                 ),
+          //               ],
+          //             ),
+          //           );
+          //         } : null,
+          //         trailing: [
+          //           BaseNavigationBarAction(
+          //             icon: const CNSymbol('gear'),
+          //             // iconSize: 12,
+          //             onPressed: () {
+          //               print('Settings tapped');
+          //             },
+          //           ),
+          //           BaseNavigationBarAction(
+          //             icon: const CNSymbol('ellipsis.circle'),
+          //             onPressed: () {
+          //               showCupertinoDialog(
+          //                 context: context,
+          //                 builder: (context) => CupertinoAlertDialog(
+          //                   title: const Text('Menu'),
+          //                   content: const Text('Copy, Paste, or Delete'),
+          //                   actions: [
+          //                     CupertinoDialogAction(
+          //                       child: const Text('Copy'),
+          //                       onPressed: () {
+          //                         Navigator.of(context).pop();
+          //                         print('Copy selected');
+          //                       },
+          //                     ),
+          //                     CupertinoDialogAction(
+          //                       child: const Text('Paste'),
+          //                       onPressed: () {
+          //                         Navigator.of(context).pop();
+          //                         print('Paste selected');
+          //                       },
+          //                     ),
+          //                     CupertinoDialogAction(
+          //                       isDestructiveAction: true,
+          //                       child: const Text('Delete'),
+          //                       onPressed: () {
+          //                         Navigator.of(context).pop();
+          //                         print('Delete selected');
+          //                       },
+          //                     ),
+          //                     CupertinoDialogAction(
+          //                       child: const Text('Cancel'),
+          //                       onPressed: () => Navigator.of(context).pop(),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               );
+          //             },
+          //           ),
+          //           BaseNavigationBarAction(
+          //             icon: const CNSymbol('plus'),
+          //             onPressed: () {
+          //               print('Add tapped');
+          //             },
+          //           ),
+          //         ],
+          //         tint: CupertinoColors.label,
+          //         transparent: _isTransparent,
+          //         largeTitle: _showLargeTitle,
+          //       )
+          //     )
+          //   ),
           
           ],
         ),

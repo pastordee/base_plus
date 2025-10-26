@@ -330,7 +330,7 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
         padding: valueOf('padding', padding),
         transitionBetweenRoutes: _transitionBetweenRoutes!,
         heroTag: _heroTag,
-        backdropFilter: false, // We handle this manually for iOS 26 effects
+        backdropFilter: _backdropFilter,
         navBarPersistentHeight: _height,
         bottom: valueOf('bottom', bottom),
         bottomOpacity: valueOf('bottomOpacity', bottomOpacity),
@@ -385,17 +385,29 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     final bool _transparent = valueOf('transparent', transparent);
     final bool _largeTitle = valueOf('largeTitle', largeTitle);
     
-    // BaseNavigationBar handles its own SafeArea internally
-    return BaseNavigationBar(
-      leading: _leadingActions,
-      title: _title,
-      trailing: _trailingActions,
-      tint: _tint,
-      transparent: _transparent,
-      largeTitle: _largeTitle,
-      height: _height,
-      baseParam: BaseParam(nativeIOS: true),
-    ).build(context);
+    final BaseThemeData baseTheme = BaseTheme.of(context);
+    final double effectiveHeight = _height ?? baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight) ?? 44.0;
+    
+    // BaseNavigationBar.build() returns CNNavigationBar which doesn't implement PreferredSizeWidget
+    // Wrap it in PreferredSize to make it compatible with ObstructingPreferredSizeWidget
+    final Widget navBar = SafeArea(
+      
+      child: BaseNavigationBar(
+        leading: _leadingActions,
+        title: _title,
+        trailing: _trailingActions,
+        tint: _tint,
+        transparent: _transparent,
+        largeTitle: _largeTitle,
+        height: _height,
+        baseParam: BaseParam(nativeIOS: true),
+      ).build(context),
+    );
+    
+    return PreferredSize(
+      preferredSize: Size.fromHeight(effectiveHeight),
+      child: navBar,
+    );
   }
 
   @override

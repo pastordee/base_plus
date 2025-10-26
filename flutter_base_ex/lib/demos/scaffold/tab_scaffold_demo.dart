@@ -118,7 +118,7 @@ class _DemoState extends State<_Demo> {
         appBar: BaseAppBar(
           transparent: true,
           tint: Colors.white,
-          baseParam: BaseParam(nativeIOS: true),
+          baseParam: BaseParam(nativeIOS: false),
           title: const Text('Tab Scaffold Demo'),
           leadingActions: [
             BaseNavigationBarAction(
