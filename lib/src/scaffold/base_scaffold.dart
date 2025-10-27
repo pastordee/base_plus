@@ -240,9 +240,14 @@ class BaseScaffold extends BaseStatelessWidget {
     }
     
     // Type-safe navigation bar assignment
-    // Only assign if it's actually an ObstructingPreferredSizeWidget (Cupertino navigation bar)
-    // If BaseAppBar is configured to force Material mode, navigationBar will be null and
-    // CupertinoPageScaffold will render without a navigation bar
+    // If the navigation bar is not an ObstructingPreferredSizeWidget (e.g., BaseAppBar forced to Material mode),
+    // automatically fall back to using Material's Scaffold to display it properly
+    if (navigationBar != null && navigationBar is! ObstructingPreferredSizeWidget) {
+      // Navigation bar is not compatible with CupertinoPageScaffold
+      // Switch to Material Scaffold to display it properly
+      return buildByMaterial(context);
+    }
+    
     ObstructingPreferredSizeWidget? cupertinoNavigationBar;
     if (navigationBar != null && navigationBar is ObstructingPreferredSizeWidget) {
       cupertinoNavigationBar = navigationBar;
@@ -257,6 +262,14 @@ class BaseScaffold extends BaseStatelessWidget {
       resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       child: _child,
     );
+  }
+
+  @override
+  Widget buildByCupertinoNative(BuildContext context) {
+    // Native iOS implementation - use Material Scaffold as CupertinoPageScaffold 
+    // doesn't support PreferredSize widgets from native navigation bars
+    // This ensures compatibility when nativeIOS: true is used with BaseAppBar
+    return buildByMaterial(context);
   }
 
   @override
