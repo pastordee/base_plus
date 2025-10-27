@@ -266,10 +266,35 @@ class BaseScaffold extends BaseStatelessWidget {
 
   @override
   Widget buildByCupertinoNative(BuildContext context) {
-    // Native iOS implementation - use Material Scaffold as CupertinoPageScaffold 
-    // doesn't support PreferredSize widgets from native navigation bars
-    // This ensures compatibility when nativeIOS: true is used with BaseAppBar
-    return buildByMaterial(context);
+    // Native iOS implementation
+    // CNNavigationBar is embedded in the body instead of as a navigation bar parameter
+    // because it doesn't implement ObstructingPreferredSizeWidget
+    final Widget body = valueOf('body', this.body);
+    assert(body != null, 'body can\'t be null');
+    final Color? backgroundColor = valueOf('backgroundColor', this.backgroundColor);
+    final BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
+    
+    Widget bodyContent;
+    if (appBar != null) {
+      // Build the native navigation bar
+      final Widget navBar = appBar.build(context);
+      
+      // Embed navigation bar directly in the body as a Column
+      bodyContent = Column(
+        children: [
+          navBar,
+          Expanded(child: body),
+        ],
+      );
+    } else {
+      bodyContent = body;
+    }
+    
+    return CupertinoPageScaffold(
+      backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
+      child: bodyContent,
+    );
   }
 
   @override
