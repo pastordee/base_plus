@@ -1433,53 +1433,109 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
           ),
         ],
         trailingActions: [
-          BaseNavigationBarAction(
+          BaseNavigationBarAction.popupMenu(
+            
             icon: const CNSymbol('gear'),
             tint: CupertinoColors.systemBlue, // Custom blue color
             // iconSize: 12,
-            onPressed: () {
-              print('Settings tapped');
-            },
+            // onPressed: () {
+            //   print('Settings tapped');
+            // }, 
+            popupMenuItems: [
+              BasePopupMenuItem(
+                label: 'Preferences',
+                iosIcon: 'slider.horizontal.3',
+                iconData: Icons.settings,
+              ),
+              BasePopupMenuItem(
+                label: 'Account',
+                iosIcon: 'person.crop.circle',
+                iconData: Icons.account_circle,
+              ),
+              BasePopupMenuItem.divider(),
+              BasePopupMenuItem(
+                label: 'Help',
+                iosIcon: 'questionmark.circle',
+                iconData: Icons.help,
+              ),
+            ], 
+            onPopupMenuSelected: (int value) { 
+              if (value == 0) {
+                print('Preferences selected');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Preferences selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              } else if (value == 1) {
+                print('Account selected');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Account selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              } else if (value == 3) { // Index 2 is the divider
+                print('Help selected');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Help selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              }
+             },
           ),
-          BaseNavigationBarAction(
+          // Popup menu button example - shows native iOS popup menu
+          BaseNavigationBarAction.popupMenuButton(
             icon: const CNSymbol('ellipsis.circle'),
             tint: CupertinoColors.systemOrange, // Custom orange color
-            onPressed: () {
-              showCupertinoDialog(
-                context: context,
-                builder: (context) => CupertinoAlertDialog(
-                  title: const Text('Menu'),
-                  content: const Text('Copy, Paste, or Delete'),
-                  actions: [
-                    CupertinoDialogAction(
-                      child: const Text('Copy'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        print('Copy selected');
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Paste'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        print('Paste selected');
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      isDestructiveAction: true,
-                      child: const Text('Delete'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        print('Delete selected');
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              );
+            popupMenuItems: const [
+              BasePopupMenuItem(
+                label: 'Copy',
+                iosIcon: 'doc.on.doc',
+                iconData: Icons.copy,
+              ),
+              BasePopupMenuItem(
+                label: 'Paste',
+                iosIcon: 'doc.on.clipboard',
+                iconData: Icons.paste,
+              ),
+              BasePopupMenuItem.divider(),
+              BasePopupMenuItem(
+                label: 'Delete',
+                iosIcon: 'trash',
+                iconData: Icons.delete,
+              ),
+            ],
+            onPopupMenuSelected: (index) {
+              // Handle selection (note: divider counts as an index)
+              if (index == 0) {
+                print('Copy selected from popup menu');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Copy action selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              } else if (index == 1) {
+                print('Paste selected from popup menu');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Paste action selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              } else if (index == 3) { // Index 2 is the divider
+                print('Delete selected from popup menu');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Delete action selected'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              }
             },
           ),
           BaseNavigationBarAction(

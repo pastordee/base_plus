@@ -3,6 +3,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
+import '../components/base_popup_menu_button.dart';
 
 /// Cross-platform navigation bar action
 /// 
@@ -96,7 +97,7 @@ class BaseNavigationBarAction {
   final double? iconSize;
 
   /// Popup menu items to display when the action is pressed
-  final List<CNPopupMenuEntry>? popupMenuItems;
+  final List<BasePopupMenuItem>? popupMenuItems;
 
   /// Called when a popup menu item is selected
   final ValueChanged<int>? onPopupMenuSelected;
@@ -127,7 +128,7 @@ class BaseNavigationBarAction {
   factory BaseNavigationBarAction.popupMenu({
     CNSymbol? icon,
     String? label,
-    required List<CNPopupMenuEntry> popupMenuItems,
+    required List<BasePopupMenuItem> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
     Color? tint,
     double? padding,
@@ -151,7 +152,7 @@ class BaseNavigationBarAction {
   factory BaseNavigationBarAction.popupMenuButton({
     CNSymbol? icon,
     String? label,
-    required List<CNPopupMenuEntry> popupMenuItems,
+    required List<BasePopupMenuItem> popupMenuItems,
     required ValueChanged<int> onPopupMenuSelected,
     Color? tint,
     double? padding,
@@ -188,13 +189,37 @@ class BaseNavigationBarAction {
     if (_isFlexibleSpace) {
       return CNNavigationBarAction.flexibleSpace();
     }
-    // Handle popup menu actions
+    // Handle popup menu actions - convert BasePopupMenuItem to CNPopupMenuItem
     if (popupMenuItems != null && onPopupMenuSelected != null) {
+      // Convert BasePopupMenuItem to CN format
+      final cnItems = popupMenuItems!.map((item) {
+        if (item.isDivider) {
+          return const CNPopupMenuDivider();
+        }
+        
+        CNSymbol? itemIcon;
+        if (item.iosIcon != null) {
+          itemIcon = CNSymbol(item.iosIcon!, size: item.iconSize ?? 18);
+        } else if (item.iconData != null) {
+          // Try to map Material icon to SF Symbol
+          final sfSymbol = _mapIconToSFSymbol(item.iconData);
+          if (sfSymbol != null) {
+            itemIcon = CNSymbol(sfSymbol, size: item.iconSize ?? 18);
+          }
+        }
+        
+        return CNPopupMenuItem(
+          label: item.label,
+          icon: itemIcon,
+          enabled: item.enabled,
+        );
+      }).toList();
+      
       if (_usePopupMenuButton) {
         return CNNavigationBarAction.popupMenuButton(
           icon: icon,
           label: label,
-          popupMenuItems: popupMenuItems!,
+          popupMenuItems: cnItems,
           onPopupMenuSelected: onPopupMenuSelected!,
           tint: tint,
           padding: padding,
@@ -205,7 +230,7 @@ class BaseNavigationBarAction {
         return CNNavigationBarAction.popupMenu(
           icon: icon,
           label: label,
-          popupMenuItems: popupMenuItems!,
+          popupMenuItems: cnItems,
           onPopupMenuSelected: onPopupMenuSelected!,
           tint: tint,
           padding: padding,
@@ -224,6 +249,33 @@ class BaseNavigationBarAction {
       labelSize: labelSize,
       iconSize: iconSize,
     );
+  }
+  
+  /// Map Material icon to SF Symbol name
+  String? _mapIconToSFSymbol(IconData? iconData) {
+    if (iconData == null) return null;
+    
+    final Map<int, String> iconMap = {
+      Icons.refresh.codePoint: 'arrow.clockwise',
+      Icons.edit.codePoint: 'pencil',
+      Icons.delete.codePoint: 'trash',
+      Icons.copy.codePoint: 'doc.on.doc',
+      Icons.paste.codePoint: 'doc.on.clipboard',
+      Icons.share.codePoint: 'square.and.arrow.up',
+      Icons.settings.codePoint: 'gear',
+      Icons.add.codePoint: 'plus',
+      Icons.remove.codePoint: 'minus',
+      Icons.close.codePoint: 'xmark',
+      Icons.check.codePoint: 'checkmark',
+      Icons.favorite.codePoint: 'heart',
+      Icons.favorite_border.codePoint: 'heart',
+      Icons.star.codePoint: 'star',
+      Icons.star_border.codePoint: 'star',
+      Icons.search.codePoint: 'magnifyingglass',
+      Icons.download.codePoint: 'square.and.arrow.down',
+    };
+    
+    return iconMap[iconData.codePoint];
   }
 }
 
