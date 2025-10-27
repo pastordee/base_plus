@@ -239,11 +239,20 @@ class BaseScaffold extends BaseStatelessWidget {
       navigationBar = appBar;
     }
     
+    // Type-safe navigation bar assignment
+    // Only assign if it's actually an ObstructingPreferredSizeWidget (Cupertino navigation bar)
+    // If BaseAppBar is configured to force Material mode, navigationBar will be null and
+    // CupertinoPageScaffold will render without a navigation bar
+    ObstructingPreferredSizeWidget? cupertinoNavigationBar;
+    if (navigationBar != null && navigationBar is ObstructingPreferredSizeWidget) {
+      cupertinoNavigationBar = navigationBar;
+    }
+    
     // Intelligent body wrapping with SafeArea
     final Widget _child = _wrapBodyWithSafeArea(body, appBar);
     
     return CupertinoPageScaffold(
-      navigationBar: navigationBar != null ? navigationBar as ObstructingPreferredSizeWidget : null,
+      navigationBar: cupertinoNavigationBar,
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       child: _child,
