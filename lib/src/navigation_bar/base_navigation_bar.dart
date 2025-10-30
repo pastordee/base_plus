@@ -354,7 +354,58 @@ class BaseNavigationBarAction {
 /// - `BaseNavigationBarAction.fixedSpace(5)` - Fixed spacing
 /// - `BaseNavigationBarAction.flexibleSpace()` - Flexible spacing
 /// 
+/// ## Forcing Rebuild/Refresh
+/// 
+/// Since BaseNavigationBar is a StatelessWidget, it rebuilds when its parent rebuilds.
+/// To force a rebuild when the navigation bar's state changes, use one of these methods:
+/// 
+/// **Method 1: Change the Key (Recommended)**
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   @override
+///   State<MyWidget> createState() => _MyWidgetState();
+/// }
+/// 
+/// class _MyWidgetState extends State<MyWidget> {
+///   int _refreshKey = 0;
+///   List<BaseNavigationBarAction> _actions = [...];
+///   
+///   void updateActions() {
+///     setState(() {
+///       _actions = [...]; // Update actions
+///       _refreshKey++; // Increment key to force rebuild
+///     });
+///   }
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     return BaseNavigationBar(
+///       key: ValueKey(_refreshKey), // Or use BaseNavigationBar.refreshKey()
+///       trailing: _actions,
+///       // ...
+///     );
+///   }
+/// }
+/// ```
+/// 
+/// **Method 2: Use UniqueKey for Each Rebuild**
+/// ```dart
+/// BaseNavigationBar(
+///   key: UniqueKey(), // Creates new key on every build
+///   // ...
+/// )
+/// ```
+/// 
+/// **Method 3: Use the Static Helper**
+/// ```dart
+/// BaseNavigationBar(
+///   key: BaseNavigationBar.refreshKey(), // Generates unique key
+///   // ...
+/// )
+/// ```
+/// 
 /// Updated: 2024.10.25 - Refactored to use BaseNavigationBarAction in public API
+/// Updated: 2024.10.30 - Added refresh documentation and helper methods
 class BaseNavigationBar extends BaseStatelessWidget {
   const BaseNavigationBar({
     Key? key,
@@ -370,6 +421,20 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.searchConfig,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
+  
+  /// Creates a unique key for forcing widget rebuild
+  /// 
+  /// Use this when you need to force the navigation bar to rebuild,
+  /// for example when actions are updated dynamically.
+  /// 
+  /// Example:
+  /// ```dart
+  /// BaseNavigationBar(
+  ///   key: BaseNavigationBar.refreshKey(),
+  ///   trailing: _dynamicActions,
+  /// )
+  /// ```
+  static Key refreshKey() => UniqueKey();
 
   /// Factory constructor for search-enabled navigation bar
   const BaseNavigationBar.search({

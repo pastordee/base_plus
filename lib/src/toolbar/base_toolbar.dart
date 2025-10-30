@@ -350,7 +350,58 @@ class BaseToolbarAction {
 /// )
 /// ```
 /// 
+/// ## Forcing Rebuild/Refresh
+/// 
+/// Since BaseToolbar is a StatelessWidget, it rebuilds when its parent rebuilds.
+/// To force a rebuild when the toolbar's state changes, use one of these methods:
+/// 
+/// **Method 1: Change the Key (Recommended)**
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   @override
+///   State<MyWidget> createState() => _MyWidgetState();
+/// }
+/// 
+/// class _MyWidgetState extends State<MyWidget> {
+///   int _refreshKey = 0;
+///   List<BaseToolbarAction> _actions = [...];
+///   
+///   void updateActions() {
+///     setState(() {
+///       _actions = [...]; // Update actions
+///       _refreshKey++; // Increment key to force rebuild
+///     });
+///   }
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     return BaseToolbar(
+///       key: ValueKey(_refreshKey), // Or use BaseToolbar.refreshKey()
+///       trailing: _actions,
+///       // ...
+///     );
+///   }
+/// }
+/// ```
+/// 
+/// **Method 2: Use UniqueKey for Each Rebuild**
+/// ```dart
+/// BaseToolbar(
+///   key: UniqueKey(), // Creates new key on every build
+///   // ...
+/// )
+/// ```
+/// 
+/// **Method 3: Use the Static Helper**
+/// ```dart
+/// BaseToolbar(
+///   key: BaseToolbar.refreshKey(), // Generates unique key
+///   // ...
+/// )
+/// ```
+/// 
 /// Updated: 2024.10.25 - Refactored to use BaseToolbarAction in public API
+/// Updated: 2024.10.30 - Added refresh documentation and helper methods
 class BaseToolbar extends BaseStatelessWidget {
   const BaseToolbar({
     Key? key,
@@ -368,6 +419,20 @@ class BaseToolbar extends BaseStatelessWidget {
     this.contextIcon,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
+  
+  /// Creates a unique key for forcing widget rebuild
+  /// 
+  /// Use this when you need to force the toolbar to rebuild,
+  /// for example when actions are updated dynamically.
+  /// 
+  /// Example:
+  /// ```dart
+  /// BaseToolbar(
+  ///   key: BaseToolbar.refreshKey(),
+  ///   middle: _dynamicActions,
+  /// )
+  /// ```
+  static Key refreshKey() => UniqueKey();
 
   /// Factory constructor for search-enabled toolbar
   const BaseToolbar.search({

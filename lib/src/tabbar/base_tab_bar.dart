@@ -128,8 +128,59 @@ import 'base_native_tab_bar_item.dart';
 /// - `SFSymbols.settings` → 'gearshape.fill'
 /// - And 30+ more...
 /// 
+/// ## Forcing Rebuild/Refresh
+/// 
+/// Since BaseTabBar is a StatelessWidget, it rebuilds when its parent rebuilds.
+/// To force a rebuild when the tab bar's state changes, use one of these methods:
+/// 
+/// **Method 1: Change the Key (Recommended)**
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   @override
+///   State<MyWidget> createState() => _MyWidgetState();
+/// }
+/// 
+/// class _MyWidgetState extends State<MyWidget> {
+///   int _refreshKey = 0;
+///   int _currentIndex = 0;
+///   
+///   void updateTabBar() {
+///     setState(() {
+///       _currentIndex = 2; // Change selected tab
+///       _refreshKey++; // Increment key to force rebuild
+///     });
+///   }
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     return BaseTabBar(
+///       key: ValueKey(_refreshKey), // Or use BaseTabBar.refreshKey()
+///       currentIndex: _currentIndex,
+///       // ...
+///     );
+///   }
+/// }
+/// ```
+/// 
+/// **Method 2: Use UniqueKey for Each Rebuild**
+/// ```dart
+/// BaseTabBar(
+///   key: UniqueKey(), // Creates new key on every build
+///   // ...
+/// )
+/// ```
+/// 
+/// **Method 3: Use the Static Helper**
+/// ```dart
+/// BaseTabBar(
+///   key: BaseTabBar.refreshKey(), // Generates unique key
+///   // ...
+/// )
+/// ```
+/// 
 /// Enhanced: 2024.01.20 with iOS 26 Liquid Glass Dynamic Material
 /// Enhanced: 2024.01.21 with Native iOS CNTabBar and SF Symbol integration
+/// Updated: 2024.10.30 - Added refresh documentation and helper methods
 class BaseTabBar extends BaseStatelessWidget { 
   const BaseTabBar({
     Key? key,
@@ -187,6 +238,21 @@ class BaseTabBar extends BaseStatelessWidget {
 
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
+  
+  /// Creates a unique key for forcing widget rebuild
+  /// 
+  /// Use this when you need to force the tab bar to rebuild,
+  /// for example when tabs or currentIndex are updated dynamically.
+  /// 
+  /// Example:
+  /// ```dart
+  /// BaseTabBar(
+  ///   key: BaseTabBar.refreshKey(),
+  ///   currentIndex: _currentIndex,
+  ///   items: _dynamicTabs,
+  /// )
+  /// ```
+  static Key refreshKey() => UniqueKey();
 
   /// Factory constructor for search-enabled tab bar
   const BaseTabBar.search({
