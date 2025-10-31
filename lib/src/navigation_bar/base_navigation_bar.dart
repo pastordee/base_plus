@@ -299,6 +299,7 @@ class BaseNavigationBarAction {
 /// - Large title mode support
 /// - Transparency with blur effects
 /// - Search functionality via factory constructor
+/// - Segmented control integration (iOS native)
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// - Automatic platform-specific conversion of actions
 /// 
@@ -329,6 +330,28 @@ class BaseNavigationBarAction {
 ///   tint: CupertinoColors.label,
 ///   transparent: false,
 ///   largeTitle: false,
+/// )
+/// ```
+/// 
+/// For segmented control, add the following parameters:
+/// ```dart
+/// BaseNavigationBar(
+///   title: 'Native Nav Bar',
+///   titleSize: 20,
+///   onTitlePressed: () => print('Title tapped!'),
+///   segmentedControlLabels: ['Notifications', 'Buddy Requests'],
+///   segmentedControlSelectedIndex: _selectedIndex,
+///   onSegmentedControlValueChanged: (index) {
+///     setState(() => _selectedIndex = index);
+///   },
+///   segmentedControlHeight: 40,
+///   segmentedControlTint: CupertinoColors.white,
+///   trailing: [
+///     BaseNavigationBarAction(
+///       icon: CNSymbol('gear'),
+///       onPressed: () => print('Settings'),
+///     ),
+///   ],
 /// )
 /// ```
 /// 
@@ -419,6 +442,11 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.titleSize,
     this.onTitlePressed,
     this.searchConfig,
+    this.segmentedControlLabels,
+    this.segmentedControlSelectedIndex,
+    this.onSegmentedControlValueChanged,
+    this.segmentedControlHeight,
+    this.segmentedControlTint,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
   
@@ -493,6 +521,22 @@ class BaseNavigationBar extends BaseStatelessWidget {
   /// Search configuration for search-enabled navigation bar
   final CNSearchConfig? searchConfig;
 
+  /// Labels for segmented control (iOS native)
+  /// When provided, displays a segmented control below the navigation bar
+  final List<String>? segmentedControlLabels;
+
+  /// Selected index for segmented control (iOS native)
+  final int? segmentedControlSelectedIndex;
+
+  /// Callback when segmented control value changes (iOS native)
+  final ValueChanged<int>? onSegmentedControlValueChanged;
+
+  /// Custom height for segmented control (iOS native)
+  final double? segmentedControlHeight;
+
+  /// Tint color for segmented control (iOS native)
+  final Color? segmentedControlTint;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
@@ -536,6 +580,11 @@ class BaseNavigationBar extends BaseStatelessWidget {
       height: valueOf('height', height),
       titleSize: valueOf('titleSize', titleSize),
       onTitlePressed: valueOf('onTitlePressed', onTitlePressed),
+      segmentedControlLabels: valueOf('segmentedControlLabels', segmentedControlLabels),
+      segmentedControlSelectedIndex: valueOf('segmentedControlSelectedIndex', segmentedControlSelectedIndex),
+      onSegmentedControlValueChanged: valueOf('onSegmentedControlValueChanged', onSegmentedControlValueChanged),
+      segmentedControlHeight: valueOf('segmentedControlHeight', segmentedControlHeight),
+      segmentedControlTint: valueOf('segmentedControlTint', segmentedControlTint),
     );
   }
 
