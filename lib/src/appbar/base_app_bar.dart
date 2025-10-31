@@ -393,6 +393,7 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     final Widget navBar = SafeArea(
       
       child: BaseNavigationBar(
+        key: valueOf('key', key), // Pass through the key for proper rebuild behavior
         leading: _leadingActions,
         title: _title,
         trailing: _trailingActions,
