@@ -81,6 +81,11 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     this.transparent = false,
     this.largeTitle = false,
     this.tint,
+    this.segmentedControlLabels,
+    this.segmentedControlSelectedIndex,
+    this.onSegmentedControlValueChanged,
+    this.segmentedControlHeight,
+    this.segmentedControlTint,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -270,6 +275,28 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   /// Used for text and icons in the navigation bar
   final Color? tint;
 
+  /// Labels for the segmented control in native iOS navigation bar
+  /// Use this when baseParam.nativeIOS is true
+  /// Example: ['Notifications', 'Buddy Requests']
+  final List<String>? segmentedControlLabels;
+
+  /// Currently selected index in the segmented control
+  /// Use this when baseParam.nativeIOS is true
+  final int? segmentedControlSelectedIndex;
+
+  /// Callback when segmented control value changes
+  /// Use this when baseParam.nativeIOS is true
+  /// Provides the newly selected index
+  final ValueChanged<int>? onSegmentedControlValueChanged;
+
+  /// Height of the segmented control in the navigation bar
+  /// Use this when baseParam.nativeIOS is true
+  final double? segmentedControlHeight;
+
+  /// Tint color for the segmented control
+  /// Use this when baseParam.nativeIOS is true
+  final Color? segmentedControlTint;
+
   /// *** native iOS properties end ***
 
   @override
@@ -401,6 +428,11 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
         transparent: _transparent,
         largeTitle: _largeTitle,
         height: _height,
+        segmentedControlLabels: valueOf('segmentedControlLabels', segmentedControlLabels),
+        segmentedControlSelectedIndex: valueOf('segmentedControlSelectedIndex', segmentedControlSelectedIndex),
+        onSegmentedControlValueChanged: valueOf('onSegmentedControlValueChanged', onSegmentedControlValueChanged),
+        segmentedControlHeight: valueOf('segmentedControlHeight', segmentedControlHeight),
+        segmentedControlTint: valueOf('segmentedControlTint', segmentedControlTint),
         baseParam: BaseParam(nativeIOS: true),
       ).build(context),
     );
