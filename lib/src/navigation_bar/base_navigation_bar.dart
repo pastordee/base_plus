@@ -22,6 +22,8 @@ class BaseNavigationBarAction {
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
+    this.badgeValue,
+    this.badgeColor,
   }) : popupMenuItems = null,
        onPopupMenuSelected = null,
        _isFixedSpace = false,
@@ -38,6 +40,8 @@ class BaseNavigationBarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        badgeValue = null,
+        badgeColor = null,
         popupMenuItems = null,
         onPopupMenuSelected = null,
         _isFixedSpace = true,
@@ -52,6 +56,8 @@ class BaseNavigationBarAction {
         padding = null,
         labelSize = null,
         iconSize = null,
+        badgeValue = null,
+        badgeColor = null,
         popupMenuItems = null,
         onPopupMenuSelected = null,
         _isFixedSpace = false,
@@ -68,6 +74,8 @@ class BaseNavigationBarAction {
     this.padding,
     this.labelSize = 15,
     this.iconSize = 16,
+    this.badgeValue,
+    this.badgeColor,
     bool usePopupMenuButton = false,
   }) : onPressed = null,
        _isFixedSpace = false,
@@ -95,6 +103,12 @@ class BaseNavigationBarAction {
 
   /// Icon size (iOS only)
   final double? iconSize;
+
+  /// Badge value to display on the action (iOS only)
+  final String? badgeValue;
+
+  /// Badge background color (iOS only)
+  final Color? badgeColor;
 
   /// Popup menu items to display when the action is pressed
   final List<BasePopupMenuItem>? popupMenuItems;
@@ -134,6 +148,8 @@ class BaseNavigationBarAction {
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
+    String? badgeValue,
+    Color? badgeColor,
   }) {
     return BaseNavigationBarAction._popupMenu(
       icon: icon,
@@ -144,6 +160,8 @@ class BaseNavigationBarAction {
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
+      badgeValue: badgeValue,
+      badgeColor: badgeColor,
       usePopupMenuButton: false,
     );
   }
@@ -158,6 +176,8 @@ class BaseNavigationBarAction {
     double? padding,
     double? labelSize = 15,
     double? iconSize = 16,
+    String? badgeValue,
+    Color? badgeColor,
   }) {
     return BaseNavigationBarAction._popupMenu(
       icon: icon,
@@ -168,6 +188,8 @@ class BaseNavigationBarAction {
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
+      badgeValue: badgeValue,
+      badgeColor: badgeColor,
       usePopupMenuButton: true,
     );
   }
@@ -225,6 +247,8 @@ class BaseNavigationBarAction {
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
+          badgeValue: badgeValue,
+          badgeColor: badgeColor,
         );
       } else {
         return CNNavigationBarAction.popupMenu(
@@ -236,6 +260,8 @@ class BaseNavigationBarAction {
           padding: padding,
           labelSize: labelSize,
           iconSize: iconSize,
+          badgeValue: badgeValue,
+          badgeColor: badgeColor,
         );
       }
     }
@@ -248,6 +274,8 @@ class BaseNavigationBarAction {
       padding: padding,
       labelSize: labelSize,
       iconSize: iconSize,
+      badgeValue: badgeValue,
+      badgeColor: badgeColor,
     );
   }
   
