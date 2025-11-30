@@ -1020,21 +1020,25 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
               label: 'B',
               icon: 'bold',
               isToggled: _isBold,
+              dismissOnTap: true,
             ),
             CNSheetInlineAction(
               label: 'I',
               icon: 'italic',
               isToggled: _isItalic,
+              dismissOnTap: false,
             ),
             CNSheetInlineAction(
               label: 'U',
               icon: 'underline',
               isToggled: _isUnderline,
+              dismissOnTap: false,
             ),
             CNSheetInlineAction(
               label: 'S',
               icon: 'strikethrough',
               isToggled: _isStrikethrough,
+              dismissOnTap: false,
             ),
           ],
         ),
@@ -1078,14 +1082,36 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
         ),
       ],
        onItemSelected: (index) {
-        print('${index} applied');
+        print('Item ${index} applied');
+        _set('Item ${index + 1} selected');
       },
       onItemRowSelected: (rowIndex, itemIndex) {
-        print('${itemIndex} tapped');
+        print('Item row - row: $rowIndex, item: $itemIndex');
+        _set('Item row selected: row $rowIndex, item $itemIndex');
       },
       onInlineActionSelected: (rowIndex, inlineActionIndex) {
         setState(() {
-          print('${inlineActionIndex} applied');
+          print('Inline action: row $rowIndex, action $inlineActionIndex');
+          
+          // Toggle the corresponding state
+          switch (inlineActionIndex) {
+            case 0: // Bold
+              _isBold = !_isBold;
+              _set('Bold toggled: $_isBold');
+              break;
+            case 1: // Italic
+              _isItalic = !_isItalic;
+              _set('Italic toggled: $_isItalic');
+              break;
+            case 2: // Underline
+              _isUnderline = !_isUnderline;
+              _set('Underline toggled: $_isUnderline');
+              break;
+            case 3: // Strikethrough
+              _isStrikethrough = !_isStrikethrough;
+              _set('Strikethrough toggled: $_isStrikethrough');
+              break;
+          }
         });
       },
     );

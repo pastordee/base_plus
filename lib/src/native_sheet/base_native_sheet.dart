@@ -311,12 +311,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         prefersEdgeAttachedInCompactHeight: prefersEdgeAttachedInCompactHeight,
         widthFollowsPreferredContentSizeWhenEdgeAttached: widthFollowsPreferredContentSizeWhenEdgeAttached,
         preferredCornerRadius: preferredCornerRadius,
-        onInlineActionSelected: (rowIndex, actionIndex) {
-          // Invoke the user's callback
-          onInlineActionSelected?.call(rowIndex, actionIndex);
-          // Dismiss the sheet after inline action selection
-          Navigator.of(context).pop();
-        },
+        onInlineActionSelected: onInlineActionSelected,
         onItemSelected: onItemSelected,
         onItemRowSelected: onItemRowSelected,
         headerTitleSize: headerTitleSize,
