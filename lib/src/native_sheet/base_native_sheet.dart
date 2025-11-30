@@ -311,7 +311,12 @@ class BaseNativeSheet extends BaseStatelessWidget {
         prefersEdgeAttachedInCompactHeight: prefersEdgeAttachedInCompactHeight,
         widthFollowsPreferredContentSizeWhenEdgeAttached: widthFollowsPreferredContentSizeWhenEdgeAttached,
         preferredCornerRadius: preferredCornerRadius,
-        onInlineActionSelected: onInlineActionSelected,
+        onInlineActionSelected: (rowIndex, actionIndex) {
+          // Invoke the user's callback
+          onInlineActionSelected?.call(rowIndex, actionIndex);
+          // Dismiss the sheet after inline action selection
+          Navigator.of(context).pop();
+        },
         onItemSelected: onItemSelected,
         onItemRowSelected: onItemRowSelected,
         headerTitleSize: headerTitleSize,
@@ -626,6 +631,70 @@ class _NativeSheetMaterial {
                   ],
                 ),
               ),
+              
+              // Inline action buttons (horizontal rows of buttons)
+              ...inlineActions.asMap().entries.map((rowEntry) {
+                final rowIndex = rowEntry.key;
+                final actionRow = rowEntry.value;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: actionRow.actions.asMap().entries.map((actionEntry) {
+                      final actionIndex = actionEntry.key;
+                      final action = actionEntry.value;
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Material(
+                            color: action.backgroundColor ?? Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            child: InkWell(
+                              onTap: action.enabled ? () {
+                                onInlineActionSelected?.call(rowIndex, actionIndex);
+                              } : null,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: action.isToggled ? theme.colorScheme.primary : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (action.icon != null)
+                                      Icon(
+                                        _MaterialSheetHelper._getIconData(action.icon!),
+                                        size: 20,
+                                        color: action.enabled ? theme.colorScheme.primary : Colors.grey,
+                                      ),
+                                    if (action.label.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          action.label,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: action.enabled ? theme.colorScheme.onSurface : Colors.grey,
+                                            fontWeight: action.isToggled ? FontWeight.bold : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }).toList(),
               
               // Items
               ...items.asMap().entries.map((entry) {
