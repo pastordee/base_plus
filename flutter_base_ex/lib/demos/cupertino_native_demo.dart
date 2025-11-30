@@ -925,7 +925,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
 
   // Native Sheet Methods
   Future<void> _showNativeSheet() async {
-    final selectedIndex = await BaseNativeSheet.show(
+    print('Opening native sheet...');
+    
+    await BaseNativeSheet.show(
       context: context,
       title: 'Settings',
       message: 'Configure your app preferences',
@@ -934,16 +936,15 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
         const CNSheetItem(title: 'Appearance', icon: 'moon'),
         const CNSheetItem(title: 'Notifications', icon: 'bell'),
       ],
+      onItemSelected: (index) {
+        print('onItemSelected callback fired with index: $index');
+        _set('Modal sheet: Item ${index + 1} selected');
+      },
       detents: [CNSheetDetent.medium],
       prefersGrabberVisible: true,
     );
     
-    if (selectedIndex != null) {
-      final options = ['Brightness', 'Appearance', 'Notifications'];
-      _set('Sheet selected: ${options[selectedIndex]}');
-    } else {
-      _set('Sheet dismissed');
-    }
+    
   }
 
   Future<void> _showNonmodalSheet() async {
@@ -958,6 +959,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       detents: [CNSheetDetent.custom(280)],
       isModal: false, // Nonmodal - allows background interaction
       prefersGrabberVisible: true,
+      onItemSelected: (int index) {
+        print('onItemSelected callback fired with index: $index');
+      },
     );
     
     if (selectedIndex != null) {
@@ -969,7 +973,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   }
 
   Future<void> _showCustomHeaderSheet() async {
-    final selectedIndex = await BaseNativeSheet.showWithCustomHeader(
+     await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Custom Header',
       headerTitleSize: 18,
@@ -980,15 +984,20 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
         const CNSheetItem(title: 'Option 2', icon: 'heart'),
         const CNSheetItem(title: 'Option 3', icon: 'bookmark'),
       ],
+      onItemSelected: (index) {
+        _set('Custom header option ${index + 1} selected');
+        print(  'Custom header option ${index + 1} selected'); // Debug
+      },
       detents: [CNSheetDetent.custom(320)],
       isModal: false,
     );
+
     
-    if (selectedIndex != null) {
-      _set('Custom header option ${selectedIndex + 1} selected');
-    } else {
-      _set('Custom header sheet dismissed');
-    }
+    // if (selectedIndex != null) {
+    //   _set('Custom header option ${selectedIndex + 1} selected');
+    // } else {
+    //   _set('Custom header sheet dismissed');
+    // }
   }
 
   void _showFormatSheet() {
@@ -1030,30 +1039,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           ],
         ),
       ],
-      onInlineActionSelected: (actionIndex, inlineActionIndex) {
-        setState(() {
-          _lastInlineAction = 'Row $actionIndex, Button $inlineActionIndex pressed';
-          // Toggle the formatting state based on which button was pressed
-          switch (inlineActionIndex) {
-            case 0:
-              _isBold = !_isBold;
-              _showMessage('Bold ${_isBold ? 'enabled' : 'disabled'}');
-              break;
-            case 1:
-              _isItalic = !_isItalic;
-              _showMessage('Italic ${_isItalic ? 'enabled' : 'disabled'}');
-              break;
-            case 2:
-              _isUnderline = !_isUnderline;
-              _showMessage('Underline ${_isUnderline ? 'enabled' : 'disabled'}');
-              break;
-            case 3:
-              _isStrikethrough = !_isStrikethrough;
-              _showMessage('Strikethrough ${_isStrikethrough ? 'enabled' : 'disabled'}');
-              break;
-          }
-        });
-      },
+      
       // Item rows - side-by-side buttons with equal widths
       itemRows: const [
         CNSheetItemRow(
@@ -1061,46 +1047,47 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
             CNSheetItem(
               title: 'Reset All',
               icon: 'arrow.counterclockwise',
+              dismissOnTap: false
             ),
             CNSheetItem(
               title: 'Copy Format',
               icon: 'doc.on.clipboard',
+              dismissOnTap: false
             ),
           ],
         ),
       ],
-      onItemSelected: (itemIndex) {
-        if (itemIndex == 0) {
-          // Reset All
-          setState(() {
-            _isBold = false;
-            _isItalic = false;
-            _isUnderline = false;
-            _isStrikethrough = false;
-            _lastInlineAction = '';
-          });
-          _showMessage('All formatting reset');
-        } else {
-          // Copy Format
-          Navigator.pop(context);
-          _showMessage('Format copied to clipboard');
-        }
-      },
+      
+     
       // Regular list items
       items: const [
         CNSheetItem(
           title: 'Font Size',
           icon: 'textformat.size',
+          dismissOnTap: false
         ),
         CNSheetItem(
           title: 'Text Color',
           icon: 'paintpalette',
+          dismissOnTap: false
         ),
         CNSheetItem(
           title: 'Background Color',
           icon: 'paintbrush.fill',
+          dismissOnTap: false
         ),
       ],
+       onItemSelected: (index) {
+        print('${index} applied');
+      },
+      onItemRowSelected: (rowIndex, itemIndex) {
+        print('${itemIndex} tapped');
+      },
+      onInlineActionSelected: (rowIndex, inlineActionIndex) {
+        setState(() {
+          print('${inlineActionIndex} applied');
+        });
+      },
     );
   }
 
@@ -1222,7 +1209,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               child: BaseToolbar(
                 middleAlignment: _middleAlignment,
                 leading: [
-                  BaseToolbarAction(
+                  BaseToolbarAction( 
                     // iconSize: 15,
                     icon: const CNSymbol('chevron.left'),
                     onPressed: () => Navigator.of(context).pop(),

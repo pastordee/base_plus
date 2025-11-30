@@ -124,6 +124,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
     Color? itemBackgroundColor,
     Color? itemTextColor,
     Color? itemTintColor,
+    void Function(int index)? onItemSelected,
     BaseParam? baseParam,
   }) async {
     final param = baseParam ?? BaseParam();
@@ -133,7 +134,8 @@ class BaseNativeSheet extends BaseStatelessWidget {
                         (!param.forceUseMaterial && _shouldUseCupertino());
     
     if (useCupertino) {
-      return await _NativeSheetCupertino.show(
+      // Delegate directly to cupertino_native's CNSheet
+      return await CNSheet.show(
         context: context,
         title: title,
         message: message,
@@ -147,6 +149,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         itemBackgroundColor: itemBackgroundColor,
         itemTextColor: itemTextColor,
         itemTintColor: itemTintColor,
+        onItemSelected: onItemSelected,
       );
     } else {
       return await _NativeSheetMaterial.show(
@@ -163,6 +166,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         itemBackgroundColor: itemBackgroundColor,
         itemTextColor: itemTextColor,
         itemTintColor: itemTintColor,
+        onItemSelected: onItemSelected,
       );
     }
   }
@@ -248,6 +252,8 @@ class BaseNativeSheet extends BaseStatelessWidget {
     required BuildContext context,
     required String title,
     String? subtitle,
+    double? subtitleSize,
+    Color? subtitleColor,
     String? message,
     List<CNSheetItem> items = const [],
     List<CNSheetItemRow> itemRows = const [],
@@ -261,11 +267,13 @@ class BaseNativeSheet extends BaseStatelessWidget {
     // Callbacks
     void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
     void Function(int index)? onItemSelected,
+    void Function(int rowIndex, int itemIndex)? onItemRowSelected,
+    
     // Header styling
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
-    String? headerTitleAlignment,
+    String headerTitleAlignment = 'left',
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -287,10 +295,12 @@ class BaseNativeSheet extends BaseStatelessWidget {
                         (!param.forceUseMaterial && _shouldUseCupertino());
     
     if (useCupertino) {
-      return await _NativeSheetCupertino.showWithCustomHeader(
+      return await CNSheet.showWithCustomHeader(
         context: context,
         title: title,
         subtitle: subtitle,
+        subtitleSize: subtitleSize,
+        subtitleColor: subtitleColor,
         message: message,
         items: items,
         itemRows: itemRows,
@@ -303,6 +313,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         preferredCornerRadius: preferredCornerRadius,
         onInlineActionSelected: onInlineActionSelected,
         onItemSelected: onItemSelected,
+        onItemRowSelected: onItemRowSelected,
         headerTitleSize: headerTitleSize,
         headerTitleWeight: headerTitleWeight,
         headerTitleColor: headerTitleColor,
@@ -324,6 +335,8 @@ class BaseNativeSheet extends BaseStatelessWidget {
         context: context,
         title: title,
         subtitle: subtitle,
+        subtitleSize: subtitleSize,
+        subtitleColor: subtitleColor,
         message: message,
         items: items,
         itemRows: itemRows,
@@ -336,6 +349,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         preferredCornerRadius: preferredCornerRadius,
         onInlineActionSelected: onInlineActionSelected,
         onItemSelected: onItemSelected,
+        onItemRowSelected: onItemRowSelected,
         headerTitleSize: headerTitleSize,
         headerTitleWeight: headerTitleWeight,
         headerTitleColor: headerTitleColor,
@@ -369,195 +383,9 @@ class BaseNativeSheet extends BaseStatelessWidget {
   }
 }
 
-/// Cupertino implementation using native UISheetPresentationController
-class _NativeSheetCupertino {
-  static const MethodChannel _channel = MethodChannel('cupertino_native_sheet');
-  static const MethodChannel _customChannel = MethodChannel('cupertino_native_custom_sheet');
-
-  /// Shows a native sheet with the given content.
-  static Future<int?> show({
-    required BuildContext context,
-    String? title,
-    String? message,
-    List<CNSheetItem> items = const [],
-    List<CNSheetDetent> detents = const [CNSheetDetent.large],
-    bool prefersGrabberVisible = true,
-    bool isModal = true,
-    bool prefersEdgeAttachedInCompactHeight = false,
-    bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
-    double? preferredCornerRadius,
-    Color? itemBackgroundColor,
-    Color? itemTextColor,
-    Color? itemTintColor,
-  }) async {
-    try {
-      final result = await _channel.invokeMethod('showSheet', {
-        'title': title,
-        'message': message,
-        'items': items.map((item) => item.toMap()).toList(),
-        'detents': detents.map((d) => d.toMap()).toList(),
-        'prefersGrabberVisible': prefersGrabberVisible,
-        'isModal': isModal,
-        'prefersEdgeAttachedInCompactHeight': prefersEdgeAttachedInCompactHeight,
-        'widthFollowsPreferredContentSizeWhenEdgeAttached': widthFollowsPreferredContentSizeWhenEdgeAttached,
-        'preferredCornerRadius': preferredCornerRadius,
-        if (itemBackgroundColor != null) 'itemBackgroundColor': itemBackgroundColor.value,
-        if (itemTextColor != null) 'itemTextColor': itemTextColor.value,
-        if (itemTintColor != null) 'itemTintColor': itemTintColor.value,
-      });
-      
-      if (result is Map) {
-        return result['selectedIndex'] as int?;
-      }
-      return null;
-    } catch (e) {
-      debugPrint('Error showing native sheet: $e');
-      return null;
-    }
-  }
-
-  /// Shows a native sheet with custom header (title + close button).
-  static Future<int?> showWithCustomHeader({
-    required BuildContext context,
-    required String title,
-    String? subtitle,
-    String? message,
-    List<CNSheetItem> items = const [],
-    List<CNSheetItemRow> itemRows = const [],
-    List<CNSheetInlineActions> inlineActions = const [],
-    List<CNSheetDetent> detents = const [CNSheetDetent.large],
-    bool prefersGrabberVisible = true,
-    bool isModal = true,
-    bool prefersEdgeAttachedInCompactHeight = false,
-    bool widthFollowsPreferredContentSizeWhenEdgeAttached = false,
-    double? preferredCornerRadius,
-    void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
-    void Function(int index)? onItemSelected,
-    double? headerTitleSize,
-    FontWeight? headerTitleWeight,
-    Color? headerTitleColor,
-    String? headerTitleAlignment,
-    double? headerHeight,
-    Color? headerBackgroundColor,
-    bool showHeaderDivider = true,
-    Color? headerDividerColor,
-    String closeButtonPosition = 'trailing',
-    String closeButtonIcon = 'xmark',
-    double? closeButtonSize,
-    Color? closeButtonColor,
-    Color? itemBackgroundColor,
-    Color? itemTextColor,
-    Color? itemTintColor,
-  }) async {
-    try {
-      final result = await _customChannel.invokeMethod('showSheet', {
-        'title': title,
-        if (subtitle != null) 'subtitle': subtitle,
-        'message': message,
-        'items': items.map((item) => item.toMap()).toList(),
-        'itemRows': _serializeItemRows(itemRows),
-        'inlineActions': _serializeInlineActions(inlineActions),
-        'detents': detents.map((d) => d.toMap()).toList(),
-        'prefersGrabberVisible': prefersGrabberVisible,
-        'isModal': isModal,
-        'prefersEdgeAttachedInCompactHeight': prefersEdgeAttachedInCompactHeight,
-        'widthFollowsPreferredContentSizeWhenEdgeAttached': widthFollowsPreferredContentSizeWhenEdgeAttached,
-        'preferredCornerRadius': preferredCornerRadius,
-        if (headerTitleSize != null) 'headerTitleSize': headerTitleSize,
-        if (headerTitleWeight != null) 'headerTitleWeight': _fontWeightToString(headerTitleWeight),
-        if (headerTitleColor != null) 'headerTitleColor': headerTitleColor.value,
-        if (headerTitleAlignment != null) 'headerTitleAlignment': headerTitleAlignment,
-        if (headerHeight != null) 'headerHeight': headerHeight,
-        if (headerBackgroundColor != null) 'headerBackgroundColor': headerBackgroundColor.value,
-        'showHeaderDivider': showHeaderDivider,
-        if (headerDividerColor != null) 'headerDividerColor': headerDividerColor.value,
-        'closeButtonPosition': closeButtonPosition,
-        'closeButtonIcon': closeButtonIcon,
-        if (closeButtonSize != null) 'closeButtonSize': closeButtonSize,
-        if (closeButtonColor != null) 'closeButtonColor': closeButtonColor.value,
-        if (itemBackgroundColor != null) 'itemBackgroundColor': itemBackgroundColor.value,
-        if (itemTextColor != null) 'itemTextColor': itemTextColor.value,
-        if (itemTintColor != null) 'itemTintColor': itemTintColor.value,
-      });
-      
-      if (result is Map) {
-        if (result.containsKey('inlineActionSelected')) {
-          final rowIndex = result['inlineActionRow'] as int;
-          final actionIndex = result['inlineActionIndex'] as int;
-          onInlineActionSelected?.call(rowIndex, actionIndex);
-        }
-        
-        if (result.containsKey('itemSelected')) {
-          final index = result['itemIndex'] as int;
-          onItemSelected?.call(index);
-        }
-        
-        return result['selectedIndex'] as int?;
-      }
-      return null;
-    } catch (e) {
-      debugPrint('Error showing native custom header sheet: $e');
-      return null;
-    }
-  }
-
-  static String _fontWeightToString(FontWeight weight) {
-    if (weight == FontWeight.w100) return 'ultraLight';
-    if (weight == FontWeight.w200) return 'thin';
-    if (weight == FontWeight.w300) return 'light';
-    if (weight == FontWeight.w400) return 'regular';
-    if (weight == FontWeight.w500) return 'medium';
-    if (weight == FontWeight.w600) return 'semibold';
-    if (weight == FontWeight.w700) return 'bold';
-    if (weight == FontWeight.w800) return 'heavy';
-    if (weight == FontWeight.w900) return 'black';
-    return 'regular';
-  }
-
-  static List<Map<String, dynamic>> _serializeItemRows(List<CNSheetItemRow> itemRows) {
-    return itemRows.map((row) {
-      return {
-        'items': row.items.map((item) => item.toMap()).toList(),
-        if (row.spacing != null) 'spacing': row.spacing,
-        if (row.height != null) 'height': row.height,
-      };
-    }).toList();
-  }
-
-  static List<Map<String, dynamic>> _serializeInlineActions(List<CNSheetInlineActions> inlineActions) {
-    return inlineActions.map((actionGroup) {
-      final actionMaps = actionGroup.actions.map((action) {
-        final map = <String, dynamic>{
-          'label': action.label,
-          'icon': action.icon,
-          'enabled': action.enabled,
-          'isToggled': action.isToggled,
-        };
-        if (action.backgroundColor != null) map['backgroundColor'] = action.backgroundColor!.value;
-        if (action.width != null) map['width'] = action.width;
-        if (action.iconSize != null) map['iconSize'] = action.iconSize;
-        if (action.labelSize != null) map['labelSize'] = action.labelSize;
-        if (action.cornerRadius != null) map['cornerRadius'] = action.cornerRadius;
-        if (action.iconLabelSpacing != null) map['iconLabelSpacing'] = action.iconLabelSpacing;
-        return map;
-      }).toList();
-
-      return {
-        'actions': actionMaps,
-        if (actionGroup.spacing != null) 'spacing': actionGroup.spacing,
-        if (actionGroup.horizontalPadding != null) 'horizontalPadding': actionGroup.horizontalPadding,
-        if (actionGroup.verticalPadding != null) 'verticalPadding': actionGroup.verticalPadding,
-        if (actionGroup.height != null) 'height': actionGroup.height,
-      };
-    }).toList();
-  }
-}
-
-/// Material implementation using bottom sheets
+/// Material implementation as fallback for non-iOS platforms
 class _NativeSheetMaterial {
-  // [Implementation remains the same as in the original file - Material fallback bottom sheet]
-  // Including the same Material implementations from BaseCNNativeSheet's _CNNativeSheetMaterial class
-  
+  /// Shows a native sheet with the given content (Material fallback).
   static Future<int?> show({
     required BuildContext context,
     String? title,
@@ -572,10 +400,10 @@ class _NativeSheetMaterial {
     Color? itemBackgroundColor,
     Color? itemTextColor,
     Color? itemTintColor,
+    void Function(int index)? onItemSelected,
   }) async {
-    final theme = Theme.of(context);
-    
     int? selectedIndex;
+    final theme = Theme.of(context);
     
     await showModalBottomSheet<int>(
       context: context,
@@ -642,12 +470,13 @@ class _NativeSheetMaterial {
                 ),
                 leading: item.icon != null
                   ? Icon(
-                      _getIconData(item.icon!),
+                      _MaterialSheetHelper._getIconData(item.icon!),
                       color: itemTintColor ?? theme.colorScheme.primary,
                     )
                   : null,
                 onTap: () {
                   selectedIndex = index;
+                  onItemSelected?.call(index);
                   if (item.dismissOnTap) {
                     Navigator.of(context).pop();
                   }
@@ -665,10 +494,13 @@ class _NativeSheetMaterial {
     return selectedIndex;
   }
 
+  /// Shows a native sheet with custom header (title + close button - Material fallback).
   static Future<int?> showWithCustomHeader({
     required BuildContext context,
     required String title,
     String? subtitle,
+    double? subtitleSize,
+    Color? subtitleColor,
     String? message,
     List<CNSheetItem> items = const [],
     List<CNSheetItemRow> itemRows = const [],
@@ -681,10 +513,11 @@ class _NativeSheetMaterial {
     double? preferredCornerRadius,
     void Function(int rowIndex, int actionIndex)? onInlineActionSelected,
     void Function(int index)? onItemSelected,
+    void Function(int rowIndex, int itemIndex)? onItemRowSelected,
     double? headerTitleSize,
     FontWeight? headerTitleWeight,
     Color? headerTitleColor,
-    String? headerTitleAlignment,
+    String headerTitleAlignment = 'left',
     double? headerHeight,
     Color? headerBackgroundColor,
     bool showHeaderDivider = true,
@@ -697,11 +530,181 @@ class _NativeSheetMaterial {
     Color? itemTextColor,
     Color? itemTintColor,
   }) async {
-    // Same implementation as original _CNNativeSheetMaterial.showWithCustomHeader
-    // [Truncated for brevity - full implementation would be copied from original]
-    return null; // Placeholder
+    int? selectedIndex;
+    final theme = Theme.of(context);
+    
+    await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: !isModal,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: headerBackgroundColor ?? theme.colorScheme.surface,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(preferredCornerRadius ?? 20),
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (prefersGrabberVisible)
+                Container(
+                  margin: const EdgeInsets.only(top: 8, bottom: 4),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              
+              // Header with title, subtitle, and close button
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: headerBackgroundColor ?? theme.colorScheme.surface,
+                  border: showHeaderDivider
+                      ? Border(
+                          bottom: BorderSide(
+                            color: headerDividerColor ?? theme.colorScheme.outlineVariant,
+                          ),
+                        )
+                      : null,
+                ),
+                child: Row(
+                  mainAxisAlignment: closeButtonPosition == 'leading' ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (closeButtonPosition == 'leading')
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Icon(
+                          _MaterialSheetHelper._getIconData(closeButtonIcon),
+                          size: closeButtonSize ?? 24,
+                          color: closeButtonColor ?? theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    Expanded(
+                      child: Padding(
+                        padding: closeButtonPosition == 'leading' ? const EdgeInsets.only(left: 16) : EdgeInsets.zero,
+                        child: Column(
+                          crossAxisAlignment: headerTitleAlignment == 'center' ? CrossAxisAlignment.center : (headerTitleAlignment == 'right' ? CrossAxisAlignment.end : CrossAxisAlignment.start),
+                          children: [
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: headerTitleSize ?? 18,
+                                fontWeight: headerTitleWeight ?? FontWeight.bold,
+                                color: headerTitleColor ?? theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            if (subtitle != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  subtitle,
+                                  style: TextStyle(
+                                    fontSize: subtitleSize ?? 14,
+                                    color: subtitleColor ?? theme.colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (closeButtonPosition == 'trailing')
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Icon(
+                          _MaterialSheetHelper._getIconData(closeButtonIcon),
+                          size: closeButtonSize ?? 24,
+                          color: closeButtonColor ?? theme.colorScheme.onSurface,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              
+              // Items
+              ...items.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                
+                return ListTile(
+                  title: Text(
+                    item.title ?? '',
+                    style: TextStyle(
+                      color: itemTextColor ?? theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  leading: item.icon != null
+                    ? Icon(
+                        _MaterialSheetHelper._getIconData(item.icon!),
+                        color: itemTintColor ?? theme.colorScheme.primary,
+                      )
+                    : null,
+                  tileColor: itemBackgroundColor,
+                  onTap: () {
+                    selectedIndex = index;
+                    onItemSelected?.call(index);
+                    if (item.dismissOnTap) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                );
+              }).toList(),
+              
+              // Item Rows
+              ...itemRows.asMap().entries.map((rowEntry) {
+                final rowIndex = rowEntry.key;
+                final row = rowEntry.value;
+                return Wrap(
+                  children: row.items.asMap().entries.map((itemEntry) {
+                    final itemIndex = itemEntry.key;
+                    final item = itemEntry.value;
+                    return Expanded(
+                      child: ListTile(
+                        title: Text(
+                          item.title ?? '',
+                          style: TextStyle(
+                            color: itemTextColor ?? theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        leading: item.icon != null
+                          ? Icon(
+                              _MaterialSheetHelper._getIconData(item.icon!),
+                              color: itemTintColor ?? theme.colorScheme.primary,
+                            )
+                          : null,
+                        tileColor: itemBackgroundColor,
+                        onTap: () {
+                          selectedIndex = rowIndex;
+                          onItemRowSelected?.call(rowIndex, itemIndex);
+                          if (item.dismissOnTap) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                    );
+                  }).toList(),
+                );
+              }).toList(),
+              
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+            ],
+          ),
+        ),
+      ),
+    );
+    
+    return selectedIndex;
   }
+}
 
+/// Helper class for Material sheet icon mapping
+class _MaterialSheetHelper {
   static IconData _getIconData(String iconName) {
     switch (iconName) {
       case 'sun.max': return Icons.wb_sunny;
@@ -709,6 +712,13 @@ class _NativeSheetMaterial {
       case 'bold': return Icons.format_bold;
       case 'italic': return Icons.format_italic;
       case 'underline': return Icons.format_underlined;
+      case 'strikethrough': return Icons.strikethrough_s;
+      case 'star': return Icons.star;
+      case 'heart': return Icons.favorite;
+      case 'bookmark': return Icons.bookmark;
+      case 'pencil': return Icons.edit;
+      case 'trash': return Icons.delete;
+      case 'gear': return Icons.settings;
       default: return Icons.circle;
     }
   }
