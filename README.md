@@ -339,14 +339,40 @@ BasePopupMenuButton.icon(
 
 ## 📱 Platform Adaptation
 
-| Feature | iOS | Android | Web |
-|---------|-----|---------|-----|
-| BaseButton | CupertinoButton | Material 3 Button | Material Button |
-| Native Sheets | ✅ UISheetPresentationController | ❌ Material BottomSheet | ❌ Material BottomSheet |
-| Native Toolbar | ✅ UIToolbar | ❌ Material AppBar | ❌ Material AppBar |
-| Native Navigation | ✅ UINavigationBar | ❌ Material AppBar | ❌ Material AppBar |
-| SF Symbols | ✅ Native | ⚠️ Fallback Icons | ⚠️ Fallback Icons |
-| Pull-down Menu | ✅ Native UIButton Menu | ❌ Material Popup | ❌ Material Popup |
+### Complete Cross-Platform Support
+
+| Component | iOS | Android | Web |
+|-----------|-----|---------|-----|
+| **BaseButton** | ✅ CupertinoButton | ✅ Material 3 FilledButton | ✅ Material 3 FilledButton |
+| **Native Sheets** | ✅ UISheetPresentationController | ✅ Material BottomSheet | ✅ Material BottomSheet |
+| **Native Toolbar** | ✅ UIToolbar | ✅ Material AppBar | ✅ Material AppBar |
+| **Native Navigation** | ✅ UINavigationBar | ✅ Material AppBar | ✅ Material AppBar |
+| **Pull-down Menu** | ✅ Native UIButton Menu | ✅ Material 3 PopupMenu | ✅ Material 3 PopupMenu |
+| **SF Symbols** | ✅ Native Symbols | ✅ Material Icon Fallback (400+) | ✅ Material Icon Fallback (400+) |
+
+### Design System Details
+
+| Platform | Design System | Button Style | Navigation | Icons |
+|----------|---------------|--------------|------------|-------|
+| iOS | Cupertino + iOS 16+ | CupertinoButton (iOS 16+ style) | Native iOS navigation | SF Symbols (Native) |
+| Android | Material 3 (Material You) | FilledButton (Material You) | Material navigation | Material Icons (400+ mappings) |
+| Web | Material 3 (Responsive) | Responsive design | Modern web experience | Material Icons (400+ mappings) |
+
+### SF Symbol Fallback System
+All SF Symbols used on iOS automatically fallback to Material Icons on Android and Web:
+- **400+ Symbol Mappings**: Comprehensive coverage of common SF Symbols
+- **Smart Fallbacks**: Intelligent matching of iOS symbols to Material equivalents
+- **Automatic Conversion**: No manual mapping needed, works transparently
+
+**Supported Symbol Categories:**
+- Navigation (chevron, arrow variants)
+- Media & Editing (camera, photo, pencil, trash)
+- Communication (envelope, phone, message, bell)
+- File Management (doc, folder variants)
+- Text Formatting (bold, italic, underline, strikethrough)
+- Layout (grid, list variants)
+- Time & Date (clock, calendar)
+- Favorites (star, heart, bookmark)
 
 ## 🔄 Migration Guide
 
