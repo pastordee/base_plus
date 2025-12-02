@@ -16,7 +16,7 @@ dependencies:
 
 ### 2. Enable GetX in BaseApp
 ```dart
-import 'package:base/base.dart';
+import 'package:base_plus/base.dart';
 import 'package:get/get.dart';
 
 BaseApp(

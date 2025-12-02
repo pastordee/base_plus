@@ -37,7 +37,7 @@ dependencies:
 ### Basic Usage
 
 ```dart
-import 'package:base/base.dart';
+import 'package:base_plus/base.dart';
 
 BaseApp(
   title: 'My App',

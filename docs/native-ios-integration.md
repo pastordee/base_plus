@@ -133,7 +133,7 @@ See `lib/src/tabbar/base_native_tab_bar_item.dart` for the complete list.
 ## Complete Example
 
 ```dart
-import 'package:base/base.dart';
+import 'package:base_plus/base.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {

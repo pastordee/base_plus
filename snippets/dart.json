@@ -124,7 +124,7 @@
 	"StatelessWidgetClass with BaseScaffold": {
     "prefix": "slbsc",
     "body": [
-			"import 'package:base/base.dart';",
+			"import 'package:base_plus/base.dart';",
 			"import 'package:flutter/widgets.dart';",
       "\nclass ${1:WidgetName} extends StatelessWidget {",
       "\t@override",
@@ -164,7 +164,7 @@
 	"StatefulWidgetClass with BaseScaffold": {
     "prefix": "sfbsc",
     "body": [
-			"import 'package:base/base.dart';",
+			"import 'package:base_plus/base.dart';",
 			"import 'package:flutter/widgets.dart';",
       "\nclass ${1:WidgetName} extends StatefulWidget {",
       "\t@override",
