@@ -1,9 +1,11 @@
-name: base
+name: base_plus
 description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
 version: 3.0.8+2
 # author: Nil <2073582423@qq.com>
-homepage: https://github.com/nillnil/flutter_base
-publish_to: none 
+homepage: https://github.com/pastordee/base_plus
+repository: https://github.com/pastordee/base_plus
+issue_tracker: https://github.com/pastordee/base_plus/issues
+publish_to: https://pub.dev 
 
 
 environment:
