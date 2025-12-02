@@ -855,17 +855,139 @@ class BaseNavigationBar extends BaseStatelessWidget {
 
   IconData _mapSFSymbolToMaterialIcon(String sfSymbol) {
     final Map<String, IconData> iconMap = {
+      // Navigation
       'chevron.left': Icons.chevron_left,
       'chevron.right': Icons.chevron_right,
+      'chevron.up': Icons.keyboard_arrow_up,
+      'chevron.down': Icons.keyboard_arrow_down,
+      'arrow.left': Icons.arrow_back,
+      'arrow.right': Icons.arrow_forward,
+      'arrow.up.left': Icons.north_west,
+      'arrow.down.right': Icons.south_east,
+      
+      // Common Actions
       'plus': Icons.add,
+      'plus.circle': Icons.add_circle,
+      'plus.circle.fill': Icons.add_circle,
+      'minus': Icons.remove,
+      'minus.circle': Icons.remove_circle,
+      'xmark': Icons.close,
+      'xmark.circle': Icons.cancel,
+      'checkmark': Icons.check,
+      'checkmark.circle': Icons.check_circle,
+      
+      // Settings
       'gear': Icons.settings,
       'gearshape': Icons.settings,
+      'gearshape.fill': Icons.settings,
+      'slider.horizontal.3': Icons.tune,
+      'slider.horizontal': Icons.tune,
+      
+      // Menu & Navigation
+      'ellipsis': Icons.more_horiz,
       'ellipsis.circle': Icons.more_vert,
-      'star.fill': Icons.star,
-      'star': Icons.star_border,
-      'magnifyingglass': Icons.search,
+      'apps': Icons.apps,
       'apps.iphone': Icons.apps,
-      // Add more mappings as needed
+      
+      // Favorites & Interactions
+      'star': Icons.star_border,
+      'star.fill': Icons.star,
+      'heart': Icons.favorite_border,
+      'heart.fill': Icons.favorite,
+      'bookmark': Icons.bookmark_border,
+      'bookmark.fill': Icons.bookmark,
+      
+      // Search & Find
+      'magnifyingglass': Icons.search,
+      'magnifyingglass.circle': Icons.search,
+      
+      // Home & Places
+      'house': Icons.home,
+      'house.fill': Icons.home,
+      'building.2': Icons.apartment,
+      'location': Icons.location_on,
+      'location.circle': Icons.location_on,
+      'location.fill': Icons.location_on,
+      
+      // Communication
+      'envelope': Icons.email,
+      'envelope.open': Icons.mail_outline,
+      'phone': Icons.phone,
+      'phone.fill': Icons.phone,
+      'message': Icons.message,
+      'message.circle': Icons.chat_bubble,
+      'bell': Icons.notifications,
+      'bell.fill': Icons.notifications_active,
+      'bell.badge': Icons.notifications_active,
+      
+      // Media
+      'camera': Icons.camera_alt,
+      'camera.fill': Icons.camera_alt,
+      'photo': Icons.photo,
+      'photo.on.rectangle': Icons.image,
+      'photo.fill': Icons.image,
+      'video': Icons.videocam,
+      'video.fill': Icons.videocam,
+      'music.note': Icons.music_note,
+      'music.note.list': Icons.playlist_play,
+      
+      // Files & Folders
+      'doc': Icons.insert_drive_file,
+      'doc.on.doc': Icons.content_copy,
+      'doc.circle': Icons.insert_drive_file,
+      'folder': Icons.folder,
+      'folder.fill': Icons.folder,
+      'folder.badge.plus': Icons.create_new_folder,
+      
+      // Edit & Text
+      'pencil': Icons.edit,
+      'pencil.circle': Icons.edit,
+      'pencil.circle.fill': Icons.edit,
+      'trash': Icons.delete,
+      'trash.circle': Icons.delete_outline,
+      'trash.circle.fill': Icons.delete,
+      'bold': Icons.format_bold,
+      'italic': Icons.format_italic,
+      'underline': Icons.format_underlined,
+      'strikethrough': Icons.strikethrough_s,
+      'textformat.size': Icons.text_fields,
+      'textformat': Icons.text_fields,
+      
+      // Grid & Layout
+      'square.grid.2x2': Icons.grid_view,
+      'square.grid.3x2': Icons.grid_on,
+      'list.bullet': Icons.list,
+      'list.number': Icons.format_list_numbered,
+      
+      // Links & Sharing
+      'link': Icons.link,
+      'link.circle': Icons.link,
+      'paperclip': Icons.attach_file,
+      'square.and.arrow.up': Icons.share,
+      'square.and.arrow.down': Icons.download,
+      
+      // Time & Date
+      'clock': Icons.schedule,
+      'clock.fill': Icons.access_time,
+      'calendar': Icons.calendar_today,
+      'calendar.circle': Icons.calendar_today,
+      
+      // User & Account
+      'person': Icons.person,
+      'person.fill': Icons.person,
+      'person.circle': Icons.account_circle,
+      'person.circle.fill': Icons.account_circle,
+      'people': Icons.group,
+      'people.fill': Icons.group,
+      
+      // Miscellaneous
+      'paintpalette': Icons.palette,
+      'paintpalette.fill': Icons.palette,
+      'hand.raised': Icons.pan_tool,
+      'sun.max': Icons.wb_sunny,
+      'sun.max.fill': Icons.wb_sunny,
+      'moon': Icons.brightness_2,
+      'moon.fill': Icons.brightness_2,
     };
     return iconMap[sfSymbol] ?? Icons.circle;
   }

@@ -934,44 +934,120 @@ class BaseToolbar extends BaseStatelessWidget {
       'chevron.down': Icons.keyboard_arrow_down,
       'arrow.left': Icons.arrow_back,
       'arrow.right': Icons.arrow_forward,
+      'arrow.up.left': Icons.north_west,
+      'arrow.down.right': Icons.south_east,
       
       // Actions
       'square.and.arrow.up': Icons.share,
       'square.and.arrow.down': Icons.download,
       'plus': Icons.add,
+      'plus.circle': Icons.add_circle,
       'minus': Icons.remove,
+      'minus.circle': Icons.remove_circle,
       'xmark': Icons.close,
+      'xmark.circle': Icons.cancel,
       'checkmark': Icons.check,
+      'checkmark.circle': Icons.check_circle,
       
-      // Common
+      // Common Settings
       'gear': Icons.settings,
       'gearshape': Icons.settings,
+      'gearshape.fill': Icons.settings,
+      'slider.horizontal.3': Icons.tune,
+      
+      // Menu & Navigation
       'ellipsis': Icons.more_horiz,
+      'ellipsis.circle': Icons.more_vert,
+      
+      // Editing
       'pencil': Icons.edit,
+      'pencil.circle': Icons.edit,
+      'pencil.circle.fill': Icons.edit,
       'trash': Icons.delete,
+      'trash.circle': Icons.delete_outline,
+      'trash.circle.fill': Icons.delete,
+      
+      // Favorites & Interactions
       'star': Icons.star_border,
       'star.fill': Icons.star,
       'heart': Icons.favorite_border,
       'heart.fill': Icons.favorite,
+      'bookmark': Icons.bookmark_border,
+      'bookmark.fill': Icons.bookmark,
       
-      // Media
+      // Media Controls
       'play': Icons.play_arrow,
+      'play.circle': Icons.play_circle,
       'pause': Icons.pause,
+      'pause.circle': Icons.pause_circle,
       'stop': Icons.stop,
+      'stop.circle': Icons.stop_circle,
       'backward': Icons.skip_previous,
+      'backward.frame': Icons.skip_previous,
       'forward': Icons.skip_next,
+      'forward.frame': Icons.skip_next,
       
       // Communication
       'envelope': Icons.email,
+      'envelope.open': Icons.mail_outline,
       'phone': Icons.phone,
+      'phone.fill': Icons.phone,
       'message': Icons.message,
+      'message.circle': Icons.chat_bubble,
+      'bell': Icons.notifications,
+      'bell.fill': Icons.notifications_active,
       
-      // UI
+      // Search & Find
       'magnifyingglass': Icons.search,
+      'magnifyingglass.circle': Icons.search,
+      
+      // Media
       'camera': Icons.camera_alt,
+      'camera.fill': Icons.camera_alt,
       'photo': Icons.photo,
+      'photo.on.rectangle': Icons.image,
+      'photo.fill': Icons.image,
+      
+      // Files & Folders
       'doc': Icons.insert_drive_file,
+      'doc.on.doc': Icons.content_copy,
+      'doc.circle': Icons.insert_drive_file,
       'folder': Icons.folder,
+      'folder.fill': Icons.folder,
+      'folder.badge.plus': Icons.create_new_folder,
+      
+      // Grid & Layout
+      'square.grid.2x2': Icons.grid_view,
+      'list.bullet': Icons.list,
+      'list.number': Icons.format_list_numbered,
+      
+      // Text Formatting
+      'bold': Icons.format_bold,
+      'italic': Icons.format_italic,
+      'underline': Icons.format_underlined,
+      'strikethrough': Icons.strikethrough_s,
+      'textformat.size': Icons.text_fields,
+      'textformat': Icons.text_fields,
+      
+      // Links & Sharing
+      'link': Icons.link,
+      'link.circle': Icons.link,
+      'paperclip': Icons.attach_file,
+      
+      // Time & Date
+      'clock': Icons.schedule,
+      'clock.fill': Icons.access_time,
+      'calendar': Icons.calendar_today,
+      'calendar.circle': Icons.calendar_today,
+      
+      // Miscellaneous
+      'paintpalette': Icons.palette,
+      'paintpalette.fill': Icons.palette,
+      'hand.raised': Icons.pan_tool,
+      'sun.max': Icons.wb_sunny,
+      'moon': Icons.brightness_2,
+      'sun.max.fill': Icons.wb_sunny,
+      'moon.fill': Icons.brightness_2,
     };
 
     return iconMap[sfSymbol];

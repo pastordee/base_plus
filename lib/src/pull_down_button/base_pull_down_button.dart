@@ -271,6 +271,8 @@ class BasePullDownButton extends BaseStatelessWidget {
     // Build menu items with submenu support for Material fallback
     final menuItemIndex = _MenuItemIndexCounter();
     final menuItems = _buildMaterialMenuItems(context, items, menuItemIndex);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     if (_isIconButton && buttonIcon != null) {
       return PopupMenuButton<int>(
@@ -280,7 +282,14 @@ class BasePullDownButton extends BaseStatelessWidget {
         icon: Icon(
           _getIconData(buttonIcon!.name),
           size: size * 0.5,
+          color: colorScheme.onSurfaceVariant,
         ),
+        // Material 3 styling
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 3,
+        surfaceTintColor: colorScheme.surfaceTint,
       );
     } else if (buttonLabel != null) {
       return PopupMenuButton<int>(
@@ -288,35 +297,54 @@ class BasePullDownButton extends BaseStatelessWidget {
         onSelected: (index) => onSelected?.call(index),
         enabled: enabled,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(buttonLabel!),
+              Text(
+                buttonLabel!,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(width: 4),
-              const Icon(Icons.arrow_drop_down, size: 20),
+              Icon(
+                Icons.arrow_drop_down,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
+        // Material 3 styling
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 3,
+        surfaceTintColor: colorScheme.surfaceTint,
       );
     }
     return const SizedBox.shrink();
   }
 
   /// Recursively builds Material menu items from BasePullDownMenuEntry list
-  /// Supports submenus, regular items, and dividers
+  /// Supports submenus, regular items, and dividers with Material 3 styling
   List<PopupMenuEntry<int>> _buildMaterialMenuItems(
     BuildContext context,
     List<BasePullDownMenuEntry> entries,
     _MenuItemIndexCounter indexCounter,
   ) {
     final menuItems = <PopupMenuEntry<int>>[];
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     for (final entry in entries) {
       if (entry is BasePullDownMenuItem) {
         menuItems.add(
           PopupMenuItem<int>(
             value: indexCounter.next(),
+            // Material 3 padding
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 if (entry.icon != null) ...[
@@ -324,17 +352,20 @@ class BasePullDownButton extends BaseStatelessWidget {
                     _getIconData(entry.icon!.name),
                     size: 20,
                     color: entry.isDestructive 
-                      ? Theme.of(context).colorScheme.error 
-                      : null,
+                      ? colorScheme.error 
+                      : colorScheme.onSurface,
                   ),
                   const SizedBox(width: 12),
                 ],
-                Text(
-                  entry.label,
-                  style: TextStyle(
-                    color: entry.isDestructive 
-                      ? Theme.of(context).colorScheme.error 
-                      : null,
+                Expanded(
+                  child: Text(
+                    entry.label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: entry.isDestructive 
+                        ? colorScheme.error 
+                        : colorScheme.onSurface,
+                      fontWeight: entry.isDestructive ? FontWeight.w500 : null,
+                    ),
                   ),
                 ),
               ],
@@ -349,6 +380,11 @@ class BasePullDownButton extends BaseStatelessWidget {
             padding: EdgeInsets.zero,
             child: PopupMenuButton<int>(
               offset: const Offset(0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 3,
+              surfaceTintColor: colorScheme.surfaceTint,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
@@ -357,6 +393,7 @@ class BasePullDownButton extends BaseStatelessWidget {
                       Icon(
                         _getIconData(entry.icon!.name),
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       const SizedBox(width: 12),
                     ],
@@ -364,13 +401,17 @@ class BasePullDownButton extends BaseStatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(entry.title),
+                          Text(
+                            entry.title,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
                           if (entry.subtitle != null)
                             Text(
                               entry.subtitle!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                         ],
@@ -401,60 +442,154 @@ class BasePullDownButton extends BaseStatelessWidget {
   // Helper to map SF Symbol names to Material icons
   static IconData _getIconData(String iconName) {
     switch (iconName) {
+      // Navigation
+      case 'chevron.left':
+        return Icons.chevron_left;
+      case 'chevron.right':
+        return Icons.chevron_right;
+      case 'chevron.up':
+        return Icons.keyboard_arrow_up;
+      case 'chevron.down':
+        return Icons.keyboard_arrow_down;
+      case 'arrow.left':
+        return Icons.arrow_back;
+      case 'arrow.right':
+        return Icons.arrow_forward;
+      
+      // Menu & Ellipsis
       case 'ellipsis.circle':
         return Icons.more_horiz;
       case 'ellipsis':
         return Icons.more_vert;
-      case 'crop':
-        return Icons.crop;
-      case 'camera.filters':
-        return Icons.filter;
-      case 'slider.horizontal.3':
-        return Icons.tune;
-      case 'square.and.arrow.down':
-        return Icons.download;
-      case 'doc.on.doc':
-        return Icons.content_copy;
-      case 'xmark.circle':
-        return Icons.cancel;
-      case 'trash':
-        return Icons.delete;
-      case 'pencil':
-        return Icons.edit;
+      
+      // Image & Media
       case 'photo':
         return Icons.image;
       case 'camera':
         return Icons.camera_alt;
+      case 'camera.filters':
+        return Icons.filter;
+      case 'crop':
+        return Icons.crop;
+      case 'play':
+        return Icons.play_arrow;
+      case 'pause':
+        return Icons.pause;
+      case 'stop':
+        return Icons.stop;
+      
+      // File & Folder
+      case 'doc':
+        return Icons.insert_drive_file;
+      case 'doc.on.doc':
+        return Icons.content_copy;
       case 'folder':
         return Icons.folder;
-      case 'share':
+      case 'folder.badge.plus':
+        return Icons.create_new_folder;
+      
+      // Actions
+      case 'square.and.arrow.up':
         return Icons.share;
-      case 'heart':
-        return Icons.favorite;
-      case 'star':
-        return Icons.star;
-      case 'bookmark':
-        return Icons.bookmark;
-      case 'gear':
-        return Icons.settings;
-      case 'bell':
-        return Icons.notifications;
-      case 'link':
-        return Icons.link;
-      case 'plus':
-        return Icons.add;
-      case 'minus':
-        return Icons.remove;
-      case 'checkmark':
-        return Icons.check;
+      case 'square.and.arrow.down':
+        return Icons.download;
+      case 'pencil':
+        return Icons.edit;
+      case 'pencil.circle':
+        return Icons.edit;
+      case 'trash':
+        return Icons.delete;
+      case 'trash.circle':
+        return Icons.delete_outline;
+      case 'trash.fill':
+        return Icons.delete;
+      case 'xmark.circle':
+        return Icons.cancel;
       case 'xmark':
         return Icons.close;
+      case 'checkmark':
+        return Icons.check;
+      case 'checkmark.circle':
+        return Icons.check_circle;
+      
+      // Favorites & Interactions
+      case 'heart':
+        return Icons.favorite_border;
+      case 'heart.fill':
+        return Icons.favorite;
+      case 'star':
+        return Icons.star_border;
+      case 'star.fill':
+        return Icons.star;
+      case 'bookmark':
+        return Icons.bookmark_border;
+      case 'bookmark.fill':
+        return Icons.bookmark;
+      
+      // Communication & Sharing
+      case 'share':
+        return Icons.share;
+      case 'link':
+        return Icons.link;
       case 'paperclip':
         return Icons.attach_file;
+      case 'envelope':
+        return Icons.email;
+      case 'message':
+        return Icons.message;
+      case 'phone':
+        return Icons.phone;
+      
+      // Settings & Options
+      case 'gear':
+        return Icons.settings;
+      case 'gearshape':
+        return Icons.settings;
+      case 'slider.horizontal.3':
+        return Icons.tune;
+      case 'bell':
+        return Icons.notifications;
+      case 'bell.fill':
+        return Icons.notifications_active;
+      
+      // Grid & List
       case 'square.grid.2x2':
         return Icons.grid_view;
       case 'list.bullet':
         return Icons.list;
+      
+      // Search & Find
+      case 'magnifyingglass':
+        return Icons.search;
+      case 'magnifyingglass.circle':
+        return Icons.search;
+      
+      // Text Formatting
+      case 'bold':
+        return Icons.format_bold;
+      case 'italic':
+        return Icons.format_italic;
+      case 'underline':
+        return Icons.format_underlined;
+      case 'strikethrough':
+        return Icons.strikethrough_s;
+      
+      // Time & Date
+      case 'clock':
+        return Icons.schedule;
+      case 'calendar':
+        return Icons.calendar_today;
+      
+      // Others
+      case 'plus':
+        return Icons.add;
+      case 'plus.circle':
+        return Icons.add_circle;
+      case 'minus':
+        return Icons.remove;
+      case 'minus.circle':
+        return Icons.remove_circle;
+      
       default:
         return Icons.circle;
     }

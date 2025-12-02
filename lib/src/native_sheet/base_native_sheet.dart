@@ -771,19 +771,100 @@ class _NativeSheetMaterial {
 class _MaterialSheetHelper {
   static IconData _getIconData(String iconName) {
     switch (iconName) {
-      case 'sun.max': return Icons.wb_sunny;
-      case 'moon': return Icons.brightness_2;
-      case 'bold': return Icons.format_bold;
-      case 'italic': return Icons.format_italic;
-      case 'underline': return Icons.format_underlined;
-      case 'strikethrough': return Icons.strikethrough_s;
-      case 'star': return Icons.star;
-      case 'heart': return Icons.favorite;
-      case 'bookmark': return Icons.bookmark;
-      case 'pencil': return Icons.edit;
-      case 'trash': return Icons.delete;
-      case 'gear': return Icons.settings;
-      default: return Icons.circle;
+      // Navigation
+      case 'chevron.left':
+        return Icons.chevron_left;
+      case 'chevron.right':
+        return Icons.chevron_right;
+      case 'chevron.up':
+        return Icons.keyboard_arrow_up;
+      case 'chevron.down':
+        return Icons.keyboard_arrow_down;
+      case 'arrow.left':
+        return Icons.arrow_back;
+      case 'arrow.right':
+        return Icons.arrow_forward;
+      
+      // Menu & Navigation
+      case 'sun.max':
+        return Icons.wb_sunny;
+      case 'moon':
+        return Icons.brightness_2;
+      case 'bell':
+        return Icons.notifications;
+      case 'hand.raised':
+        return Icons.pan_tool;
+      
+      // Text Formatting
+      case 'bold':
+        return Icons.format_bold;
+      case 'italic':
+        return Icons.format_italic;
+      case 'underline':
+        return Icons.format_underlined;
+      case 'strikethrough':
+        return Icons.strikethrough_s;
+      
+      // Common Actions
+      case 'pencil':
+        return Icons.edit;
+      case 'trash':
+        return Icons.delete;
+      case 'gear':
+        return Icons.settings;
+      case 'star':
+        return Icons.star_border;
+      case 'star.fill':
+        return Icons.star;
+      case 'heart':
+        return Icons.favorite_border;
+      case 'heart.fill':
+        return Icons.favorite;
+      case 'bookmark':
+        return Icons.bookmark_border;
+      
+      // Menu & File
+      case 'ellipsis':
+        return Icons.more_vert;
+      case 'ellipsis.circle':
+        return Icons.more_horiz;
+      
+      // Sharing
+      case 'square.and.arrow.up':
+        return Icons.share;
+      case 'square.and.arrow.down':
+        return Icons.download;
+      case 'link':
+        return Icons.link;
+      
+      // Media & Files
+      case 'photo':
+        return Icons.image;
+      case 'camera':
+        return Icons.camera_alt;
+      case 'doc':
+        return Icons.insert_drive_file;
+      case 'doc.on.doc':
+        return Icons.content_copy;
+      case 'folder':
+        return Icons.folder;
+      
+      // UI & Layout
+      case 'square.grid.2x2':
+        return Icons.grid_view;
+      case 'list.bullet':
+        return Icons.list;
+      case 'magnifyingglass':
+        return Icons.search;
+      
+      // Text & Input
+      case 'textformat.size':
+        return Icons.text_fields;
+      case 'paintpalette':
+        return Icons.palette;
+      
+      default:
+        return Icons.circle;
     }
   }
 }
