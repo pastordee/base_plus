@@ -17,6 +17,10 @@ dependencies:
   vector_math: ^2.0.8
   get: ^4.6.6
   cupertino_native_extra: ^0.2.0+1
+  cupertino_interactive_keyboard:
+    git:
+      url: https://github.com/pastordee/cupertino_interactive_keyboard.git
+      ref: pc
 
 dev_dependencies:
   flutter_test:
