@@ -1,11 +1,10 @@
 name: base_plus
 description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
 version: 0.2.0
-# author: Nil <2073582423@qq.com>
 homepage: https://github.com/pastordee/base_plus
 repository: https://github.com/pastordee/base_plus
 issue_tracker: https://github.com/pastordee/base_plus/issues
-publish_to: https://pub.dev 
+publish_to: 'https://pub.dev' 
 
 
 environment:
@@ -18,10 +17,6 @@ dependencies:
   vector_math: ^2.0.8
   get: ^4.6.6
   cupertino_native_extra: ^0.2.0+1
-  cupertino_interactive_keyboard:
-    git:
-      url: https://github.com/pastordee/cupertino_interactive_keyboard.git
-      ref: pc
 
 dev_dependencies:
   flutter_test:
