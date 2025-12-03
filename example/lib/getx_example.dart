@@ -1,3 +1,8 @@
+/// GetX integration example with base_plus
+///
+/// Demonstrates how to use BaseApp with GetX state management for reactive programming,
+/// including controllers, reactive variables, and GetX routing capabilities.
+
 // GetX Integration Example with Flutter Base
 // This demonstrates how to use BaseApp with GetX state management
 

@@ -1,47 +1,221 @@
-<p align="center">
-  <img src="https://github.com/nillnil/flutter_base/blob/master/screenshot/logo.png?raw=true"  alt="logo">
-</p>
+# base_plus Example Application
 
-## 简单示例（模拟器：iPhone Xs Max 12.2、Nexus_5X android 8.0.0)
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/home_cupertino.png?raw=true" width="40%" height="40%" alt="home_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/home_material.png?raw=true" width="40%" height="40%" alt="home_material">
+A comprehensive example application demonstrating all features and capabilities of the base_plus library.
 
-### BaseAppBar
-#### height
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_height_cupertino.gif?raw=true" width="40%" height="40%" alt="appBar_height_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_height_material.gif?raw=true" width="40%" height="40%" alt="appBar_height_material">
+## Overview
 
-#### bottom
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_bottom_cupertino.gif?raw=true" width="40%" height="40%" alt="appBar_bottom_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_bottom_material.gif?raw=true" width="40%" height="40%" alt="appBar_bottom_material">
+The example showcases:
+- **Platform-Adaptive Design**: Cupertino on iOS, Material on Android/Fuchsia
+- **Material 3 Support**: Modern Material You design with dynamic colors
+- **Native iOS Components**: UIKit integration for iOS-specific features
+- **GetX Integration**: Reactive state management and routing
+- **Theme Management**: Light/dark theme switching with Provider
+- **Component Library**: Comprehensive demonstrations of all base_plus widgets
 
-#### toolbarOpacity
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_toolbarOpacity_cupertino.gif?raw=true" width="40%" height="40%" alt="appBar_toolbarOpacity_cupertino">
+## Project Structure
 
-#### backdropFilter
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/app_bar/appBar_backdropFilter_cupertino.gif?raw=true" width="40%" height="40%" alt="appBar_backdropFilter_cupertino">
+```
+example/lib/
+├── main.dart                      # Application entry point
+├── app.dart                       # Root app widget with theme configuration
+├── home.dart                      # Main demo screen with component navigation
+├── settings.dart                  # Settings screen example
+├── theme_example.dart             # Theme configuration patterns
+├── modern_examples.dart           # Modern Material 3 design patterns
+├── getx_example.dart              # GetX state management integration
+├── bottom_nav_test.dart           # Bottom navigation test app
+├── standalone_bottom_nav_test.dart # Material-specific navigation test
+├── provider/                      # Provider-based state management
+│   └── app_provider.dart          # Theme and app state provider
+├── demos/                         # Feature demonstrations
+│   ├── demos.dart                 # Demo navigation
+│   ├── appbar/                    # App bar variations
+│   ├── action_sheet/              # Action sheet patterns
+│   ├── dialog/                    # Dialog implementations
+│   ├── button/                    # Button variants
+│   ├── section/                   # List and section widgets
+│   ├── refresh/                   # Pull-to-refresh patterns
+│   ├── scaffold/                  # Scaffold layouts
+│   └── ... (other component demos)
+├── iconfont/                      # Custom icon font definitions
+└── provider/                      # State management utilities
+```
 
-### Scaffold
-#### safeArea scaffold
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/scaffold/scaffold_safeArea_cupertino.gif?raw=true" width="40%" height="40%" alt="scaffold_safeArea_cupertino">
+## Running the App
 
-#### tab scaffold
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/scaffold/scaffold_tabScaffold_cupertino.gif?raw=true" width="40%" height="40%" alt="scaffold_tabScaffold_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/scaffold/scaffold_tabScaffold_material.gif?raw=true" width="40%" height="40%" alt="scaffold_tabScaffold_material">
+### Default Entry Point
+```bash
+flutter run
+```
 
-### Section & Tile
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/section/section_wechat_cupertino.gif?raw=true" width="40%" height="40%" alt="section_wechat_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/section/section_wechat_material.gif?raw=true" width="40%" height="40%" alt="section_wechat_material">
+This runs the main app with all demos and features accessible from the home screen.
 
-### Button
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/button/button_cupertino.gif?raw=true" width="40%" height="40%" alt="button_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/button/button_material.gif?raw=true" width="40%" height="40%" alt="button_material">
+### Alternative Entry Points
 
-### Route
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/routes/routes_cupertino.gif?raw=true" width="40%" height="40%" alt="routes_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/routes/routes_material.gif?raw=true" width="40%" height="40%" alt="routes_material">
+For focused testing, you can modify `lib/main.dart` to use these alternative entry points:
 
-### Alert Dialog
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/alert_dialog/alertDialog_cupertino.gif?raw=true" width="40%" height="40%" alt="alertDialog_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/alert_dialog/alertDialog_material.gif?raw=true" width="40%" height="40%" alt="alertDialog_material">
+#### Bottom Navigation Test
+```dart
+import 'bottom_nav_test.dart';
 
-### Action Sheet
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/action_sheet/actionSheet_cupertino.gif?raw=true" width="40%" height="40%" alt="actionSheet_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/action_sheet/actionSheet_material.gif?raw=true" width="40%" height="40%" alt="actionSheet_material">
+void main() {
+  runApp(const BottomNavTestApp());
+}
+```
 
-### Refresh
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/refresh/refresh_cupertino.gif?raw=true" width="40%" height="40%" alt="refresh_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/refresh/refresh_material.gif?raw=true" width="40%" height="40%" alt="refresh_material">
+#### Material-Specific Navigation Test
+```dart
+import 'standalone_bottom_nav_test.dart';
 
-### Text Field
-<img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/text_field/textField_cupertino.gif?raw=true" width="40%" height="40%" alt="textField_cupertino">      <img src="https://github.com/nillnil/flutter_base/blob/master/example/screenshot/text_field/textField_material.gif?raw=true" width="40%" height="40%" alt="textField_material">
+void main() {
+  runApp(const StandaloneBottomNavTest());
+}
+```
+
+#### GetX Integration
+```dart
+import 'getx_example.dart';
+
+void main() {
+  runApp(const GetXApp());
+}
+```
+
+#### Theme Configuration Example
+```dart
+import 'theme_example.dart';
+
+void main() {
+  runApp(const ThemeExampleApp());
+}
+```
+
+## Key Features Demonstrated
+
+### 1. Adaptive UI Components
+- **BaseButton**: Material 3 buttons with automatic platform adaptation
+- **BaseNavigationBar**: Platform-aware navigation with bottom tabs
+- **BaseAppBar**: Adaptive app bar for iOS and Android
+- **BaseScaffold**: Platform-specific scaffold implementations
+- **BaseIcon**: Cross-platform icon rendering
+
+### 2. Native iOS Components
+- **BaseNativeSheet**: UISheetPresentationController integration
+- **BaseCNToolbar**: Native UIToolbar for iOS
+- **BaseCNSearchBar**: Native UISearchBar implementation
+- **BaseCNPullDownButton**: Native UIButton with pull-down menus
+
+### 3. Material 3 Components
+- **BasePopupMenuButton**: Material 3 popup menus
+- **BaseSegmentedControl**: Segmented control widgets
+- **BaseSlider**: Modern slider implementations
+- **BaseSwitch**: Platform-aware toggle switches
+- **BaseTabBar**: Adaptive tab bar
+
+### 4. State Management
+The example demonstrates:
+- **Provider**: Theme and app state management (default)
+- **GetX**: Reactive state with GetX controllers and routing
+- **Integration**: How to combine base_plus with state management solutions
+
+### 5. Theme Configuration
+- Material 3 with semantic colors
+- Light and dark theme variants
+- Dynamic color schemes with seed colors
+- Cross-platform theme consistency
+
+## Demo Features
+
+### Home Screen
+- Comprehensive component showcase
+- Navigation to all feature demonstrations
+- Real-time theme switching
+- Platform mode toggling
+
+### Component Demos
+Each demo directory contains examples of specific widgets:
+- **appbar**: Various app bar configurations
+- **action_sheet**: iOS-style action sheets
+- **button**: Button variants (filled, tonal, outlined, text)
+- **dialog**: Alert dialogs and custom dialogs
+- **section**: List items and section layouts
+- **refresh**: Pull-to-refresh implementations
+- **bottom_navigation**: Navigation patterns
+- **scaffold**: Layout structures
+- **toolbar**: iOS toolbar implementations
+- **navigation_bar**: Bottom navigation examples
+
+## Building for Production
+
+```bash
+# iOS
+flutter build ios
+
+# Android
+flutter build apk
+flutter build appbundle
+
+# Web
+flutter build web
+```
+
+## Dependencies
+
+See `pubspec.yaml` for a complete list. Key dependencies:
+- **base_plus**: The main package being demonstrated
+- **provider**: State management
+- **get**: Alternative state management (optional)
+- **flutter_localizations**: Localization support
+- **webview_flutter**: WebView widget
+- **url_launcher**: URL handling
+- **cached_network_image**: Image caching
+
+## Troubleshooting
+
+### Build Issues
+If you encounter build issues:
+1. Clean the project: `flutter clean`
+2. Get dependencies: `flutter pub get`
+3. Rebuild: `flutter pub get && flutter run`
+
+### Platform-Specific Issues
+
+#### iOS
+- Ensure iOS deployment target is 12.0 or higher
+- Update pods: `cd ios && pod update`
+
+#### Android
+- Minimum API level: 21
+- Update gradle: `./gradlew wrapper --gradle-version=7.x.x`
+
+## Development Tips
+
+### Adding New Demos
+1. Create a new file in `example/lib/demos/feature_name/`
+2. Add a demo widget that demonstrates the feature
+3. Update `demos/demos.dart` to include the new demo
+4. Add a navigation item in `home.dart`
+
+### Testing Themes
+1. Use device settings to toggle light/dark mode
+2. Use the settings screen in the app to switch themes
+3. Test on both iOS and Android simulators/devices
+
+### Debugging
+- Use `flutter run -v` for verbose output
+- Check IDE console for detailed error messages
+- Use Flutter DevTools: `flutter pub global run devtools`
+
+## Additional Resources
+
+- [base_plus Documentation](../README.md)
+- [Flutter Documentation](https://flutter.dev/docs)
+- [Material Design 3](https://m3.material.io/)
+- [Cupertino Design](https://developer.apple.com/design/human-interface-guidelines/)
+
+## Support
+
+For issues or questions about the example:
+1. Check the [base_plus repository](https://github.com/pastordee/base_plus)
+2. Review existing issues and discussions
+3. File a new issue with detailed information

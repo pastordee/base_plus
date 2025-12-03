@@ -1,3 +1,8 @@
+/// Root application widget with theme configuration
+///
+/// Manages the overall app state and theme for the example application.
+/// Demonstrates integration with base_plus and Provider pattern for state management.
+
 import 'package:base_plus/base.dart';
 
 import 'home.dart';

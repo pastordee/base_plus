@@ -1,3 +1,15 @@
+/// Home screen demonstrating all available components and features
+///
+/// The main demonstration screen showing all base_plus widgets and components.
+/// Includes navigation to demos for:
+/// - App configuration and themes
+/// - App bars and toolbars
+/// - Buttons and native components
+/// - Navigation and routing
+/// - Dialogs and action sheets
+/// - Lists and scrolling
+/// - And many more features
+
 import 'package:base_plus/base.dart';
 import 'provider/app_provider.dart';
 import 'package:flutter/cupertino.dart';

@@ -1,3 +1,9 @@
+/// Standalone test application for bottom navigation
+///
+/// This is a focused test app to demonstrate and verify the BaseNavigationBar
+/// component with various configuration options and state management patterns.
+/// Use this as a starting point for testing navigation implementations.
+
 import 'package:base_plus/base.dart';
 import 'package:flutter/material.dart';
 import 'demos/bottom_navigation_example.dart';

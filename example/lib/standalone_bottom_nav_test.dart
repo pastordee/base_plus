@@ -1,3 +1,9 @@
+/// Standalone test application for bottom navigation with Material design
+///
+/// This test app explicitly uses Material design across all platforms for testing
+/// bottom navigation behavior specifically in Material mode.
+/// Useful for validating Material-specific navigation features and styling.
+
 import 'package:base_plus/base.dart';
 import 'package:flutter/material.dart';
 

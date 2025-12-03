@@ -1,3 +1,8 @@
+/// Settings screen demonstrating advanced features
+///
+/// Shows how to create complex layouts with base_plus including
+/// custom app bars, lists, theme switching, and navigation features.
+
 import 'package:base_plus/base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

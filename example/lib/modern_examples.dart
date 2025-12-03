@@ -1,3 +1,8 @@
+/// Modern design pattern examples using base_plus
+///
+/// Demonstrates the latest Material 3 design patterns and iOS design conventions
+/// including updated button hierarchies, colors, and component styling.
+
 // Modern Flutter Base Usage Examples
 // This file demonstrates the updated Material 3 and iOS design patterns
 

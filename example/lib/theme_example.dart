@@ -1,3 +1,8 @@
+/// Theme configuration example with base_plus
+///
+/// Demonstrates how to configure Material 3 themes and use BaseApp with
+/// custom theme parameters including light and dark theme variants.
+
 // Theme Example with Flutter Base
 // This demonstrates how to use BaseApp with direct theme parameters
 
