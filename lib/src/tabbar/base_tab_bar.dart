@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoDynamicCo
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show MouseCursor;
 import 'package:flutter/services.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';

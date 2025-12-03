@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';

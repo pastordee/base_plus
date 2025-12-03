@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../navigation_bar/base_navigation_bar.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // iOS 26 Liquid Glass Dynamic Material Native Implementation
-// import 'package:cupertino_native/cupertino_native.dart';
+// import 'package:cupertino_native_extra/cupertino_native.dart';
 // import 'package:liquid_glass_texture/liquid_glass_texture.dart';
 
 import '../base_param.dart';

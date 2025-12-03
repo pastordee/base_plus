@@ -1,10 +1,10 @@
 library base_widgets;
 
-// Re-export commonly used cupertino_native classes
+// Re-export commonly used cupertino_native_extra classes
 // CNSymbol - Used for SF Symbols in public API (icons on all platforms)
 // CNSearchConfig - Used for search configuration
 // CNSheetDetent, CNSheetItem, etc. - Used in BaseNativeSheet (will be refactored later)
-export 'package:cupertino_native/cupertino_native.dart'
+export 'package:cupertino_native_extra/cupertino_native_extra.dart'
     show
         CNSymbol,
         CNSearchConfig,

@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart' show CupertinoButton, ShapeBorder, Cuper
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
