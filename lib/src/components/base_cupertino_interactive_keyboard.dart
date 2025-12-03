@@ -3,7 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cupertino_interactive_keyboard/cupertino_interactive_keyboard.dart' as cik;
+import 'package:cupertino_interactive_keyboard_plus/cupertino_interactive_keyboard.dart' as cik;
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
