@@ -1,10 +1,38 @@
+/// Base Widgets Library
+///
+/// Exports all adaptive widgets and components for building cross-platform UIs.
+/// Each widget automatically selects between Cupertino (iOS) and Material (Android/Fuchsia) implementations.
+///
+/// ## Core Widgets
+///
+/// - [BaseApp]: Root application widget with theme support
+/// - [BaseScaffold]: Platform-aware scaffold with app bar and navigation
+/// - [BaseAppBar]: Adaptive app bar supporting custom actions
+/// - [BaseButton]: Multi-variant button supporting Material 3 and Cupertino styles
+/// - [BaseNavigationBar]: Bottom navigation bar with adaptive styling
+/// - [BaseTabBar]: Tab bar supporting Material 3 and Cupertino tab views
+///
+/// ## Native Components (iOS)
+///
+/// - [BaseNativeSheet]: UISheetPresentationController wrapper
+/// - [BaseCNToolbar]: Native UIToolbar integration
+/// - [BaseCNPullDownButton]: Native UIButton with pull-down menu
+/// - [BaseCNSearchBar]: Native UISearchBar integration
+///
+/// ## Material 3 Components
+///
+/// - [BasePopupMenuButton]: Material 3 popup menu with semantic colors
+/// - [BaseSegmentedControl]: Material 3 segmented controls
+/// - [BaseSlider]: Material 3 slider with platform-specific styling
+/// - [BaseSwitch]: Material 3 switch component
+
 library base_widgets;
 
 // Re-export commonly used cupertino_native_extra classes
 // CNSymbol - Used for SF Symbols in public API (icons on all platforms)
 // CNSearchConfig - Used for search configuration
 // CNSheetDetent, CNSheetItem, etc. - Used in BaseNativeSheet (will be refactored later)
-export 'package:cupertino_native_extra/cupertino_native.dart'
+export 'package:cupertino_native_extra/cupertino_native_extra.dart'
     show
         CNSymbol,
         CNSearchConfig,
