@@ -2,7 +2,7 @@ import 'package:base_plus/base.dart';
 import '../../iconfont/iconfont.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../demo_page.dart';
 import '../demo_tile.dart';

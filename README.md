@@ -26,12 +26,9 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  base_plus:
-    git:
-      url: https://github.com/pastordee/base_plus.git
-      ref: main
+  base_plus: ^3.0.8
   get: ^4.6.6  # Optional: For GetX features
-  cupertino_native: ^0.1.5  # Required for native iOS components
+  cupertino_native_extra: ^0.2.0  # Required for native iOS components
   cupertino_interactive_keyboard:
     git:
       url: https://github.com/pastordee/cupertino_interactive_keyboard.git

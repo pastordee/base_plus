@@ -4,7 +4,7 @@ library base_widgets;
 // CNSymbol - Used for SF Symbols in public API (icons on all platforms)
 // CNSearchConfig - Used for search configuration
 // CNSheetDetent, CNSheetItem, etc. - Used in BaseNativeSheet (will be refactored later)
-export 'package:cupertino_native_extra/cupertino_native_extra.dart'
+export 'package:cupertino_native_extra/cupertino_native.dart'
     show
         CNSymbol,
         CNSearchConfig,
