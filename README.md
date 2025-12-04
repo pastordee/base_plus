@@ -6,7 +6,7 @@
 
 > One code, two modes - use Cupertino widgets on iOS, Material widgets on Android or Fuchsia. Supports Material 3 and modern iOS design patterns.
 >
-> **✨ v0.2.0 Features**: Material 3 support, Native iOS components (UISheetPresentationController, UIButton, UISearchBar), GetX integration, responsive design
+> **✨ v0.2.1 Features**: Material 3 support, Native iOS components (UISheetPresentationController, UIButton, UISearchBar), GetX integration, responsive design
 
 ## ✨ Key Features
 
@@ -26,13 +26,10 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  base_plus: ^0.2.0
+  base_plus: ^0.2.1
   get: ^4.6.6  # Optional: For GetX features
   cupertino_native_extra: ^0.2.0  # Required for native iOS components
-  cupertino_interactive_keyboard:
-    git:
-      url: https://github.com/pastordee/cupertino_interactive_keyboard.git
-      ref: pc
+  cupertino_interactive_keyboard_plus: ^0.0.5  # Required for iOS keyboard features
 ```
 
 ### Basic Usage
