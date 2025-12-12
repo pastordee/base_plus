@@ -170,7 +170,7 @@ class BaseScaffold extends BaseStatelessWidget {
     if (appBar == null) {
       return false;
     }
-    
+
     // Check if backgroundColor is transparent or has opacity < 1.0
     final Color? bgColor = appBar.backgroundColor;
     if (bgColor != null) {
@@ -179,14 +179,14 @@ class BaseScaffold extends BaseStatelessWidget {
         return true;
       }
     }
-    
+
     // Check for iOS 26 Liquid Glass properties
-    // if (appBar.liquidGlassBlurIntensity != null || 
+    // if (appBar.liquidGlassBlurIntensity != null ||
     //     appBar.liquidGlassGradientOpacity != null ||
     //     appBar.liquidGlassDynamicBlur == true) {
     //   return true;
     // }
-    
+
     // Default to false for solid app bars
     return false;
   }
@@ -196,13 +196,14 @@ class BaseScaffold extends BaseStatelessWidget {
     if (!autoSafeArea) {
       return body;
     }
-    
-    final bool needsSafeArea = _shouldExtendBodyBehindAppBar(appBar) || safeAreaTop || safeAreaBottom;
-    
+
+    final bool needsSafeArea =
+        _shouldExtendBodyBehindAppBar(appBar) || safeAreaTop || safeAreaBottom;
+
     if (!needsSafeArea) {
       return body;
     }
-    
+
     return SafeArea(
       top: _shouldExtendBodyBehindAppBar(appBar) || safeAreaTop,
       bottom: safeAreaBottom,
@@ -216,46 +217,54 @@ class BaseScaffold extends BaseStatelessWidget {
     // This ensures Scaffold.of(context).openDrawer() works without manual forceUseMaterial
     final Widget? drawer = valueOf('drawer', this.drawer);
     final Widget? endDrawer = valueOf('endDrawer', this.endDrawer);
-    
-    if (drawer != null || endDrawer != null) {
-      // Automatically use Material design when drawers are present
-      // This provides the proper Scaffold context for drawer functionality
+    final Widget? fab =
+        valueOf('floatingActionButton', this.floatingActionButton);
+
+    if (drawer != null || endDrawer != null || fab != null) {
+      // Automatically use Material design when drawers or FAB are present
+      // This provides the proper Scaffold context for these Material-only features
       return buildByMaterial(context);
     }
-    
+
     final Widget body = valueOf('body', this.body);
     assert(body != null, 'body can\'t be null');
-    final Color? backgroundColor = valueOf('backgroundColor', this.backgroundColor);
-    final BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
-    final double? appBarHeight = BaseTheme.of(context).valueOf('appBarHeight', BaseTheme.of(context).appBarHeight);
+    final Color? backgroundColor =
+        valueOf('backgroundColor', this.backgroundColor);
+    final BaseAppBar? appBar =
+        valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
+    final double? appBarHeight = BaseTheme.of(context)
+        .valueOf('appBarHeight', BaseTheme.of(context).appBarHeight);
     Widget? navigationBar;
     if (appBarHeight != null && appBar != null) {
       navigationBar = appBar.build(context);
     } else {
       navigationBar = appBar;
     }
-    
+
     // Type-safe navigation bar assignment
     // If the navigation bar is not an ObstructingPreferredSizeWidget (e.g., BaseAppBar forced to Material mode),
     // automatically fall back to using Material's Scaffold to display it properly
-    if (navigationBar != null && navigationBar is! ObstructingPreferredSizeWidget) {
+    if (navigationBar != null &&
+        navigationBar is! ObstructingPreferredSizeWidget) {
       // Navigation bar is not compatible with CupertinoPageScaffold
       // Switch to Material Scaffold to display it properly
       return buildByMaterial(context);
     }
-    
+
     ObstructingPreferredSizeWidget? cupertinoNavigationBar;
-    if (navigationBar != null && navigationBar is ObstructingPreferredSizeWidget) {
+    if (navigationBar != null &&
+        navigationBar is ObstructingPreferredSizeWidget) {
       cupertinoNavigationBar = navigationBar;
     }
-    
+
     // Intelligent body wrapping with SafeArea
     final Widget _child = _wrapBodyWithSafeArea(body, appBar);
-    
+
     return CupertinoPageScaffold(
       navigationBar: cupertinoNavigationBar,
       backgroundColor: backgroundColor,
-      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
+      resizeToAvoidBottomInset:
+          valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       child: _child,
     );
   }
@@ -267,14 +276,16 @@ class BaseScaffold extends BaseStatelessWidget {
     // because it doesn't implement ObstructingPreferredSizeWidget
     final Widget body = valueOf('body', this.body);
     assert(body != null, 'body can\'t be null');
-    final Color? backgroundColor = valueOf('backgroundColor', this.backgroundColor);
-    final BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
-    
+    final Color? backgroundColor =
+        valueOf('backgroundColor', this.backgroundColor);
+    final BaseAppBar? appBar =
+        valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
+
     Widget bodyContent;
     if (appBar != null) {
       // Build the native navigation bar
       final Widget navBar = appBar.build(context);
-      
+
       // Embed navigation bar directly in the body as a Column
       bodyContent = Column(
         children: [
@@ -285,25 +296,31 @@ class BaseScaffold extends BaseStatelessWidget {
     } else {
       bodyContent = body;
     }
-    
+
     return CupertinoPageScaffold(
       backgroundColor: backgroundColor,
-      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
+      resizeToAvoidBottomInset:
+          valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       child: bodyContent,
     );
   }
 
   @override
   Widget buildByMaterial(BuildContext context) {
-    BaseAppBar? appBar = valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
-    final double? appBarHeight = BaseTheme.of(context).valueOf('appBarHeight', BaseTheme.of(context).appBarHeight);
-    
+    BaseAppBar? appBar =
+        valueOf('appBar', this.appBar) ?? valueOf('navBar', navBar);
+    final double? appBarHeight = BaseTheme.of(context)
+        .valueOf('appBarHeight', BaseTheme.of(context).appBarHeight);
+
     // Check if drawers are present and automatically inject menu icon if needed
     final Widget? drawer = valueOf('drawer', this.drawer);
     final Widget? endDrawer = valueOf('endDrawer', this.endDrawer);
-    
+
     // Auto-inject drawer menu icon when drawer is present and no leading widget specified
-    if (appBar != null && drawer != null && appBar.leading == null && appBar.automaticallyImplyLeading) {
+    if (appBar != null &&
+        drawer != null &&
+        appBar.leading == null &&
+        appBar.automaticallyImplyLeading) {
       // Create a new BaseAppBar instance with drawer menu icon
       appBar = BaseAppBar(
         key: appBar.key,
@@ -352,35 +369,42 @@ class BaseScaffold extends BaseStatelessWidget {
         baseParam: appBar.baseParam,
       );
     }
-    
+
     Widget? _appBar;
     if (appBarHeight != null && appBar != null) {
       _appBar = appBar.build(context);
     } else {
       _appBar = appBar;
     }
-    
+
     // Determine if body should extend behind app bar
-    final bool shouldExtendBehindAppBar = extendBodyBehindAppBar ?? _shouldExtendBodyBehindAppBar(appBar);
-    
+    final bool shouldExtendBehindAppBar =
+        extendBodyBehindAppBar ?? _shouldExtendBodyBehindAppBar(appBar);
+
     // Intelligent body wrapping with SafeArea
     final Widget? bodyWidget = valueOf('body', body);
-    final Widget? wrappedBody = bodyWidget != null ? _wrapBodyWithSafeArea(bodyWidget, appBar) : null;
-    
+    final Widget? wrappedBody =
+        bodyWidget != null ? _wrapBodyWithSafeArea(bodyWidget, appBar) : null;
+
     // Get theme-aware background color for Material mode
-    Color? effectiveBackgroundColor = valueOf('backgroundColor', backgroundColor);
+    Color? effectiveBackgroundColor =
+        valueOf('backgroundColor', backgroundColor);
     if (effectiveBackgroundColor == null) {
       // Use theme's scaffold background color when no explicit color is provided
       effectiveBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
     }
-    
+
     return Scaffold(
       appBar: _appBar != null ? _appBar as PreferredSizeWidget : null,
       body: wrappedBody,
-      floatingActionButton: valueOf('floatingActionButton', floatingActionButton),
-      floatingActionButtonLocation: valueOf('floatingActionButtonLocation', floatingActionButtonLocation),
-      floatingActionButtonAnimator: valueOf('floatingActionButtonAnimator', floatingActionButtonAnimator),
-      persistentFooterButtons: valueOf('persistentFooterButtons', persistentFooterButtons),
+      floatingActionButton:
+          valueOf('floatingActionButton', floatingActionButton),
+      floatingActionButtonLocation:
+          valueOf('floatingActionButtonLocation', floatingActionButtonLocation),
+      floatingActionButtonAnimator:
+          valueOf('floatingActionButtonAnimator', floatingActionButtonAnimator),
+      persistentFooterButtons:
+          valueOf('persistentFooterButtons', persistentFooterButtons),
       drawer: valueOf('drawer', drawer),
       onDrawerChanged: valueOf('onDrawerChanged', onDrawerChanged),
       endDrawer: valueOf('endDrawer', endDrawer),
@@ -388,15 +412,19 @@ class BaseScaffold extends BaseStatelessWidget {
       bottomNavigationBar: valueOf('bottomNavigationBar', bottomNavigationBar),
       bottomSheet: valueOf('bottomSheet', bottomSheet),
       backgroundColor: effectiveBackgroundColor,
-      resizeToAvoidBottomInset: valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
+      resizeToAvoidBottomInset:
+          valueOf('resizeToAvoidBottomInset', resizeToAvoidBottomInset),
       primary: valueOf('primary', primary),
-      drawerDragStartBehavior: valueOf('drawerDragStartBehavior', drawerDragStartBehavior),
+      drawerDragStartBehavior:
+          valueOf('drawerDragStartBehavior', drawerDragStartBehavior),
       extendBody: valueOf('extendBody', extendBody),
       extendBodyBehindAppBar: shouldExtendBehindAppBar,
       drawerScrimColor: valueOf('drawerScrimColor', drawerScrimColor),
       drawerEdgeDragWidth: valueOf('drawerEdgeDragWidth', drawerEdgeDragWidth),
-      drawerEnableOpenDragGesture: valueOf('drawerEnableOpenDragGesture', drawerEnableOpenDragGesture),
-      endDrawerEnableOpenDragGesture: valueOf('endDrawerEnableOpenDragGesture', endDrawerEnableOpenDragGesture),
+      drawerEnableOpenDragGesture:
+          valueOf('drawerEnableOpenDragGesture', drawerEnableOpenDragGesture),
+      endDrawerEnableOpenDragGesture: valueOf(
+          'endDrawerEnableOpenDragGesture', endDrawerEnableOpenDragGesture),
       restorationId: valueOf('restorationId', restorationId),
     );
   }
