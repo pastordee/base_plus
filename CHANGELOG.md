@@ -1,3 +1,11 @@
+## [0.2.2] - 2025-12-12
+
+### Fixed
+- Improved code formatting and FAB detection in BaseScaffold
+- Enhanced automatic Material mode switching for FloatingActionButton
+
+## [0.2.1] - Previous Release
+
 # v3.0.0+2 - 2025.01.21 🍎 Native iOS Integration Release
 
 ## 🎯 **New Features**
