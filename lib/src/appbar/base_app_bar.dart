@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart' hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
+import 'package:flutter/cupertino.dart'
+    hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter/widgets.dart';
@@ -31,7 +32,8 @@ import '../theme/base_theme_data.dart';
 /// CupertinoNavigationBar: 2021.04.01
 /// AppBar: 2021.03.30
 /// modify 2021.06.25 by flutter 2.2.2
-class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSizeWidget {
+class BaseAppBar extends BaseStatelessWidget
+    implements ObstructingPreferredSizeWidget {
   const BaseAppBar({
     Key? key,
     this.leading,
@@ -86,6 +88,7 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     this.onSegmentedControlValueChanged,
     this.segmentedControlHeight,
     this.segmentedControlTint,
+    this.segmentedControlLabelSize,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -297,6 +300,11 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   /// Use this when baseParam.nativeIOS is true
   final Color? segmentedControlTint;
 
+  /// Label size for the segmented control text
+  /// Use this when baseParam.nativeIOS is true
+  /// Controls the font size of segment labels
+  final double? segmentedControlLabelSize;
+
   /// *** native iOS properties end ***
 
   @override
@@ -336,10 +344,13 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     }
 
     CupertinoNavigationBar cupertinoNavigationBar;
-    final double? _height = valueOf('height', height) ?? baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight);
-    final bool? _transitionBetweenRoutes = valueOf('transitionBetweenRoutes', transitionBetweenRoutes) ?? baseTheme.appBarTransitionBetweenRoutes;
+    final double? _height = valueOf('height', height) ??
+        baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight);
+    final bool? _transitionBetweenRoutes =
+        valueOf('transitionBetweenRoutes', transitionBetweenRoutes) ??
+            baseTheme.appBarTransitionBetweenRoutes;
     final Object? _heroTag = valueOf('heroTag', heroTag);
-    
+
     if (_heroTag != null) {
       cupertinoNavigationBar = CupertinoNavigationBar(
         leading: _leading,
@@ -387,7 +398,7 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
         toolbarOpacity: _toolbarOpacity,
       );
     }
-    
+
     return cupertinoNavigationBar;
   }
 
@@ -395,32 +406,37 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   Widget buildByCupertinoNative(BuildContext context) {
     // Native iOS implementation using BaseNavigationBar which handles CNNavigationBar internally
     // Liquid Glass effects are not applicable here as CNNavigationBar handles its own native rendering
-    final Widget? _titleWidget = valueOf('middle', middle) ?? valueOf('title', title);
-    
+    final Widget? _titleWidget =
+        valueOf('middle', middle) ?? valueOf('title', title);
+
     // Extract title text if it's a Text widget
     String? _title;
     if (_titleWidget is Text) {
       _title = _titleWidget.data ?? _titleWidget.textSpan?.toPlainText();
     }
-    
+
     // Use the dedicated leadingActions and trailingActions properties
-    final List<BaseNavigationBarAction>? _leadingActions = valueOf('leadingActions', leadingActions);
-    final List<BaseNavigationBarAction>? _trailingActions = valueOf('trailingActions', trailingActions);
-    
+    final List<BaseNavigationBarAction>? _leadingActions =
+        valueOf('leadingActions', leadingActions);
+    final List<BaseNavigationBarAction>? _trailingActions =
+        valueOf('trailingActions', trailingActions);
+
     final Color? _tint = valueOf('tint', tint);
     final double? _height = valueOf('height', height);
     final bool _transparent = valueOf('transparent', transparent);
     final bool _largeTitle = valueOf('largeTitle', largeTitle);
-    
+
     final BaseThemeData baseTheme = BaseTheme.of(context);
-    final double effectiveHeight = _height ?? baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight) ?? 44.0;
-    
+    final double effectiveHeight = _height ??
+        baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight) ??
+        44.0;
+
     // BaseNavigationBar.build() returns CNNavigationBar which doesn't implement PreferredSizeWidget
     // Wrap it in PreferredSize to make it compatible with ObstructingPreferredSizeWidget
     final Widget navBar = SafeArea(
-      
       child: BaseNavigationBar(
-        key: valueOf('key', key), // Pass through the key for proper rebuild behavior
+        key: valueOf(
+            'key', key), // Pass through the key for proper rebuild behavior
         leading: _leadingActions,
         title: _title,
         trailing: _trailingActions,
@@ -428,15 +444,22 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
         transparent: _transparent,
         largeTitle: _largeTitle,
         height: _height,
-        segmentedControlLabels: valueOf('segmentedControlLabels', segmentedControlLabels),
-        segmentedControlSelectedIndex: valueOf('segmentedControlSelectedIndex', segmentedControlSelectedIndex),
-        onSegmentedControlValueChanged: valueOf('onSegmentedControlValueChanged', onSegmentedControlValueChanged),
-        segmentedControlHeight: valueOf('segmentedControlHeight', segmentedControlHeight),
-        segmentedControlTint: valueOf('segmentedControlTint', segmentedControlTint),
+        segmentedControlLabels:
+            valueOf('segmentedControlLabels', segmentedControlLabels),
+        segmentedControlSelectedIndex: valueOf(
+            'segmentedControlSelectedIndex', segmentedControlSelectedIndex),
+        onSegmentedControlValueChanged: valueOf(
+            'onSegmentedControlValueChanged', onSegmentedControlValueChanged),
+        segmentedControlHeight:
+            valueOf('segmentedControlHeight', segmentedControlHeight),
+        segmentedControlTint:
+            valueOf('segmentedControlTint', segmentedControlTint),
+        segmentedControlLabelSize:
+            valueOf('segmentedControlLabelSize', segmentedControlLabelSize),
         baseParam: BaseParam(nativeIOS: true),
       ).build(context),
     );
-    
+
     return PreferredSize(
       preferredSize: Size.fromHeight(effectiveHeight),
       child: navBar,
@@ -465,33 +488,39 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
     }
 
     final BaseThemeData baseTheme = BaseTheme.of(context);
-    final ThemeData theme = MediaQuery.of(context).platformBrightness == Brightness.light
-        ? (baseTheme.materialTheme ?? Theme.of(context))
-        : (baseTheme.materialDarkTheme ??
-            Theme.of(context).copyWith(
-              brightness: Brightness.dark,
-            ));
+    final ThemeData theme =
+        MediaQuery.of(context).platformBrightness == Brightness.light
+            ? (baseTheme.materialTheme ?? Theme.of(context))
+            : (baseTheme.materialDarkTheme ??
+                Theme.of(context).copyWith(
+                  brightness: Brightness.dark,
+                ));
 
     // Material 3 Color Scheme Integration
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color? _backgroundColor = valueOf('backgroundColor', backgroundColor) ?? 
-        (theme.useMaterial3 ? colorScheme.surface : null);
-    
+    final Color? _backgroundColor =
+        valueOf('backgroundColor', backgroundColor) ??
+            (theme.useMaterial3 ? colorScheme.surface : null);
+
     // Material 3 Semantic Shadow Color
-    final Color? _shadowColor = valueOf('shadowColor', shadowColor) ?? 
+    final Color? _shadowColor = valueOf('shadowColor', shadowColor) ??
         (theme.useMaterial3 ? colorScheme.shadow : null);
 
     // Material 3 Foreground Color from Color Scheme
-    final Color? _foregroundColor = valueOf('foregroundColor', foregroundColor) ?? 
-        (theme.useMaterial3 ? colorScheme.onSurface : null);
+    final Color? _foregroundColor =
+        valueOf('foregroundColor', foregroundColor) ??
+            (theme.useMaterial3 ? colorScheme.onSurface : null);
 
     // Material 3 Enhanced Elevation
-    final double? _elevation = valueOf('elevation', elevation) ?? 
-        (theme.useMaterial3 ? 3.0 : 4.0);
+    final double? _elevation =
+        valueOf('elevation', elevation) ?? (theme.useMaterial3 ? 3.0 : 4.0);
 
-    final double? _height = valueOf('height', height) ?? baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight);
-    final bool centerTitle = this.centerTitle ?? theme.appBarTheme.centerTitle ?? theme.platform == TargetPlatform.iOS;
-    
+    final double? _height = valueOf('height', height) ??
+        baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight);
+    final bool centerTitle = this.centerTitle ??
+        theme.appBarTheme.centerTitle ??
+        theme.platform == TargetPlatform.iOS;
+
     return AppBar(
       leading: _leading,
       automaticallyImplyLeading: valueOf(
@@ -512,7 +541,8 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
       textTheme: valueOf('textTheme', textTheme),
       primary: valueOf('primary', primary),
       centerTitle: centerTitle,
-      excludeHeaderSemantics: valueOf('excludeHeaderSemantics', excludeHeaderSemantics),
+      excludeHeaderSemantics:
+          valueOf('excludeHeaderSemantics', excludeHeaderSemantics),
       titleSpacing: valueOf('titleSpacing', titleSpacing),
       toolbarOpacity: valueOf('toolbarOpacity', toolbarOpacity),
       bottomOpacity: valueOf('bottomOpacity', bottomOpacity),
@@ -526,7 +556,9 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   @override
   bool shouldFullyObstruct(BuildContext context) {
     if (isCupertinoMode) {
-      final Color backgroundColor = CupertinoDynamicColor.maybeResolve(this.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
+      final Color backgroundColor =
+          CupertinoDynamicColor.maybeResolve(this.backgroundColor, context) ??
+              CupertinoTheme.of(context).barBackgroundColor;
       return backgroundColor.alpha == 0xFF;
     }
     return true;
@@ -541,8 +573,10 @@ class BaseAppBar extends BaseStatelessWidget implements ObstructingPreferredSize
   ///   2.build BaseScaffold after build BaseAppBar
   @override
   Size get preferredSize {
-    double _height = height != null ? height! : (isCupertinoMode ? 44.0 : kToolbarHeight);
-    final Widget? middle = valueOf('title', title) ?? valueOf('middle', this.middle);
+    double _height =
+        height != null ? height! : (isCupertinoMode ? 44.0 : kToolbarHeight);
+    final Widget? middle =
+        valueOf('title', title) ?? valueOf('middle', this.middle);
     if (middle != null && bottom != null) {
       _height += bottom!.preferredSize.height;
     }

@@ -5,11 +5,11 @@ import '../base_param.dart';
 import '../base_stateless_widget.dart';
 
 /// BaseSegmentedControl - Cross-platform segmented control with native iOS support
-/// 
+///
 /// Uses CNSegmentedControl (Cupertino Native) for iOS - provides true native iOS appearance
 /// with built-in liquid glass effects and native rendering.
 /// Uses Material SegmentedButton for Android and other platforms.
-/// 
+///
 /// *** use cupertino = { forceUseMaterial: true } force use SegmentedButton on iOS
 /// *** use material = { forceUseCupertino: true } force use CNSegmentedControl on Android
 ///
@@ -18,7 +18,7 @@ import '../base_stateless_widget.dart';
 /// - Material Design SegmentedButton for Android
 /// - Consistent API across platforms
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
-/// 
+///
 /// Example:
 /// ```dart
 /// BaseSegmentedControl(
@@ -27,7 +27,7 @@ import '../base_stateless_widget.dart';
 ///   onValueChanged: (i) => setState(() => _selectedIndex = i),
 /// )
 /// ```
-/// 
+///
 /// Updated: 2024.10.25 - Renamed from BaseCNSegmentedControl for consistency
 class BaseSegmentedControl extends BaseStatelessWidget {
   const BaseSegmentedControl({
@@ -35,6 +35,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
     required this.labels,
     required this.selectedIndex,
     required this.onValueChanged,
+    this.labelSize,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -47,12 +48,17 @@ class BaseSegmentedControl extends BaseStatelessWidget {
   /// Called when a segment is selected
   final ValueChanged<int> onValueChanged;
 
+  /// Size of the segment labels (iOS only)
+  /// Applies to CNSegmentedControl on iOS
+  final double? labelSize;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     return CNSegmentedControl(
       labels: valueOf('labels', labels),
       selectedIndex: valueOf('selectedIndex', selectedIndex),
       onValueChanged: valueOf('onValueChanged', onValueChanged),
+      labelSize: valueOf('labelSize', labelSize),
     );
   }
 
@@ -60,7 +66,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
   Widget buildByMaterial(BuildContext context) {
     final selectedIdx = valueOf('selectedIndex', selectedIndex);
     final labelsList = valueOf('labels', labels);
-    
+
     return SegmentedButton<int>(
       segments: List.generate(
         labelsList.length,

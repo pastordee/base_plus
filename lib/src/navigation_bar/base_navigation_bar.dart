@@ -6,10 +6,10 @@ import '../base_stateless_widget.dart';
 import '../components/base_popup_menu_button.dart';
 
 /// Cross-platform navigation bar action
-/// 
+///
 /// Represents an action button in the navigation bar with icon and/or label.
 /// Also supports spacing actions for layout control.
-/// 
+///
 /// Automatically converts to platform-specific formats:
 /// - iOS: Uses CNNavigationBarAction with SF Symbols
 /// - Material: Uses IconButton/TextButton with Material icons
@@ -24,13 +24,14 @@ class BaseNavigationBarAction {
     this.iconSize = 16,
     this.badgeValue,
     this.badgeColor,
-  }) : popupMenuItems = null,
-       onPopupMenuSelected = null,
-       _isFixedSpace = false,
-       _isFlexibleSpace = false,
-       _usePopupMenuButton = false,
-       _spaceWidth = null,
-       assert(icon != null || label != null, 'Either icon or label must be provided');
+  })  : popupMenuItems = null,
+        onPopupMenuSelected = null,
+        _isFixedSpace = false,
+        _isFlexibleSpace = false,
+        _usePopupMenuButton = false,
+        _spaceWidth = null,
+        assert(icon != null || label != null,
+            'Either icon or label must be provided');
 
   const BaseNavigationBarAction._fixedSpace(this._spaceWidth)
       : icon = null,
@@ -77,11 +78,11 @@ class BaseNavigationBarAction {
     this.badgeValue,
     this.badgeColor,
     bool usePopupMenuButton = false,
-  }) : onPressed = null,
-       _isFixedSpace = false,
-       _isFlexibleSpace = false,
-       _usePopupMenuButton = usePopupMenuButton,
-       _spaceWidth = null;
+  })  : onPressed = null,
+        _isFixedSpace = false,
+        _isFlexibleSpace = false,
+        _usePopupMenuButton = usePopupMenuButton,
+        _spaceWidth = null;
 
   /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
   final CNSymbol? icon;
@@ -218,7 +219,7 @@ class BaseNavigationBarAction {
         if (item.isDivider) {
           return const CNPopupMenuDivider();
         }
-        
+
         CNSymbol? itemIcon;
         if (item.iosIcon != null) {
           itemIcon = CNSymbol(item.iosIcon!, size: item.iconSize ?? 18);
@@ -229,14 +230,14 @@ class BaseNavigationBarAction {
             itemIcon = CNSymbol(sfSymbol, size: item.iconSize ?? 18);
           }
         }
-        
+
         return CNPopupMenuItem(
           label: item.label,
           icon: itemIcon,
           enabled: item.enabled,
         );
       }).toList();
-      
+
       if (_usePopupMenuButton) {
         return CNNavigationBarAction.popupMenuButton(
           icon: icon,
@@ -278,11 +279,11 @@ class BaseNavigationBarAction {
       badgeColor: badgeColor,
     );
   }
-  
+
   /// Map Material icon to SF Symbol name
   String? _mapIconToSFSymbol(IconData? iconData) {
     if (iconData == null) return null;
-    
+
     final Map<int, String> iconMap = {
       Icons.refresh.codePoint: 'arrow.clockwise',
       Icons.edit.codePoint: 'pencil',
@@ -302,7 +303,7 @@ class BaseNavigationBarAction {
       Icons.search.codePoint: 'magnifyingglass',
       Icons.download.codePoint: 'square.and.arrow.down',
     };
-    
+
     return iconMap[iconData.codePoint];
   }
 }
@@ -312,11 +313,11 @@ class BaseNavigationBarAction {
 /// Public API should use BaseNavigationBarAction instead
 
 /// BaseNavigationBar - Cross-platform navigation bar with native iOS support
-/// 
+///
 /// Uses CNNavigationBar (Cupertino Native) for iOS - provides native iOS navigation bar
 /// with large title mode, transparency, and flexible actions via UINavigationBar.
 /// Uses Material AppBar for Android.
-/// 
+///
 /// *** use cupertino = { forceUseMaterial: true } force use Material AppBar on iOS
 /// *** use material = { forceUseCupertino: true } force use CNNavigationBar on Android
 ///
@@ -330,7 +331,7 @@ class BaseNavigationBarAction {
 /// - Segmented control integration (iOS native)
 /// - Built-in liquid glass effects on iOS (no manual wrapper needed)
 /// - Automatic platform-specific conversion of actions
-/// 
+///
 /// Example:
 /// ```dart
 /// BaseNavigationBar(
@@ -360,7 +361,7 @@ class BaseNavigationBarAction {
 ///   largeTitle: false,
 /// )
 /// ```
-/// 
+///
 /// For segmented control, add the following parameters:
 /// ```dart
 /// BaseNavigationBar(
@@ -382,7 +383,7 @@ class BaseNavigationBarAction {
 ///   ],
 /// )
 /// ```
-/// 
+///
 /// For search functionality, use the factory constructor:
 /// ```dart
 /// BaseNavigationBar.search(
@@ -399,35 +400,35 @@ class BaseNavigationBarAction {
 ///   ),
 /// )
 /// ```
-/// 
+///
 /// Available action types:
 /// - `BaseNavigationBarAction()` - Regular action with icon/label
 /// - `BaseNavigationBarAction.fixedSpace(5)` - Fixed spacing
 /// - `BaseNavigationBarAction.flexibleSpace()` - Flexible spacing
-/// 
+///
 /// ## Forcing Rebuild/Refresh
-/// 
+///
 /// Since BaseNavigationBar is a StatelessWidget, it rebuilds when its parent rebuilds.
 /// To force a rebuild when the navigation bar's state changes, use one of these methods:
-/// 
+///
 /// **Method 1: Change the Key (Recommended)**
 /// ```dart
 /// class MyWidget extends StatefulWidget {
 ///   @override
 ///   State<MyWidget> createState() => _MyWidgetState();
 /// }
-/// 
+///
 /// class _MyWidgetState extends State<MyWidget> {
 ///   int _refreshKey = 0;
 ///   List<BaseNavigationBarAction> _actions = [...];
-///   
+///
 ///   void updateActions() {
 ///     setState(() {
 ///       _actions = [...]; // Update actions
 ///       _refreshKey++; // Increment key to force rebuild
 ///     });
 ///   }
-///   
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return BaseNavigationBar(
@@ -438,7 +439,7 @@ class BaseNavigationBarAction {
 ///   }
 /// }
 /// ```
-/// 
+///
 /// **Method 2: Use UniqueKey for Each Rebuild**
 /// ```dart
 /// BaseNavigationBar(
@@ -446,7 +447,7 @@ class BaseNavigationBarAction {
 ///   // ...
 /// )
 /// ```
-/// 
+///
 /// **Method 3: Use the Static Helper**
 /// ```dart
 /// BaseNavigationBar(
@@ -454,7 +455,7 @@ class BaseNavigationBarAction {
 ///   // ...
 /// )
 /// ```
-/// 
+///
 /// Updated: 2024.10.25 - Refactored to use BaseNavigationBarAction in public API
 /// Updated: 2024.10.30 - Added refresh documentation and helper methods
 class BaseNavigationBar extends BaseStatelessWidget {
@@ -475,14 +476,15 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.onSegmentedControlValueChanged,
     this.segmentedControlHeight,
     this.segmentedControlTint,
+    this.segmentedControlLabelSize,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
-  
+
   /// Creates a unique key for forcing widget rebuild
-  /// 
+  ///
   /// Use this when you need to force the navigation bar to rebuild,
   /// for example when actions are updated dynamically.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// BaseNavigationBar(
@@ -506,18 +508,18 @@ class BaseNavigationBar extends BaseStatelessWidget {
     VoidCallback? onTitlePressed,
     BaseParam? baseParam,
   }) : this(
-         key: key,
-         leading: leading,
-         trailing: trailing,
-         searchConfig: searchConfig,
-         tint: tint,
-         transparent: transparent,
-         largeTitle: largeTitle,
-         height: height,
-         titleSize: titleSize,
-         onTitlePressed: onTitlePressed,
-         baseParam: baseParam,
-       );
+          key: key,
+          leading: leading,
+          trailing: trailing,
+          searchConfig: searchConfig,
+          tint: tint,
+          transparent: transparent,
+          largeTitle: largeTitle,
+          height: height,
+          titleSize: titleSize,
+          onTitlePressed: onTitlePressed,
+          baseParam: baseParam,
+        );
 
   /// Leading navigation actions
   final List<BaseNavigationBarAction>? leading;
@@ -565,23 +567,32 @@ class BaseNavigationBar extends BaseStatelessWidget {
   /// Tint color for segmented control (iOS native)
   final Color? segmentedControlTint;
 
+  /// Label size for segmented control text (iOS native)
+  final double? segmentedControlLabelSize;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
     final leadingActions = valueOf('leading', leading);
     final trailingActions = valueOf('trailing', trailing);
-    
+
     List<CNNavigationBarAction>? cnLeading;
     List<CNNavigationBarAction>? cnTrailing;
-    
+
     if (leadingActions != null) {
-      cnLeading = (leadingActions as List).map((action) => (action as BaseNavigationBarAction).toCNNavigationBarAction()).toList();
+      cnLeading = (leadingActions as List)
+          .map((action) =>
+              (action as BaseNavigationBarAction).toCNNavigationBarAction())
+          .toList();
     }
-    
+
     if (trailingActions != null) {
-      cnTrailing = (trailingActions as List).map((action) => (action as BaseNavigationBarAction).toCNNavigationBarAction()).toList();
+      cnTrailing = (trailingActions as List)
+          .map((action) =>
+              (action as BaseNavigationBarAction).toCNNavigationBarAction())
+          .toList();
     }
-    
+
     // Check if this is a search navigation bar
     final searchConf = valueOf('searchConfig', searchConfig);
     if (searchConf != null) {
@@ -608,11 +619,18 @@ class BaseNavigationBar extends BaseStatelessWidget {
       height: valueOf('height', height),
       titleSize: valueOf('titleSize', titleSize),
       onTitlePressed: valueOf('onTitlePressed', onTitlePressed),
-      segmentedControlLabels: valueOf('segmentedControlLabels', segmentedControlLabels),
-      segmentedControlSelectedIndex: valueOf('segmentedControlSelectedIndex', segmentedControlSelectedIndex),
-      onSegmentedControlValueChanged: valueOf('onSegmentedControlValueChanged', onSegmentedControlValueChanged),
-      segmentedControlHeight: valueOf('segmentedControlHeight', segmentedControlHeight),
-      segmentedControlTint: valueOf('segmentedControlTint', segmentedControlTint),
+      segmentedControlLabels:
+          valueOf('segmentedControlLabels', segmentedControlLabels),
+      segmentedControlSelectedIndex: valueOf(
+          'segmentedControlSelectedIndex', segmentedControlSelectedIndex),
+      onSegmentedControlValueChanged: valueOf(
+          'onSegmentedControlValueChanged', onSegmentedControlValueChanged),
+      segmentedControlHeight:
+          valueOf('segmentedControlHeight', segmentedControlHeight),
+      segmentedControlTint:
+          valueOf('segmentedControlTint', segmentedControlTint),
+      segmentedControlLabelSize:
+          valueOf('segmentedControlLabelSize', segmentedControlLabelSize),
     );
   }
 
@@ -625,15 +643,18 @@ class BaseNavigationBar extends BaseStatelessWidget {
     // Check if this is a search navigation bar
     final searchConf = valueOf('searchConfig', searchConfig);
     if (searchConf != null) {
-      return _buildMaterialSearchNavBar(context, theme, iconColor, textColor, searchConf);
+      return _buildMaterialSearchNavBar(
+          context, theme, iconColor, textColor, searchConf);
     }
 
     return Container(
-      height: valueOf('height', height) ?? (valueOf('largeTitle', largeTitle) ? 96 : 56),
+      height: valueOf('height', height) ??
+          (valueOf('largeTitle', largeTitle) ? 96 : 56),
       decoration: valueOf('transparent', transparent)
           ? null
           : BoxDecoration(
-              color: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface,
+              color: theme.appBarTheme.backgroundColor ??
+                  theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -666,7 +687,8 @@ class BaseNavigationBar extends BaseStatelessWidget {
       decoration: valueOf('transparent', transparent)
           ? null
           : BoxDecoration(
-              color: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface,
+              color: theme.appBarTheme.backgroundColor ??
+                  theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -682,10 +704,11 @@ class BaseNavigationBar extends BaseStatelessWidget {
             children: [
               // Leading actions
               if (valueOf('leading', leading) != null) ...[
-                ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
+                ..._buildMaterialActions(
+                    valueOf('leading', leading)!, iconColor),
                 const SizedBox(width: 12),
               ],
-              
+
               // Search field
               Expanded(
                 child: Container(
@@ -700,18 +723,21 @@ class BaseNavigationBar extends BaseStatelessWidget {
                     decoration: InputDecoration(
                       hintText: searchConfig.placeholder,
                       hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
-                      prefixIcon: Icon(Icons.search, color: iconColor.withOpacity(0.7), size: 20),
+                      prefixIcon: Icon(Icons.search,
+                          color: iconColor.withOpacity(0.7), size: 20),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                     ),
                   ),
                 ),
               ),
-              
+
               // Trailing actions
               if (valueOf('trailing', trailing) != null) ...[
                 const SizedBox(width: 12),
-                ..._buildMaterialActions(valueOf('trailing', trailing)!, iconColor),
+                ..._buildMaterialActions(
+                    valueOf('trailing', trailing)!, iconColor),
               ],
             ],
           ),
@@ -730,12 +756,14 @@ class BaseNavigationBar extends BaseStatelessWidget {
           child: Row(
             children: [
               if (valueOf('leading', leading) != null) ...[
-                ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
+                ..._buildMaterialActions(
+                    valueOf('leading', leading)!, iconColor),
                 const Spacer(),
               ] else
                 const Spacer(),
               if (valueOf('trailing', trailing) != null)
-                ..._buildMaterialActions(valueOf('trailing', trailing)!, iconColor),
+                ..._buildMaterialActions(
+                    valueOf('trailing', trailing)!, iconColor),
             ],
           ),
         ),
@@ -764,7 +792,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
           ..._buildMaterialActions(valueOf('leading', leading)!, iconColor),
           const SizedBox(width: 12),
         ],
-        
+
         // Title
         if (valueOf('title', title) != null)
           Expanded(
@@ -780,7 +808,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
           )
         else
           const Spacer(),
-        
+
         // Trailing actions
         if (valueOf('trailing', trailing) != null) ...[
           const SizedBox(width: 12),
@@ -790,22 +818,23 @@ class BaseNavigationBar extends BaseStatelessWidget {
     );
   }
 
-  List<Widget> _buildMaterialActions(List<BaseNavigationBarAction> actions, Color iconColor) {
+  List<Widget> _buildMaterialActions(
+      List<BaseNavigationBarAction> actions, Color iconColor) {
     return actions.map((action) {
       // Handle special action types
       if (action.isFixedSpace) {
         // This is a fixed space action
         return SizedBox(width: action.spaceWidth ?? 8);
       }
-      
+
       if (action.isFlexibleSpace) {
         // This is a flexible space action
         return const Expanded(child: SizedBox());
       }
-      
+
       // Use custom tint color if provided, otherwise use default iconColor
       final actionColor = action.tint ?? iconColor;
-      
+
       // Regular action with icon/label
       if (action.icon != null && action.label != null) {
         // Both icon and label
@@ -842,7 +871,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
           child: Text(action.label!, style: TextStyle(color: actionColor)),
         );
       }
-      
+
       return const SizedBox.shrink();
     }).toList();
   }
@@ -864,7 +893,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'arrow.right': Icons.arrow_forward,
       'arrow.up.left': Icons.north_west,
       'arrow.down.right': Icons.south_east,
-      
+
       // Common Actions
       'plus': Icons.add,
       'plus.circle': Icons.add_circle,
@@ -875,20 +904,20 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'xmark.circle': Icons.cancel,
       'checkmark': Icons.check,
       'checkmark.circle': Icons.check_circle,
-      
+
       // Settings
       'gear': Icons.settings,
       'gearshape': Icons.settings,
       'gearshape.fill': Icons.settings,
       'slider.horizontal.3': Icons.tune,
       'slider.horizontal': Icons.tune,
-      
+
       // Menu & Navigation
       'ellipsis': Icons.more_horiz,
       'ellipsis.circle': Icons.more_vert,
       'apps': Icons.apps,
       'apps.iphone': Icons.apps,
-      
+
       // Favorites & Interactions
       'star': Icons.star_border,
       'star.fill': Icons.star,
@@ -896,11 +925,11 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'heart.fill': Icons.favorite,
       'bookmark': Icons.bookmark_border,
       'bookmark.fill': Icons.bookmark,
-      
+
       // Search & Find
       'magnifyingglass': Icons.search,
       'magnifyingglass.circle': Icons.search,
-      
+
       // Home & Places
       'house': Icons.home,
       'house.fill': Icons.home,
@@ -908,7 +937,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'location': Icons.location_on,
       'location.circle': Icons.location_on,
       'location.fill': Icons.location_on,
-      
+
       // Communication
       'envelope': Icons.email,
       'envelope.open': Icons.mail_outline,
@@ -919,7 +948,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'bell': Icons.notifications,
       'bell.fill': Icons.notifications_active,
       'bell.badge': Icons.notifications_active,
-      
+
       // Media
       'camera': Icons.camera_alt,
       'camera.fill': Icons.camera_alt,
@@ -930,7 +959,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'video.fill': Icons.videocam,
       'music.note': Icons.music_note,
       'music.note.list': Icons.playlist_play,
-      
+
       // Files & Folders
       'doc': Icons.insert_drive_file,
       'doc.on.doc': Icons.content_copy,
@@ -938,7 +967,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'folder': Icons.folder,
       'folder.fill': Icons.folder,
       'folder.badge.plus': Icons.create_new_folder,
-      
+
       // Edit & Text
       'pencil': Icons.edit,
       'pencil.circle': Icons.edit,
@@ -952,26 +981,26 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'strikethrough': Icons.strikethrough_s,
       'textformat.size': Icons.text_fields,
       'textformat': Icons.text_fields,
-      
+
       // Grid & Layout
       'square.grid.2x2': Icons.grid_view,
       'square.grid.3x2': Icons.grid_on,
       'list.bullet': Icons.list,
       'list.number': Icons.format_list_numbered,
-      
+
       // Links & Sharing
       'link': Icons.link,
       'link.circle': Icons.link,
       'paperclip': Icons.attach_file,
       'square.and.arrow.up': Icons.share,
       'square.and.arrow.down': Icons.download,
-      
+
       // Time & Date
       'clock': Icons.schedule,
       'clock.fill': Icons.access_time,
       'calendar': Icons.calendar_today,
       'calendar.circle': Icons.calendar_today,
-      
+
       // User & Account
       'person': Icons.person,
       'person.fill': Icons.person,
@@ -979,7 +1008,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
       'person.circle.fill': Icons.account_circle,
       'people': Icons.group,
       'people.fill': Icons.group,
-      
+
       // Miscellaneous
       'paintpalette': Icons.palette,
       'paintpalette.fill': Icons.palette,
