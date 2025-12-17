@@ -1,6 +1,6 @@
 name: base_plus
 description: One code, two modes, use cupertino's widgets on ios, use material's widget on android or fuchsia. Supports Material 3 and modern iOS design patterns.
-version: 0.2.2
+version: 0.2.2+1
 homepage: https://github.com/pastordee/base_plus
 repository: https://github.com/pastordee/base_plus
 issue_tracker: https://github.com/pastordee/base_plus/issues

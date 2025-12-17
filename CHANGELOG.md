@@ -1,3 +1,16 @@
+## [0.2.2+1] - 2025-12-17
+
+### Added
+- Added `labelSize` parameter to `BaseSegmentedControl` for controlling segment text size
+- Added `segmentedControlLabelSize` parameter to `BaseAppBar` for native iOS segmented control
+- Added `segmentedControlLabelSize` parameter to `BaseNavigationBar` for native iOS segmented control
+
+### Changed
+- Updated `cupertino_native_extra` dependency to ^0.2.0+3 for segmented control label size support
+
+### Fixed
+- Fixed iOS code signing configuration for simulator debug builds in example app
+
 ## [0.2.2] - 2025-12-12
 
 ### Fixed
