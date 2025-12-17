@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
   vector_math: ^2.0.8
   get: ^4.6.6
-  cupertino_native_extra: ^0.2.0+1
+  cupertino_native_extra: ^0.2.0+3
   cupertino_interactive_keyboard_plus: ^0.0.5
 
 dev_dependencies:

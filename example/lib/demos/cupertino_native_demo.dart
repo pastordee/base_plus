@@ -21,7 +21,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   bool _switchValue = true;
   bool _coloredSwitchValue = false;
   int _segmentedControlIndex = 0;
-  
+
   // For format sheet demo
   bool _isBold = false;
   bool _isItalic = false;
@@ -34,25 +34,23 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   int _filterIndex3 = 0; // Gray style button with prefix
   final List<String> _filterOptions = ['All', 'Images', 'Videos', 'Documents'];
 
+  // For BaseAppBar with segmented control demo
+  int _appBarSegmentIndex = 0;
+
   void _set(String action) {
     setState(() => _lastAction = action);
   }
-  
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 1),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appBar: BaseAppBar(
-        title: const Text('Native Components'),
-      ),
+      appBar: BaseAppBar(title: const Text('Native Components')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -63,12 +61,15 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Last Action: $_lastAction',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
           ),
-          
+
           _buildSection(
             title: 'CNButton Styles',
             child: Wrap(
@@ -228,6 +229,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
               children: [
                 BaseSegmentedControl(
                   labels: const ['One', 'Two', 'Three'],
+                  labelSize: 14,
                   selectedIndex: _segmentedControlIndex,
                   onValueChanged: (i) {
                     setState(() => _segmentedControlIndex = i);
@@ -368,7 +370,6 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    
                     // Icon-style pull-down button with inline actions
                     BaseCNPullDownButton.icon(
                       buttonIcon: const CNSymbol('ellipsis.circle', size: 24),
@@ -422,7 +423,11 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         ),
                       ],
                       onSelected: (index) {
-                        final actions = ['Save to Photos', 'Duplicate', 'Delete'];
+                        final actions = [
+                          'Save to Photos',
+                          'Duplicate',
+                          'Delete',
+                        ];
                         setState(() => _lastAction = 'Menu: ${actions[index]}');
                       },
                       onInlineActionSelected: (index) {
@@ -433,7 +438,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         });
                       },
                     ),
-                    
+
                     // Label-style pull-down button
                     BaseCNPullDownButton(
                       buttonLabel: 'Edit Photo',
@@ -453,7 +458,11 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         ),
                       ],
                       onSelected: (index) {
-                        final actions = ['Rotate Left', 'Rotate Right', 'Flip Horizontal'];
+                        final actions = [
+                          'Rotate Left',
+                          'Rotate Right',
+                          'Flip Horizontal',
+                        ];
                         setState(() => _lastAction = 'Edit: ${actions[index]}');
                       },
                     ),
@@ -535,7 +544,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         });
                       },
                     ),
-                    
+
                     // Icon-style with tinted button style
                     BasePullDownButtonAnchor.icon(
                       buttonIcon: const CNSymbol('star.fill'),
@@ -560,11 +569,17 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                         ),
                       ],
                       onSelected: (index) {
-                        final actions = ['Add to Favorites', 'View Favorites', 'Clear Favorites'];
-                        setState(() => _lastAction = 'Favorite: ${actions[index]}');
+                        final actions = [
+                          'Add to Favorites',
+                          'View Favorites',
+                          'Clear Favorites',
+                        ];
+                        setState(
+                          () => _lastAction = 'Favorite: ${actions[index]}',
+                        );
                       },
                     ),
-                    
+
                     // Icon-style with filled button style
                     BasePullDownButtonAnchor.icon(
                       buttonIcon: const CNSymbol('square.and.arrow.up'),
@@ -586,7 +601,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                       ],
                       onSelected: (index) {
                         final actions = ['Share Link', 'Copy', 'Save'];
-                        setState(() => _lastAction = 'Share: ${actions[index]}');
+                        setState(
+                          () => _lastAction = 'Share: ${actions[index]}',
+                        );
                       },
                     ),
                   ],
@@ -635,7 +652,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                       ),
                     ),
                     const SizedBox(width: 2),
-                    
+
                     // Popup button with tinted style
                     Expanded(
                       child: BasePopupButton(
@@ -652,11 +669,11 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                       ),
                     ),
                     const SizedBox(width: 2),
-                    
+
                     // Popup button with gray style and prefix
                     Expanded(
                       child: BasePopupButton(
-                        width:200,
+                        width: 200,
                         options: _filterOptions,
                         selectedIndex: _filterIndex3,
                         onSelected: (index) {
@@ -690,7 +707,10 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                 const SizedBox(height: 8),
                 Text(
                   'Selected: Plain=${_filterOptions[_filterIndex1]}, Tinted=${_filterOptions[_filterIndex2]}, Gray=${_filterOptions[_filterIndex3]}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -736,6 +756,40 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                   '• Title with large title support\n'
                   '• Trailing actions (settings, add, etc.)\n'
                   '• Transparent mode with blur effects',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          _buildSection(
+            title: 'BaseAppBar with Segmented Control (Tap to Open Demo)',
+            child: Column(
+              children: [
+                const Text(
+                  'Native iOS navigation bar with integrated segmented control for filtering content.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const _AppBarSegmentedControlDemoPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Open AppBar Segmented Control Demo'),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Features:\n'
+                  '• Integrated segmented control in nav bar\n'
+                  '• Filters content based on selection\n'
+                  '• Native iOS appearance\n'
+                  '• Smooth transitions',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
@@ -800,7 +854,8 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     ),
                     searchPlaceholder: 'Search messages...',
                     onSearchChanged: (text) => _set('Search: $text'),
-                    onSearchFocusChanged: (focused) => _set('Search focused: $focused'),
+                    onSearchFocusChanged: (focused) =>
+                        _set('Search focused: $focused'),
                     trailingAction: CupertinoButton(
                       padding: EdgeInsets.zero,
                       child: const Icon(CupertinoIcons.square_pencil),
@@ -845,7 +900,8 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
                     scopeButtonTitles: const ['All', 'Movies', 'TV Shows'],
                     selectedScopeIndex: 0,
                     onTextChanged: (text) => _set('Search: $text'),
-                    onSearchButtonClicked: (text) => _set('Search submitted: $text'),
+                    onSearchButtonClicked: (text) =>
+                        _set('Search submitted: $text'),
                     onCancelButtonClicked: () => _set('Search cancelled'),
                     onScopeChanged: (index) => _set('Scope changed to: $index'),
                     height: 56,
@@ -926,7 +982,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   // Native Sheet Methods
   Future<void> _showNativeSheet() async {
     print('Opening native sheet...');
-    
+
     await BaseNativeSheet.show(
       context: context,
       title: 'Settings',
@@ -943,8 +999,6 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       detents: [CNSheetDetent.medium],
       prefersGrabberVisible: true,
     );
-    
-    
   }
 
   Future<void> _showNonmodalSheet() async {
@@ -963,7 +1017,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
         print('onItemSelected callback fired with index: $index');
       },
     );
-    
+
     if (selectedIndex != null) {
       final formats = ['Bold', 'Italic', 'Underline'];
       _set('Nonmodal sheet: ${formats[selectedIndex]}');
@@ -973,7 +1027,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
   }
 
   Future<void> _showCustomHeaderSheet() async {
-     await BaseNativeSheet.showWithCustomHeader(
+    await BaseNativeSheet.showWithCustomHeader(
       context: context,
       title: 'Custom Header',
       headerTitleSize: 18,
@@ -986,13 +1040,12 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       ],
       onItemSelected: (index) {
         _set('Custom header option ${index + 1} selected');
-        print(  'Custom header option ${index + 1} selected'); // Debug
+        print('Custom header option ${index + 1} selected'); // Debug
       },
       detents: [CNSheetDetent.custom(320)],
       isModal: false,
     );
 
-    
     // if (selectedIndex != null) {
     //   _set('Custom header option ${selectedIndex + 1} selected');
     // } else {
@@ -1008,10 +1061,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       isModal: true,
       headerTitleAlignment: 'center',
       headerHeight: 70,
-      detents: const [
-        CNSheetDetent.medium,
-        CNSheetDetent.large,
-      ],
+      detents: const [CNSheetDetent.medium, CNSheetDetent.large],
       // Inline action buttons - like iOS Notes formatting toolbar
       inlineActions: [
         CNSheetInlineActions(
@@ -1043,7 +1093,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           ],
         ),
       ],
-      
+
       // Item rows - side-by-side buttons with equal widths
       itemRows: const [
         CNSheetItemRow(
@@ -1051,37 +1101,36 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
             CNSheetItem(
               title: 'Reset All',
               icon: 'arrow.counterclockwise',
-              dismissOnTap: false
+              dismissOnTap: false,
             ),
             CNSheetItem(
               title: 'Copy Format',
               icon: 'doc.on.clipboard',
-              dismissOnTap: false
+              dismissOnTap: false,
             ),
           ],
         ),
       ],
-      
-     
+
       // Regular list items
       items: const [
         CNSheetItem(
           title: 'Font Size',
           icon: 'textformat.size',
-          dismissOnTap: false
+          dismissOnTap: false,
         ),
         CNSheetItem(
           title: 'Text Color',
           icon: 'paintpalette',
-          dismissOnTap: false
+          dismissOnTap: false,
         ),
         CNSheetItem(
           title: 'Background Color',
           icon: 'paintbrush.fill',
-          dismissOnTap: false
+          dismissOnTap: false,
         ),
       ],
-       onItemSelected: (index) {
+      onItemSelected: (index) {
         print('Item ${index} applied');
         _set('Item ${index + 1} selected');
       },
@@ -1092,7 +1141,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       onInlineActionSelected: (rowIndex, inlineActionIndex) {
         setState(() {
           print('Inline action: row $rowIndex, action $inlineActionIndex');
-          
+
           // Toggle the corresponding state
           switch (inlineActionIndex) {
             case 0: // Bold
@@ -1125,10 +1174,7 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
           padding: const EdgeInsets.only(top: 24, bottom: 12),
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         child,
@@ -1166,10 +1212,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade100,
-                  Colors.purple.shade100,
-                ],
+                colors: [Colors.blue.shade100, Colors.purple.shade100],
               ),
             ),
             child: SafeArea(
@@ -1179,7 +1222,10 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                   children: [
                     const Text(
                       'CNToolbar Demo',
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     Card(
@@ -1191,7 +1237,8 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                             SwitchListTile(
                               title: const Text('Transparent Background'),
                               value: _isTransparent,
-                              onChanged: (v) => setState(() => _isTransparent = v),
+                              onChanged: (v) =>
+                                  setState(() => _isTransparent = v),
                             ),
                             const Divider(),
                             const Text('Middle Alignment:'),
@@ -1211,9 +1258,12 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                                 ),
                               ],
                               selected: {_middleAlignment},
-                              onSelectionChanged: (Set<BaseToolbarAlignment> selection) {
-                                setState(() => _middleAlignment = selection.first);
-                              },
+                              onSelectionChanged:
+                                  (Set<BaseToolbarAlignment> selection) {
+                                    setState(
+                                      () => _middleAlignment = selection.first,
+                                    );
+                                  },
                             ),
                           ],
                         ),
@@ -1224,7 +1274,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               ),
             ),
           ),
-          
+
           // Top toolbar
           Positioned(
             left: 0,
@@ -1235,7 +1285,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               child: BaseToolbar(
                 middleAlignment: _middleAlignment,
                 leading: [
-                  BaseToolbarAction( 
+                  BaseToolbarAction(
                     // iconSize: 15,
                     icon: const CNSymbol('chevron.left'),
                     onPressed: () => Navigator.of(context).pop(),
@@ -1250,19 +1300,19 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                 middle: [
                   BaseToolbarAction(
                     iconSize: 15,
-                    icon: const CNSymbol('pencil',),
+                    icon: const CNSymbol('pencil'),
                     tint: CupertinoColors.systemBlue, // Custom blue color
                     onPressed: () => print('Edit tapped'),
                   ),
                   BaseToolbarAction(
                     iconSize: 15,
-                    icon: const CNSymbol('trash',),
+                    icon: const CNSymbol('trash'),
                     tint: CupertinoColors.systemRed, // Custom red color
                     onPressed: () => print('Delete tapped'),
                   ),
                 ],
                 trailing: [
-                   BaseToolbarAction.fixedSpace(2),
+                  BaseToolbarAction.fixedSpace(2),
                   BaseToolbarAction(
                     padding: 12,
                     label: 'Settings',
@@ -1273,7 +1323,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
                   BaseToolbarAction.fixedSpace(2),
                   BaseToolbarAction(
                     // iconSize: 10,
-                    icon: const CNSymbol('plus',),
+                    icon: const CNSymbol('plus'),
                     tint: CupertinoColors.systemGreen, // Custom green color
                     onPressed: () => print('Add tapped'),
                   ),
@@ -1283,7 +1333,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
               ),
             ),
           ),
-          
+
           // Bottom toolbar
           Positioned(
             left: 10,
@@ -1301,7 +1351,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
     );
   }
 
-   Widget _buildExpandedSearchToolbar() {
+  Widget _buildExpandedSearchToolbar() {
     return SafeArea(
       top: false,
       child: Container(
@@ -1359,6 +1409,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
       ),
     );
   }
+
   Widget _buildNormalToolbar() {
     return SafeArea(
       top: false,
@@ -1375,7 +1426,7 @@ class _CNToolbarDemoPageState extends State<_CNToolbarDemoPage> {
           BaseToolbarAction(
             iconSize: 10,
             icon: CNSymbol('pencil', size: 10),
-            onPressed: () => print('Edit tapped', ),
+            onPressed: () => print('Edit tapped'),
           ),
           BaseToolbarAction(
             icon: CNSymbol('trash', size: 4),
@@ -1412,7 +1463,8 @@ class _CNNavigationBarDemoPage extends StatefulWidget {
   const _CNNavigationBarDemoPage();
 
   @override
-  State<_CNNavigationBarDemoPage> createState() => _CNNavigationBarDemoPageState();
+  State<_CNNavigationBarDemoPage> createState() =>
+      _CNNavigationBarDemoPageState();
 }
 
 class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
@@ -1423,8 +1475,8 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScaffold( 
-      backgroundColor:  CupertinoColors.systemPink, 
+    return BaseScaffold(
+      backgroundColor: CupertinoColors.systemPink,
       // baseParam: BaseParam(nativeIOS: true),
       appBar: BaseAppBar(
         baseParam: BaseParam(nativeIOS: true),
@@ -1447,13 +1499,12 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
         ],
         trailingActions: [
           BaseNavigationBarAction.popupMenu(
-            
             icon: const CNSymbol('gear'),
             tint: CupertinoColors.systemBlue, // Custom blue color
             // iconSize: 12,
             // onPressed: () {
             //   print('Settings tapped');
-            // }, 
+            // },
             popupMenuItems: [
               BasePopupMenuItem(
                 label: 'Preferences',
@@ -1471,8 +1522,8 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                 iosIcon: 'questionmark.circle',
                 iconData: Icons.help,
               ),
-            ], 
-            onPopupMenuSelected: (int value) { 
+            ],
+            onPopupMenuSelected: (int value) {
               if (value == 0) {
                 print('Preferences selected');
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1489,7 +1540,8 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                     duration: Duration(seconds: 1),
                   ),
                 );
-              } else if (value == 3) { // Index 2 is the divider
+              } else if (value == 3) {
+                // Index 2 is the divider
                 print('Help selected');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -1498,7 +1550,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                   ),
                 );
               }
-             },
+            },
           ),
           // Popup menu button example - shows native iOS popup menu
           BaseNavigationBarAction.popupMenuButton(
@@ -1540,7 +1592,8 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                     duration: Duration(seconds: 1),
                   ),
                 );
-              } else if (index == 3) { // Index 2 is the divider
+              } else if (index == 3) {
+                // Index 2 is the divider
                 print('Delete selected from popup menu');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -1587,12 +1640,10 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
               children: [
                 // SizedBox(height: 100),
                 // Top Navigation Bar
-                
-                
+
                 // Content area
                 Expanded(
                   child: ListView(
-                    
                     padding: const EdgeInsets.all(16),
                     children: [
                       Card(
@@ -1614,9 +1665,15 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                                 style: TextStyle(fontSize: 16),
                               ),
                               const SizedBox(height: 8),
-                              const Text('• Leading actions (back button and label)'),
-                              const Text('• Title text with custom size and tap interaction'),
-                              const Text('• Trailing actions (settings and add buttons)'),
+                              const Text(
+                                '• Leading actions (back button and label)',
+                              ),
+                              const Text(
+                                '• Title text with custom size and tap interaction',
+                              ),
+                              const Text(
+                                '• Trailing actions (settings and add buttons)',
+                              ),
                               const Text('• Optional transparency'),
                               const Text('• Optional large title mode'),
                               const SizedBox(height: 16),
@@ -1632,7 +1689,9 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                               ),
                               SwitchListTile(
                                 title: const Text('Large Title'),
-                                subtitle: const Text('iOS 11+ style large title'),
+                                subtitle: const Text(
+                                  'iOS 11+ style large title',
+                                ),
                                 value: _showLargeTitle,
                                 onChanged: (value) {
                                   setState(() {
@@ -1641,7 +1700,9 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                                 },
                               ),
                               const Divider(),
-                              Text('Title Size: ${_titleSize.toStringAsFixed(1)}'),
+                              Text(
+                                'Title Size: ${_titleSize.toStringAsFixed(1)}',
+                              ),
                               Slider(
                                 value: _titleSize,
                                 min: 12.0,
@@ -1655,7 +1716,9 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                               ),
                               SwitchListTile(
                                 title: const Text('Enable Title Tap'),
-                                subtitle: const Text('Allow tapping the navigation bar title'),
+                                subtitle: const Text(
+                                  'Allow tapping the navigation bar title',
+                                ),
                                 value: _enableTitleTap,
                                 onChanged: (value) {
                                   setState(() {
@@ -1679,13 +1742,17 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.touch_app, color: Colors.blue.shade700, size: 24),
+                            Icon(
+                              Icons.touch_app,
+                              color: Colors.blue.shade700,
+                              size: 24,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                _enableTitleTap 
-                                  ? '👆 Try tapping the "Native Nav Bar" title above to see the onTitlePressed in action!' 
-                                  : 'Enable "Title Tap" setting above to make the navigation title interactive',
+                                _enableTitleTap
+                                    ? '👆 Try tapping the "Native Nav Bar" title above to see the onTitlePressed in action!'
+                                    : 'Enable "Title Tap" setting above to make the navigation title interactive',
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontWeight: FontWeight.w500,
@@ -1758,11 +1825,17 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              _buildSymbolItem('chevron.left', 'Back navigation'),
+                              _buildSymbolItem(
+                                'chevron.left',
+                                'Back navigation',
+                              ),
                               _buildSymbolItem('gear', 'Settings'),
                               _buildSymbolItem('plus', 'Add new item'),
                               _buildSymbolItem('magnifyingglass', 'Search'),
-                              _buildSymbolItem('ellipsis.circle', 'More options'),
+                              _buildSymbolItem(
+                                'ellipsis.circle',
+                                'More options',
+                              ),
                               _buildSymbolItem('square.and.arrow.up', 'Share'),
                               _buildSymbolItem('trash', 'Delete'),
                               _buildSymbolItem('pencil', 'Edit'),
@@ -1775,108 +1848,107 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                 ),
               ],
             ),
-          
-          // Positioned(
-          //   left: 0,
-          //   right: 0,
-          //   top: 5,
-          //   child: SafeArea(
-          //     bottom: false,
-          //     child:BaseNavigationBar(
-          //         leading: [
-          //           BaseNavigationBarAction(
-          //             icon: const CNSymbol('chevron.left'),
-          //             onPressed: () {
-          //               Navigator.of(context).pop();
-          //             },
-          //           ),
-          //           BaseNavigationBarAction.fixedSpace(8),
-          //           BaseNavigationBarAction(
-          //             label: 'Back',
-          //             onPressed: () {
-          //               Navigator.of(context).pop();
-          //             },
-          //           ),
-          //         ],
-          //         title: 'Native Nav Bar',
-          //         titleSize: _titleSize,
-          //         onTitlePressed: _enableTitleTap ? () {
-          //           showCupertinoDialog(
-          //             context: context,
-          //             builder: (context) => CupertinoAlertDialog(
-          //               title: const Text('Title Tapped!'),
-          //               content: const Text('The navigation bar title was tapped. This demonstrates the onTitlePressed functionality.'),
-          //               actions: [
-          //                 CupertinoDialogAction(
-          //                   child: const Text('Cool!'),
-          //                   onPressed: () => Navigator.of(context).pop(),
-          //                 ),
-          //               ],
-          //             ),
-          //           );
-          //         } : null,
-          //         trailing: [
-          //           BaseNavigationBarAction(
-          //             icon: const CNSymbol('gear'),
-          //             // iconSize: 12,
-          //             onPressed: () {
-          //               print('Settings tapped');
-          //             },
-          //           ),
-          //           BaseNavigationBarAction(
-          //             icon: const CNSymbol('ellipsis.circle'),
-          //             onPressed: () {
-          //               showCupertinoDialog(
-          //                 context: context,
-          //                 builder: (context) => CupertinoAlertDialog(
-          //                   title: const Text('Menu'),
-          //                   content: const Text('Copy, Paste, or Delete'),
-          //                   actions: [
-          //                     CupertinoDialogAction(
-          //                       child: const Text('Copy'),
-          //                       onPressed: () {
-          //                         Navigator.of(context).pop();
-          //                         print('Copy selected');
-          //                       },
-          //                     ),
-          //                     CupertinoDialogAction(
-          //                       child: const Text('Paste'),
-          //                       onPressed: () {
-          //                         Navigator.of(context).pop();
-          //                         print('Paste selected');
-          //                       },
-          //                     ),
-          //                     CupertinoDialogAction(
-          //                       isDestructiveAction: true,
-          //                       child: const Text('Delete'),
-          //                       onPressed: () {
-          //                         Navigator.of(context).pop();
-          //                         print('Delete selected');
-          //                       },
-          //                     ),
-          //                     CupertinoDialogAction(
-          //                       child: const Text('Cancel'),
-          //                       onPressed: () => Navigator.of(context).pop(),
-          //                     ),
-          //                   ],
-          //                 ),
-          //               );
-          //             },
-          //           ),
-          //           BaseNavigationBarAction(
-          //             icon: const CNSymbol('plus'),
-          //             onPressed: () {
-          //               print('Add tapped');
-          //             },
-          //           ),
-          //         ],
-          //         tint: CupertinoColors.label,
-          //         transparent: _isTransparent,
-          //         largeTitle: _showLargeTitle,
-          //       )
-          //     )
-          //   ),
-          
+
+            // Positioned(
+            //   left: 0,
+            //   right: 0,
+            //   top: 5,
+            //   child: SafeArea(
+            //     bottom: false,
+            //     child:BaseNavigationBar(
+            //         leading: [
+            //           BaseNavigationBarAction(
+            //             icon: const CNSymbol('chevron.left'),
+            //             onPressed: () {
+            //               Navigator.of(context).pop();
+            //             },
+            //           ),
+            //           BaseNavigationBarAction.fixedSpace(8),
+            //           BaseNavigationBarAction(
+            //             label: 'Back',
+            //             onPressed: () {
+            //               Navigator.of(context).pop();
+            //             },
+            //           ),
+            //         ],
+            //         title: 'Native Nav Bar',
+            //         titleSize: _titleSize,
+            //         onTitlePressed: _enableTitleTap ? () {
+            //           showCupertinoDialog(
+            //             context: context,
+            //             builder: (context) => CupertinoAlertDialog(
+            //               title: const Text('Title Tapped!'),
+            //               content: const Text('The navigation bar title was tapped. This demonstrates the onTitlePressed functionality.'),
+            //               actions: [
+            //                 CupertinoDialogAction(
+            //                   child: const Text('Cool!'),
+            //                   onPressed: () => Navigator.of(context).pop(),
+            //                 ),
+            //               ],
+            //             ),
+            //           );
+            //         } : null,
+            //         trailing: [
+            //           BaseNavigationBarAction(
+            //             icon: const CNSymbol('gear'),
+            //             // iconSize: 12,
+            //             onPressed: () {
+            //               print('Settings tapped');
+            //             },
+            //           ),
+            //           BaseNavigationBarAction(
+            //             icon: const CNSymbol('ellipsis.circle'),
+            //             onPressed: () {
+            //               showCupertinoDialog(
+            //                 context: context,
+            //                 builder: (context) => CupertinoAlertDialog(
+            //                   title: const Text('Menu'),
+            //                   content: const Text('Copy, Paste, or Delete'),
+            //                   actions: [
+            //                     CupertinoDialogAction(
+            //                       child: const Text('Copy'),
+            //                       onPressed: () {
+            //                         Navigator.of(context).pop();
+            //                         print('Copy selected');
+            //                       },
+            //                     ),
+            //                     CupertinoDialogAction(
+            //                       child: const Text('Paste'),
+            //                       onPressed: () {
+            //                         Navigator.of(context).pop();
+            //                         print('Paste selected');
+            //                       },
+            //                     ),
+            //                     CupertinoDialogAction(
+            //                       isDestructiveAction: true,
+            //                       child: const Text('Delete'),
+            //                       onPressed: () {
+            //                         Navigator.of(context).pop();
+            //                         print('Delete selected');
+            //                       },
+            //                     ),
+            //                     CupertinoDialogAction(
+            //                       child: const Text('Cancel'),
+            //                       onPressed: () => Navigator.of(context).pop(),
+            //                     ),
+            //                   ],
+            //                 ),
+            //               );
+            //             },
+            //           ),
+            //           BaseNavigationBarAction(
+            //             icon: const CNSymbol('plus'),
+            //             onPressed: () {
+            //               print('Add tapped');
+            //             },
+            //           ),
+            //         ],
+            //         tint: CupertinoColors.label,
+            //         transparent: _isTransparent,
+            //         largeTitle: _showLargeTitle,
+            //       )
+            //     )
+            //   ),
           ],
         ),
       ),
@@ -1904,10 +1976,7 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
                 ),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
             ),
@@ -1931,21 +2000,182 @@ class _CNNavigationBarDemoPageState extends State<_CNNavigationBarDemoPage> {
             ),
             child: Text(
               symbol,
-              style: const TextStyle(
-                fontFamily: 'Courier',
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              description,
-              style: const TextStyle(fontSize: 14),
-            ),
+            child: Text(description, style: const TextStyle(fontSize: 14)),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Full-page BaseAppBar with Segmented Control Demo
+class _AppBarSegmentedControlDemoPage extends StatefulWidget {
+  const _AppBarSegmentedControlDemoPage();
+
+  @override
+  State<_AppBarSegmentedControlDemoPage> createState() =>
+      _AppBarSegmentedControlDemoPageState();
+}
+
+class _AppBarSegmentedControlDemoPageState
+    extends State<_AppBarSegmentedControlDemoPage> {
+  int _segmentedIndex = 0;
+  final List<String> _segments = ['Notifications', 'Buddy Requests'];
+
+  // Sample data for each segment
+  final List<Map<String, String>> _notifications = [
+    {
+      'title': 'New Message',
+      'subtitle': 'John sent you a message',
+      'icon': 'envelope.fill',
+    },
+    {
+      'title': 'Friend Request',
+      'subtitle': 'Sarah wants to connect',
+      'icon': 'person.badge.plus',
+    },
+    {
+      'title': 'Update Available',
+      'subtitle': 'Version 2.0 is ready',
+      'icon': 'arrow.down.circle.fill',
+    },
+    {'title': 'Reminder', 'subtitle': 'Meeting at 3 PM', 'icon': 'bell.fill'},
+  ];
+
+  final List<Map<String, String>> _buddyRequests = [
+    {
+      'title': 'Mike Johnson',
+      'subtitle': '5 mutual friends',
+      'icon': 'person.crop.circle',
+    },
+    {
+      'title': 'Emily Davis',
+      'subtitle': '12 mutual friends',
+      'icon': 'person.crop.circle',
+    },
+    {
+      'title': 'Alex Chen',
+      'subtitle': '3 mutual friends',
+      'icon': 'person.crop.circle',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseScaffold(
+      baseParam: BaseParam(nativeIOS: true),
+      appBar: BaseAppBar(
+        baseParam: BaseParam(nativeIOS: true),
+        leadingActions: [
+          BaseNavigationBarAction(
+            icon: const CNSymbol('chevron.left'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          BaseNavigationBarAction.fixedSpace(8),
+          BaseNavigationBarAction(
+            label: 'Back',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+        trailingActions: [
+          BaseNavigationBarAction(
+            icon: const CNSymbol('ellipsis.circle'),
+            onPressed: () {
+              print('More options tapped');
+            },
+          ),
+        ],
+        segmentedControlLabels: _segments,
+        segmentedControlSelectedIndex: _segmentedIndex,
+        onSegmentedControlValueChanged: (index) {
+          setState(() {
+            _segmentedIndex = index;
+          });
+        },
+        segmentedControlHeight: 32,
+        segmentedControlLabelSize: 10,
+        tint: CupertinoColors.label,
+      ),
+      body: SafeArea(
+        top: false,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Material(child: _buildContent()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    final items = _segmentedIndex == 0 ? _notifications : _buddyRequests;
+
+    return ListView.separated(
+      key: ValueKey(_segmentedIndex),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemCount: items.length,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ListTile(
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBlue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: BaseCNIcon(
+                symbol: item['icon']!,
+                size: 20,
+                color: CupertinoColors.systemBlue,
+              ),
+            ),
+          ),
+          title: Text(
+            item['title']!,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(item['subtitle']!),
+          trailing: _segmentedIndex == 1
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CNButton(
+                      label: 'Decline',
+                      style: CNButtonStyle.gray,
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Declined ${item['title']}')),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    CNButton(
+                      label: 'Accept',
+                      style: CNButtonStyle.tinted,
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Accepted ${item['title']}')),
+                        );
+                      },
+                    ),
+                  ],
+                )
+              : const Icon(
+                  Icons.chevron_right,
+                  color: CupertinoColors.systemGrey,
+                ),
+          onTap: () {
+            print('Tapped on ${item['title']}');
+          },
+        );
+      },
     );
   }
 }
