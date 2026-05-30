@@ -1,3 +1,10 @@
+## [0.2.2+3] - 2026-05-31
+
+### Added
+- Added `BaseNavigationBarAction.withImage()` factory for custom image asset icons in navigation bar actions
+- Added `BaseNavigationBarAction.loadImage()` async helper that loads image bytes from assets (with optional `iosImage` override for platform-specific assets)
+- Updated `cupertino_native_extra` dependency to ^0.2.0+14 for native image rendering in iOS navigation bar buttons
+
 ## [0.2.2+1] - 2025-12-17
 
 ### Added

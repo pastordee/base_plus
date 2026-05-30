@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
@@ -30,6 +33,11 @@ class BaseNavigationBarAction {
         _isFlexibleSpace = false,
         _usePopupMenuButton = false,
         _spaceWidth = null,
+        _isImageAction = false,
+        _materialImage = null,
+        _imageBytes = null,
+        _imageWidth = null,
+        _imageHeight = null,
         assert(icon != null || label != null,
             'Either icon or label must be provided');
 
@@ -47,7 +55,12 @@ class BaseNavigationBarAction {
         onPopupMenuSelected = null,
         _isFixedSpace = true,
         _isFlexibleSpace = false,
-        _usePopupMenuButton = false;
+        _usePopupMenuButton = false,
+        _isImageAction = false,
+        _materialImage = null,
+        _imageBytes = null,
+        _imageWidth = null,
+        _imageHeight = null;
 
   const BaseNavigationBarAction._flexibleSpace()
       : icon = null,
@@ -64,7 +77,12 @@ class BaseNavigationBarAction {
         _isFixedSpace = false,
         _isFlexibleSpace = true,
         _usePopupMenuButton = false,
-        _spaceWidth = null;
+        _spaceWidth = null,
+        _isImageAction = false,
+        _materialImage = null,
+        _imageBytes = null,
+        _imageWidth = null,
+        _imageHeight = null;
 
   const BaseNavigationBarAction._popupMenu({
     required this.icon,
@@ -82,7 +100,39 @@ class BaseNavigationBarAction {
         _isFixedSpace = false,
         _isFlexibleSpace = false,
         _usePopupMenuButton = usePopupMenuButton,
-        _spaceWidth = null;
+        _spaceWidth = null,
+        _isImageAction = false,
+        _materialImage = null,
+        _imageBytes = null,
+        _imageWidth = null,
+        _imageHeight = null;
+
+  BaseNavigationBarAction._imageAction({
+    required String materialImage,
+    Uint8List? imageBytes,
+    double imageSize = 24.0,
+    double imageWidth = 24.0,
+    double imageHeight = 24.0,
+    this.label,
+    this.onPressed,
+    this.tint,
+    this.padding,
+    this.labelSize,
+    this.badgeValue,
+    this.badgeColor,
+  })  : icon = null,
+        iconSize = imageSize,
+        popupMenuItems = null,
+        onPopupMenuSelected = null,
+        _isFixedSpace = false,
+        _isFlexibleSpace = false,
+        _usePopupMenuButton = false,
+        _spaceWidth = null,
+        _isImageAction = true,
+        _materialImage = materialImage,
+        _imageBytes = imageBytes,
+        _imageWidth = imageWidth,
+        _imageHeight = imageHeight;
 
   /// Icon for the action (CNSymbol on iOS, Material icon elsewhere)
   final CNSymbol? icon;
@@ -128,6 +178,21 @@ class BaseNavigationBarAction {
 
   /// Internal space width
   final double? _spaceWidth;
+
+  /// Internal flag for image action
+  final bool _isImageAction;
+
+  /// Asset path for Material image rendering
+  final String? _materialImage;
+
+  /// Pre-loaded image bytes for iOS native rendering
+  final Uint8List? _imageBytes;
+
+  /// Image width for Material rendering
+  final double? _imageWidth;
+
+  /// Image height for Material rendering
+  final double? _imageHeight;
 
   /// Creates a fixed space action
   factory BaseNavigationBarAction.fixedSpace(double width) {
@@ -195,11 +260,96 @@ class BaseNavigationBarAction {
     );
   }
 
+  /// Creates an action with a custom image asset.
+  ///
+  /// Pass [imageBytes] (pre-loaded from [loadImage]) for iOS native rendering.
+  /// [materialImage] is always used on Android via [Image.asset].
+  ///
+  /// Example:
+  /// ```dart
+  /// // In initState / async setup:
+  /// final action = await BaseNavigationBarAction.loadImage(
+  ///   materialImage: 'assets/icons/custom.png',
+  ///   iosImage: 'assets/icons/custom_ios.png',
+  ///   imageSize: 24.0,
+  ///   label: 'Custom',
+  ///   onPressed: () {},
+  /// );
+  /// ```
+  factory BaseNavigationBarAction.withImage({
+    required String materialImage,
+    Uint8List? imageBytes,
+    double imageSize = 24.0,
+    double imageWidth = 24.0,
+    double imageHeight = 24.0,
+    String? label,
+    VoidCallback? onPressed,
+    Color? tint,
+    double? padding,
+    double? labelSize,
+    String? badgeValue,
+    Color? badgeColor,
+  }) {
+    return BaseNavigationBarAction._imageAction(
+      materialImage: materialImage,
+      imageBytes: imageBytes,
+      imageSize: imageSize,
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      label: label,
+      onPressed: onPressed,
+      tint: tint,
+      padding: padding,
+      labelSize: labelSize,
+      badgeValue: badgeValue,
+      badgeColor: badgeColor,
+    );
+  }
+
+  /// Loads image bytes from assets and returns a ready-to-use [withImage] action.
+  ///
+  /// Call this once in [initState] or before building and store the result in state.
+  /// [iosImage] is loaded for iOS native rendering; falls back to [materialImage].
+  static Future<BaseNavigationBarAction> loadImage({
+    required String materialImage,
+    String? iosImage,
+    double imageSize = 24.0,
+    double imageWidth = 24.0,
+    double imageHeight = 24.0,
+    String? label,
+    VoidCallback? onPressed,
+    Color? tint,
+    double? padding,
+    double? labelSize,
+    String? badgeValue,
+    Color? badgeColor,
+  }) async {
+    final String assetPath = iosImage ?? materialImage;
+    final Uint8List bytes = (await rootBundle.load(assetPath)).buffer.asUint8List();
+    return BaseNavigationBarAction.withImage(
+      materialImage: materialImage,
+      imageBytes: bytes,
+      imageSize: imageSize,
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      label: label,
+      onPressed: onPressed,
+      tint: tint,
+      padding: padding,
+      labelSize: labelSize,
+      badgeValue: badgeValue,
+      badgeColor: badgeColor,
+    );
+  }
+
   /// Check if this is a fixed space action
   bool get isFixedSpace => _isFixedSpace;
 
   /// Check if this is a flexible space action
   bool get isFlexibleSpace => _isFlexibleSpace;
+
+  /// Check if this is a custom image action
+  bool get isImageAction => _isImageAction;
 
   /// Get the space width (for fixed space actions)
   double? get spaceWidth => _spaceWidth;
@@ -265,6 +415,20 @@ class BaseNavigationBarAction {
           badgeColor: badgeColor,
         );
       }
+    }
+    // Image action
+    if (_isImageAction) {
+      return CNNavigationBarAction(
+        imageBytes: _imageBytes,
+        label: label,
+        onPressed: onPressed,
+        tint: tint,
+        padding: padding,
+        labelSize: labelSize,
+        iconSize: iconSize,
+        badgeValue: badgeValue,
+        badgeColor: badgeColor,
+      );
     }
     // Regular action
     return CNNavigationBarAction(
@@ -834,6 +998,37 @@ class BaseNavigationBar extends BaseStatelessWidget {
 
       // Use custom tint color if provided, otherwise use default iconColor
       final actionColor = action.tint ?? iconColor;
+
+      // Custom image action
+      if (action.isImageAction) {
+        final Image img = Image.asset(
+          action._materialImage!,
+          width: action._imageWidth ?? 24.0,
+          height: action._imageHeight ?? 24.0,
+        );
+        if (action.label != null) {
+          return GestureDetector(
+            onTap: action.onPressed,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                img,
+                Text(
+                  action.label!,
+                  style: TextStyle(color: actionColor, fontSize: 10),
+                ),
+              ],
+            ),
+          );
+        }
+        return GestureDetector(
+          onTap: action.onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: img,
+          ),
+        );
+      }
 
       // Regular action with icon/label
       if (action.icon != null && action.label != null) {
