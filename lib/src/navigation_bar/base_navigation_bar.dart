@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
@@ -35,7 +32,7 @@ class BaseNavigationBarAction {
         _spaceWidth = null,
         _isImageAction = false,
         _materialImage = null,
-        _imageBytes = null,
+        _iosImage = null,
         _imageWidth = null,
         _imageHeight = null,
         assert(icon != null || label != null,
@@ -58,7 +55,7 @@ class BaseNavigationBarAction {
         _usePopupMenuButton = false,
         _isImageAction = false,
         _materialImage = null,
-        _imageBytes = null,
+        _iosImage = null,
         _imageWidth = null,
         _imageHeight = null;
 
@@ -80,7 +77,7 @@ class BaseNavigationBarAction {
         _spaceWidth = null,
         _isImageAction = false,
         _materialImage = null,
-        _imageBytes = null,
+        _iosImage = null,
         _imageWidth = null,
         _imageHeight = null;
 
@@ -103,13 +100,13 @@ class BaseNavigationBarAction {
         _spaceWidth = null,
         _isImageAction = false,
         _materialImage = null,
-        _imageBytes = null,
+        _iosImage = null,
         _imageWidth = null,
         _imageHeight = null;
 
   BaseNavigationBarAction._imageAction({
     required String materialImage,
-    Uint8List? imageBytes,
+    String? iosImage,
     double imageSize = 24.0,
     double imageWidth = 24.0,
     double imageHeight = 24.0,
@@ -130,7 +127,7 @@ class BaseNavigationBarAction {
         _spaceWidth = null,
         _isImageAction = true,
         _materialImage = materialImage,
-        _imageBytes = imageBytes,
+        _iosImage = iosImage,
         _imageWidth = imageWidth,
         _imageHeight = imageHeight;
 
@@ -185,8 +182,8 @@ class BaseNavigationBarAction {
   /// Asset path for Material image rendering
   final String? _materialImage;
 
-  /// Pre-loaded image bytes for iOS native rendering
-  final Uint8List? _imageBytes;
+  /// iOS-specific asset path; falls back to [_materialImage] if not set
+  final String? _iosImage;
 
   /// Image width for Material rendering
   final double? _imageWidth;
@@ -262,23 +259,23 @@ class BaseNavigationBarAction {
 
   /// Creates an action with a custom image asset.
   ///
-  /// Pass [imageBytes] (pre-loaded from [loadImage]) for iOS native rendering.
-  /// [materialImage] is always used on Android via [Image.asset].
+  /// [materialImage] is the asset path used on Android via [Image.asset].
+  /// [iosImage] is an optional iOS-specific asset path; on iOS the native side
+  /// resolves it via [lookupKey(forAsset:)] — no bytes cross the channel.
   ///
   /// Example:
   /// ```dart
-  /// // In initState / async setup:
-  /// final action = await BaseNavigationBarAction.loadImage(
+  /// BaseNavigationBarAction.withImage(
   ///   materialImage: 'assets/icons/custom.png',
-  ///   iosImage: 'assets/icons/custom_ios.png',
+  ///   iosImage: 'assets/icons/custom_ios.png', // optional
   ///   imageSize: 24.0,
   ///   label: 'Custom',
   ///   onPressed: () {},
-  /// );
+  /// )
   /// ```
   factory BaseNavigationBarAction.withImage({
     required String materialImage,
-    Uint8List? imageBytes,
+    String? iosImage,
     double imageSize = 24.0,
     double imageWidth = 24.0,
     double imageHeight = 24.0,
@@ -292,43 +289,7 @@ class BaseNavigationBarAction {
   }) {
     return BaseNavigationBarAction._imageAction(
       materialImage: materialImage,
-      imageBytes: imageBytes,
-      imageSize: imageSize,
-      imageWidth: imageWidth,
-      imageHeight: imageHeight,
-      label: label,
-      onPressed: onPressed,
-      tint: tint,
-      padding: padding,
-      labelSize: labelSize,
-      badgeValue: badgeValue,
-      badgeColor: badgeColor,
-    );
-  }
-
-  /// Loads image bytes from assets and returns a ready-to-use [withImage] action.
-  ///
-  /// Call this once in [initState] or before building and store the result in state.
-  /// [iosImage] is loaded for iOS native rendering; falls back to [materialImage].
-  static Future<BaseNavigationBarAction> loadImage({
-    required String materialImage,
-    String? iosImage,
-    double imageSize = 24.0,
-    double imageWidth = 24.0,
-    double imageHeight = 24.0,
-    String? label,
-    VoidCallback? onPressed,
-    Color? tint,
-    double? padding,
-    double? labelSize,
-    String? badgeValue,
-    Color? badgeColor,
-  }) async {
-    final String assetPath = iosImage ?? materialImage;
-    final Uint8List bytes = (await rootBundle.load(assetPath)).buffer.asUint8List();
-    return BaseNavigationBarAction.withImage(
-      materialImage: materialImage,
-      imageBytes: bytes,
+      iosImage: iosImage,
       imageSize: imageSize,
       imageWidth: imageWidth,
       imageHeight: imageHeight,
@@ -419,7 +380,7 @@ class BaseNavigationBarAction {
     // Image action
     if (_isImageAction) {
       return CNNavigationBarAction(
-        imageBytes: _imageBytes,
+        imageAsset: _iosImage ?? _materialImage,
         label: label,
         onPressed: onPressed,
         tint: tint,
