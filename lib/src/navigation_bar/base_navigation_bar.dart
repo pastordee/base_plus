@@ -487,7 +487,9 @@ class BaseNavigationBarAction {
       );
     }
 
-    // Icon (SF Symbol) action → nearest Material icon
+    // Icon (SF Symbol) action → nearest Material icon.
+    // Set the tint directly on the Icon (authoritative) so the AppBar's own
+    // foregroundColor / actionsIconTheme can't override it.
     if (icon != null) {
       return IconButton(
         onPressed: onPressed,
@@ -496,7 +498,10 @@ class BaseNavigationBarAction {
         color: color,
         iconSize: size,
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-        icon: Icon(_sfSymbolToMaterialIcon(icon!.name) ?? Icons.circle_outlined),
+        icon: Icon(
+          _sfSymbolToMaterialIcon(icon!.name) ?? Icons.circle_outlined,
+          color: color,
+        ),
       );
     }
 
