@@ -92,6 +92,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.segmentedControlHeight,
     this.segmentedControlTint,
     this.segmentedControlLabelSize,
+    this.tabController,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -323,6 +324,16 @@ class BaseAppBar extends BaseStatelessWidget
   /// Use this when baseParam.nativeIOS is true
   /// Controls the font size of segment labels
   final double? segmentedControlLabelSize;
+
+  /// Optional [TabController] for the segmented control (Material/Android).
+  ///
+  /// When provided, the Android segmented control (rendered from
+  /// [segmentedControlLabels] as the title) stays in sync with this controller:
+  /// its selection follows body swipes, and tapping a segment drives
+  /// `animateTo`. This replaces having to also pass a separate `TabController`-
+  /// backed tab bar as the title. iOS continues to use
+  /// [segmentedControlSelectedIndex] / [onSegmentedControlValueChanged].
+  final TabController? tabController;
 
   /// *** native iOS properties end ***
 
@@ -576,7 +587,7 @@ class BaseAppBar extends BaseStatelessWidget
     // tint, drawn behind the bar's title/actions. Only injected when the caller
     // didn't supply their own flexibleSpace.
     Widget? _flexibleSpace = valueOf('flexibleSpace', flexibleSpace);
-    if (_glass && _flexibleSpace == null) {
+    if (_glass && _flexibleSpace == null) { 
       final double _blur =
           baseTheme.valueOf('appBarGlassBlur', baseTheme.appBarGlassBlur) ??
               18.0;
@@ -591,13 +602,34 @@ class BaseAppBar extends BaseStatelessWidget
       );
     }
 
+    // Reuse the segmentedControl* config as the Material title when no explicit
+    // title/middle was given — so callers configure the tab switcher ONCE for
+    // both platforms (native segmented control on iOS, a segmented control here
+    // on Android) instead of also passing a separate title tab bar.
+    Widget? _materialTitle = _title;
+    if (_materialTitle == null) {
+      final List<String>? _segLabels =
+          valueOf('segmentedControlLabels', segmentedControlLabels);
+      if (_segLabels != null && _segLabels.isNotEmpty) {
+        _materialTitle =
+            _buildMaterialSegmentedControl(context, colorScheme, _segLabels);
+      }
+    }
+
+    // ignore: avoid_print
+    print('PIP_DEBUG appbar.material: glass=$_glass '
+        'leading=${_leading != null} title=${_materialTitle?.runtimeType} '
+        'actions=${_actions?.length} height=$_height '
+        'segLabels=${valueOf('segmentedControlLabels', segmentedControlLabels)} '
+        'toolbarOpacity=${valueOf('toolbarOpacity', toolbarOpacity)}');
+
     return AppBar(
       leading: _leading,
       automaticallyImplyLeading: valueOf(
         'automaticallyImplyLeading',
         automaticallyImplyLeading,
       ),
-      title: _title,
+      title: _materialTitle,
       actions: _actions,
       flexibleSpace: _flexibleSpace,
       bottom: valueOf('bottom', bottom),
@@ -621,6 +653,74 @@ class BaseAppBar extends BaseStatelessWidget
       titleTextStyle: valueOf('titleTextStyle', titleTextStyle),
       systemOverlayStyle: valueOf('systemOverlayStyle', systemOverlayStyle),
     );
+  }
+
+  /// Material rendering of the `segmentedControl*` config (used as the title on
+  /// Android so callers don't also pass a separate tab bar). A sliding segmented
+  /// control keeps it visually consistent with the native iOS segmented control.
+  Widget _buildMaterialSegmentedControl(
+    BuildContext context,
+    ColorScheme colorScheme,
+    List<String> labels,
+  ) {
+    final double? h =
+        valueOf('segmentedControlHeight', segmentedControlHeight);
+    final double labelSize =
+        valueOf('segmentedControlLabelSize', segmentedControlLabelSize) ?? 13.0;
+    final Color? bg = valueOf('segmentedControlTint', segmentedControlTint);
+    final ValueChanged<int>? onChanged = valueOf(
+      'onSegmentedControlValueChanged',
+      onSegmentedControlValueChanged,
+    );
+    final TabController? _tabController =
+        valueOf('tabController', tabController);
+
+    final Map<int, Widget> children = <int, Widget>{
+      for (int i = 0; i < labels.length; i++)
+        i: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: Text(
+            labels[i],
+            style: TextStyle(fontSize: labelSize, fontWeight: FontWeight.w500),
+          ),
+        ),
+    };
+
+    Widget buildControl(int selected) {
+      final Widget control = CupertinoSlidingSegmentedControl<int>(
+        groupValue: selected.clamp(0, labels.length - 1),
+        backgroundColor: bg ?? CupertinoColors.tertiarySystemFill,
+        thumbColor: colorScheme.surface,
+        children: children,
+        onValueChanged: (int? v) {
+          if (v == null) {
+            return;
+          }
+          // Drive the TabController (if any) so the body switches, and still
+          // fire the value-changed callback for callers that rely on it.
+          _tabController?.animateTo(v);
+          onChanged?.call(v);
+        },
+      );
+      return h != null
+          ? SizedBox(height: h, child: Center(child: control))
+          : control;
+    }
+
+    // With a TabController, rebuild on swipe/animation so the selected segment
+    // follows the body (this is what the old TabController-backed tab bar did).
+    if (_tabController != null) {
+      return AnimatedBuilder(
+        animation: _tabController.animation ?? _tabController,
+        builder: (BuildContext context, Widget? _) =>
+            buildControl(_tabController.index),
+      );
+    }
+
+    final int selected =
+        valueOf('segmentedControlSelectedIndex', segmentedControlSelectedIndex) ??
+            0;
+    return buildControl(selected);
   }
 
   @override

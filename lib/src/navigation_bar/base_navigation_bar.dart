@@ -445,7 +445,11 @@ class BaseNavigationBarAction {
       return SizedBox(width: _spaceWidth ?? 8);
     }
     if (_isFlexibleSpace) {
-      return const Spacer();
+      // `flexibleSpace` is an iOS trailing-layout concept. A [Spacer] here would
+      // throw inside the AppBar's min-width actions Row (unbounded flex), taking
+      // the whole toolbar (leading + actions) down with it. Material actions are
+      // already right-aligned, so this is just a no-op gap.
+      return const SizedBox.shrink();
     }
 
     final Color? color = tint;
