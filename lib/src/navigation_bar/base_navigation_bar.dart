@@ -453,13 +453,22 @@ class BaseNavigationBarAction {
 
     // Popup menu action
     if (popupMenuItems != null && onPopupMenuSelected != null) {
-      return BasePopupMenuButton.icon(
+      final Widget menu = BasePopupMenuButton.icon(
         items: popupMenuItems!,
         onSelected: onPopupMenuSelected!,
         materialIcon: _sfSymbolToMaterialIcon(icon?.name) ?? Icons.more_vert,
         iosIcon: icon?.name ?? 'ellipsis',
         tooltip: label,
       );
+      // BasePopupMenuButton renders Icon(materialIcon) with no explicit color,
+      // so it inherits the ambient IconTheme — apply the action's tint here.
+      if (color != null) {
+        return IconTheme.merge(
+          data: IconThemeData(color: color),
+          child: menu,
+        );
+      }
+      return menu;
     }
 
     // Custom image action
