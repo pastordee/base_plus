@@ -431,6 +431,140 @@ class BaseNavigationBarAction {
 
     return iconMap[iconData.codePoint];
   }
+
+  /// Render this action as a Material widget.
+  ///
+  /// Lets [BaseAppBar]'s Android (Material) build reuse `leadingActions` /
+  /// `trailingActions` as its `leading` / `actions`, so callers configure the
+  /// bar's buttons ONCE instead of duplicating them with `leading` / `actions`.
+  /// Icon actions map their SF Symbol name to the nearest Material icon; image
+  /// actions use `materialImage`; popup-menu actions become a
+  /// [BasePopupMenuButton]; space actions become sized gaps.
+  Widget toMaterialWidget(BuildContext context) {
+    if (_isFixedSpace) {
+      return SizedBox(width: _spaceWidth ?? 8);
+    }
+    if (_isFlexibleSpace) {
+      return const Spacer();
+    }
+
+    final Color? color = tint;
+    final double size = iconSize ?? 20;
+
+    // Popup menu action
+    if (popupMenuItems != null && onPopupMenuSelected != null) {
+      return BasePopupMenuButton.icon(
+        items: popupMenuItems!,
+        onSelected: onPopupMenuSelected!,
+        materialIcon: _sfSymbolToMaterialIcon(icon?.name) ?? Icons.more_vert,
+        iosIcon: icon?.name ?? 'ellipsis',
+        tooltip: label,
+      );
+    }
+
+    // Custom image action
+    if (_isImageAction && _materialImage != null) {
+      return IconButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        tooltip: label,
+        constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+        icon: Image.asset(
+          _materialImage!,
+          width: _imageWidth ?? size,
+          height: _imageHeight ?? size,
+          color: color,
+        ),
+      );
+    }
+
+    // Icon (SF Symbol) action → nearest Material icon
+    if (icon != null) {
+      return IconButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        tooltip: label,
+        color: color,
+        iconSize: size,
+        constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+        icon: Icon(_sfSymbolToMaterialIcon(icon!.name) ?? Icons.circle_outlined),
+      );
+    }
+
+    // Label-only action
+    if (label != null) {
+      return TextButton(
+        onPressed: onPressed,
+        child: Text(label!, style: color != null ? TextStyle(color: color) : null),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  /// Map an SF Symbol name to the nearest Material [IconData] (inverse of
+  /// [_mapIconToSFSymbol], plus common navigation symbols). Returns null when
+  /// there's no good match.
+  IconData? _sfSymbolToMaterialIcon(String? name) {
+    if (name == null) {
+      return null;
+    }
+    const Map<String, IconData> map = {
+      'chevron.left': Icons.arrow_back_ios_new,
+      'chevron.right': Icons.arrow_forward_ios,
+      'chevron.backward': Icons.arrow_back_ios_new,
+      'chevron.forward': Icons.arrow_forward_ios,
+      'arrow.left': Icons.arrow_back,
+      'arrow.backward': Icons.arrow_back,
+      'arrow.right': Icons.arrow_forward,
+      'arrow.up': Icons.arrow_upward,
+      'arrow.down': Icons.arrow_downward,
+      'arrow.clockwise': Icons.refresh,
+      'ellipsis': Icons.more_horiz,
+      'ellipsis.circle': Icons.more_vert,
+      'xmark': Icons.close,
+      'xmark.circle': Icons.cancel,
+      'checkmark': Icons.check,
+      'plus': Icons.add,
+      'plus.circle': Icons.add_circle_outline,
+      'minus': Icons.remove,
+      'trash': Icons.delete,
+      'pencil': Icons.edit,
+      'square.and.pencil': Icons.edit,
+      'doc.on.doc': Icons.copy,
+      'doc.on.clipboard': Icons.paste,
+      'square.and.arrow.up': Icons.share,
+      'square.and.arrow.down': Icons.download,
+      'gear': Icons.settings,
+      'gearshape': Icons.settings,
+      'heart': Icons.favorite,
+      'heart.fill': Icons.favorite,
+      'star': Icons.star,
+      'star.fill': Icons.star,
+      'magnifyingglass': Icons.search,
+      'person': Icons.person,
+      'person.badge.plus': Icons.person_add,
+      'person.crop.circle': Icons.account_circle,
+      'message': Icons.message,
+      'bell': Icons.notifications_none,
+      'bell.fill': Icons.notifications,
+      'bookmark': Icons.bookmark_border,
+      'bookmark.fill': Icons.bookmark,
+      'house': Icons.home,
+      'line.3.horizontal': Icons.menu,
+      'slider.horizontal.3': Icons.tune,
+      'paperplane': Icons.send,
+      'paperplane.fill': Icons.send,
+      'info.circle': Icons.info_outline,
+      'exclamationmark.triangle': Icons.warning_amber,
+      'calendar': Icons.calendar_today,
+      'camera': Icons.camera_alt,
+      'photo': Icons.photo,
+      'play.fill': Icons.play_arrow,
+      'pause.fill': Icons.pause,
+    };
+    return map[name];
+  }
 }
 
 /// Internal: CNNavigationBarAction from cupertino_native package

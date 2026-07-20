@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart'
     hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
 import 'package:flutter/material.dart' hide AppBar;
@@ -81,6 +83,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.leadingActions,
     this.trailingActions,
     this.transparent = false,
+    this.glass = false,
     this.largeTitle = false,
     this.tint,
     this.segmentedControlLabels,
@@ -269,6 +272,22 @@ class BaseAppBar extends BaseStatelessWidget
   /// Whether the navigation bar should be transparent (native iOS mode)
   /// When true, the navigation bar will have a transparent background
   final bool transparent;
+
+  /// Frosted "glass" app bar for the **Material (Android)** build.
+  ///
+  /// iOS already renders a glass nav bar (the Cupertino paths blur when
+  /// transparent), so this flag only affects Android: when true, the [AppBar]
+  /// is made transparent (elevation 0) and backed by a [BackdropFilter] blur
+  /// with a translucent fill — matching the iOS glass look through the single
+  /// [BaseAppBar] API instead of a flat opaque bar. No-op on iOS.
+  ///
+  /// The content behind the bar must be able to scroll under it — pair with
+  /// `BaseScaffold(extendBodyBehindAppBar: true)` (auto-enabled when the bar's
+  /// background is translucent).
+  ///
+  /// Blur amount / tint come from [BaseThemeData.appBarGlassBlur] /
+  /// [BaseThemeData.appBarGlassColor] (sensible defaults otherwise).
+  final bool glass;
 
   /// Whether to use large title style (native iOS mode)
   /// When true, displays a large title in the navigation bar
@@ -470,6 +489,21 @@ class BaseAppBar extends BaseStatelessWidget
   Widget buildByMaterial(BuildContext context) {
     final Widget? _title = valueOf('title', title) ?? valueOf('middle', middle);
     Widget? _leading = valueOf('leading', leading);
+    // Reuse leadingActions as the Material leading when no explicit `leading`
+    // was given, so callers configure the bar's buttons ONCE for both platforms
+    // (leadingActions on iOS, converted to a Material widget here on Android).
+    if (_leading == null) {
+      final List<BaseNavigationBarAction>? _leadingActions =
+          valueOf('leadingActions', leadingActions);
+      if (_leadingActions != null && _leadingActions.isNotEmpty) {
+        final List<Widget> _lw = _leadingActions
+            .map((BaseNavigationBarAction a) => a.toMaterialWidget(context))
+            .toList();
+        _leading = _lw.length == 1
+            ? _lw.first
+            : Row(mainAxisSize: MainAxisSize.min, children: _lw);
+      }
+    }
     final EdgeInsetsDirectional? _padding = valueOf(
       'padding',
       padding,
@@ -486,6 +520,16 @@ class BaseAppBar extends BaseStatelessWidget
     if (_actions == null && _trailing != null) {
       _actions = <Widget>[_trailing];
     }
+    // Reuse trailingActions as the Material actions when none were given.
+    if (_actions == null) {
+      final List<BaseNavigationBarAction>? _trailingActions =
+          valueOf('trailingActions', trailingActions);
+      if (_trailingActions != null && _trailingActions.isNotEmpty) {
+        _actions = _trailingActions
+            .map((BaseNavigationBarAction a) => a.toMaterialWidget(context))
+            .toList();
+      }
+    }
 
     final BaseThemeData baseTheme = BaseTheme.of(context);
     final ThemeData theme =
@@ -498,9 +542,15 @@ class BaseAppBar extends BaseStatelessWidget
 
     // Material 3 Color Scheme Integration
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color? _backgroundColor =
-        valueOf('backgroundColor', backgroundColor) ??
-            (theme.useMaterial3 ? colorScheme.surface : null);
+
+    // Frosted "glass" mode: transparent bar + BackdropFilter blur, matching the
+    // iOS glass look through the single BaseAppBar API.
+    final bool _glass = valueOf('glass', glass);
+
+    final Color? _backgroundColor = _glass
+        ? Colors.transparent
+        : (valueOf('backgroundColor', backgroundColor) ??
+            (theme.useMaterial3 ? colorScheme.surface : null));
 
     // Material 3 Semantic Shadow Color
     final Color? _shadowColor = valueOf('shadowColor', shadowColor) ??
@@ -511,15 +561,35 @@ class BaseAppBar extends BaseStatelessWidget
         valueOf('foregroundColor', foregroundColor) ??
             (theme.useMaterial3 ? colorScheme.onSurface : null);
 
-    // Material 3 Enhanced Elevation
-    final double? _elevation =
-        valueOf('elevation', elevation) ?? (theme.useMaterial3 ? 3.0 : 4.0);
+    // Material 3 Enhanced Elevation (no shadow/elevation for glass)
+    final double? _elevation = _glass
+        ? 0.0
+        : (valueOf('elevation', elevation) ?? (theme.useMaterial3 ? 3.0 : 4.0));
 
     final double? _height = valueOf('height', height) ??
         baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight);
     final bool centerTitle = this.centerTitle ??
         theme.appBarTheme.centerTitle ??
         theme.platform == TargetPlatform.iOS;
+
+    // Glass flexibleSpace: a full-bleed BackdropFilter blur with a translucent
+    // tint, drawn behind the bar's title/actions. Only injected when the caller
+    // didn't supply their own flexibleSpace.
+    Widget? _flexibleSpace = valueOf('flexibleSpace', flexibleSpace);
+    if (_glass && _flexibleSpace == null) {
+      final double _blur =
+          baseTheme.valueOf('appBarGlassBlur', baseTheme.appBarGlassBlur) ??
+              18.0;
+      final Color _tint =
+          baseTheme.valueOf('appBarGlassColor', baseTheme.appBarGlassColor) ??
+              colorScheme.surface.withValues(alpha: 0.6);
+      _flexibleSpace = ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: _blur, sigmaY: _blur),
+          child: Container(color: _tint),
+        ),
+      );
+    }
 
     return AppBar(
       leading: _leading,
@@ -529,7 +599,7 @@ class BaseAppBar extends BaseStatelessWidget
       ),
       title: _title,
       actions: _actions,
-      flexibleSpace: valueOf('flexibleSpace', flexibleSpace),
+      flexibleSpace: _flexibleSpace,
       bottom: valueOf('bottom', bottom),
       elevation: _elevation,
       shadowColor: _shadowColor,

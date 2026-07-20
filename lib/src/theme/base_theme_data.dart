@@ -18,6 +18,8 @@ class BaseThemeData with Diagnosticable {
     double? appBarHeight,
     bool appBarBackdropFilter = true,
     bool appBarTransitionBetweenRoutes = true,
+    double appBarGlassBlur = 18.0,
+    Color? appBarGlassColor,
     ThemeData? materialTheme,
     ThemeData? materialDarkTheme,
     ThemeData? materialHighContrastTheme,
@@ -83,6 +85,8 @@ class BaseThemeData with Diagnosticable {
       appBarHeight: appBarHeight,
       appBarBackdropFilter: appBarBackdropFilter,
       appBarTransitionBetweenRoutes: appBarTransitionBetweenRoutes,
+      appBarGlassBlur: appBarGlassBlur,
+      appBarGlassColor: appBarGlassColor,
       materialTheme: materialTheme,
       materialDarkTheme: materialDarkTheme,
       materialHighContrastTheme: materialHighContrastTheme,
@@ -102,6 +106,8 @@ class BaseThemeData with Diagnosticable {
     this.appBarHeight,
     this.appBarBackdropFilter,
     this.appBarTransitionBetweenRoutes,
+    this.appBarGlassBlur = 18.0,
+    this.appBarGlassColor,
     this.materialTheme,
     this.materialDarkTheme,
     this.materialHighContrastTheme,
@@ -126,6 +132,13 @@ class BaseThemeData with Diagnosticable {
 
   /// [BaseAppBar.appBarTransitionBetweenRoutes]
   final bool? appBarTransitionBetweenRoutes;
+
+  /// [BaseAppBar.glass] blur sigma for the frosted-glass app bar (Material).
+  final double appBarGlassBlur;
+
+  /// [BaseAppBar.glass] translucent tint painted over the blur.
+  /// When null, falls back to `colorScheme.surface` at ~60% opacity.
+  final Color? appBarGlassColor;
 
   /// [BaseRoute.fullscreenGackGesture]
   final bool routeFullscreenGackGesture;
@@ -197,6 +210,8 @@ class BaseThemeData with Diagnosticable {
     double? appBarHeight,
     bool? appBarBackdropFilter,
     bool? appBarTransitionBetweenRoutes,
+    double? appBarGlassBlur,
+    Color? appBarGlassColor,
     ThemeData? materialTheme,
     ThemeData? materialDarkTheme,
     ThemeData? materialHighContrastTheme,
@@ -214,6 +229,8 @@ class BaseThemeData with Diagnosticable {
       appBarHeight: appBarHeight ?? this.appBarHeight,
       appBarBackdropFilter: appBarBackdropFilter ?? this.appBarBackdropFilter,
       appBarTransitionBetweenRoutes: appBarTransitionBetweenRoutes ?? this.appBarTransitionBetweenRoutes,
+      appBarGlassBlur: appBarGlassBlur ?? this.appBarGlassBlur,
+      appBarGlassColor: appBarGlassColor ?? this.appBarGlassColor,
       materialTheme: materialTheme ?? this.materialTheme,
       materialDarkTheme: materialDarkTheme ?? this.materialDarkTheme,
       materialHighContrastTheme: materialHighContrastTheme ?? this.materialHighContrastTheme,
