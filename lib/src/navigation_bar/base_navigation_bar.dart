@@ -21,7 +21,9 @@ class BaseNavigationBarAction {
     this.tint,
     this.padding,
     this.labelSize = 15,
-    this.iconSize = 16,
+    // Null → BaseAppBar applies a per-platform default at render time
+    // (Android/Material 25, iOS/Cupertino 20). Set explicitly to override.
+    this.iconSize,
     this.badgeValue,
     this.badgeColor,
   })  : popupMenuItems = null,
@@ -89,7 +91,7 @@ class BaseNavigationBarAction {
     this.tint,
     this.padding,
     this.labelSize = 15,
-    this.iconSize = 16,
+    this.iconSize,
     this.badgeValue,
     this.badgeColor,
     bool usePopupMenuButton = false,
@@ -210,7 +212,7 @@ class BaseNavigationBarAction {
     Color? tint,
     double? padding,
     double? labelSize = 15,
-    double? iconSize = 16,
+    double? iconSize,
     String? badgeValue,
     Color? badgeColor,
   }) {
@@ -238,7 +240,7 @@ class BaseNavigationBarAction {
     Color? tint,
     double? padding,
     double? labelSize = 15,
-    double? iconSize = 16,
+    double? iconSize,
     String? badgeValue,
     Color? badgeColor,
   }) {
@@ -358,7 +360,7 @@ class BaseNavigationBarAction {
           tint: tint,
           padding: padding,
           labelSize: labelSize,
-          iconSize: iconSize,
+          iconSize: iconSize ?? 20,
           badgeValue: badgeValue,
           badgeColor: badgeColor,
         );
@@ -371,7 +373,7 @@ class BaseNavigationBarAction {
           tint: tint,
           padding: padding,
           labelSize: labelSize,
-          iconSize: iconSize,
+          iconSize: iconSize ?? 20,
           badgeValue: badgeValue,
           badgeColor: badgeColor,
         );
@@ -386,7 +388,7 @@ class BaseNavigationBarAction {
         tint: tint,
         padding: padding,
         labelSize: labelSize,
-        iconSize: iconSize,
+        iconSize: iconSize ?? 20,
         badgeValue: badgeValue,
         badgeColor: badgeColor,
       );
@@ -453,7 +455,8 @@ class BaseNavigationBarAction {
     }
 
     final Color? color = tint;
-    final double size = iconSize ?? 20;
+    // Android/Material app-bar icon default. iOS uses 20 (see toCNNavigationBarAction).
+    final double size = iconSize ?? 25;
 
     // Popup menu action
     if (popupMenuItems != null && onPopupMenuSelected != null) {
@@ -538,7 +541,7 @@ class BaseNavigationBarAction {
       'arrow.up': Icons.arrow_upward,
       'arrow.down': Icons.arrow_downward,
       'arrow.clockwise': Icons.refresh,
-      'ellipsis': Icons.more_horiz,
+      'ellipsis': Icons.more_vert,
       'ellipsis.circle': Icons.more_vert,
       'xmark': Icons.close,
       'xmark.circle': Icons.cancel,
@@ -754,6 +757,9 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.segmentedControlHeight,
     this.segmentedControlTint,
     this.segmentedControlLabelSize,
+    this.segmentedControlSelectedColor,
+    this.segmentedControlLabelColor,
+    this.segmentedControlSelectedLabelColor,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -847,6 +853,15 @@ class BaseNavigationBar extends BaseStatelessWidget {
   /// Label size for segmented control text (iOS native)
   final double? segmentedControlLabelSize;
 
+  /// Background color of the selected segment (iOS native `selectedSegmentTintColor`).
+  final Color? segmentedControlSelectedColor;
+
+  /// Text color for unselected segment labels (iOS native).
+  final Color? segmentedControlLabelColor;
+
+  /// Text color for the selected segment label (iOS native).
+  final Color? segmentedControlSelectedLabelColor;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
@@ -908,6 +923,13 @@ class BaseNavigationBar extends BaseStatelessWidget {
           valueOf('segmentedControlTint', segmentedControlTint),
       segmentedControlLabelSize:
           valueOf('segmentedControlLabelSize', segmentedControlLabelSize),
+      segmentedControlSelectedColor: valueOf(
+          'segmentedControlSelectedColor', segmentedControlSelectedColor),
+      segmentedControlLabelColor:
+          valueOf('segmentedControlLabelColor', segmentedControlLabelColor),
+      segmentedControlSelectedLabelColor: valueOf(
+          'segmentedControlSelectedLabelColor',
+          segmentedControlSelectedLabelColor),
     );
   }
 

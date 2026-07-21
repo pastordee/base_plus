@@ -316,10 +316,14 @@ class BaseScaffold extends BaseStatelessWidget {
     final Widget? drawer = valueOf('drawer', this.drawer);
     final Widget? endDrawer = valueOf('endDrawer', this.endDrawer);
 
-    // Auto-inject drawer menu icon when drawer is present and no leading widget specified
+    // Auto-inject drawer menu icon when drawer is present and no leading widget
+    // specified — but NOT when leadingActions are provided (those already supply
+    // the leading, e.g. a tinted hamburger that opens the drawer). Injecting a
+    // plain menu icon there would override the caller's tinted leadingActions.
     if (appBar != null &&
         drawer != null &&
         appBar.leading == null &&
+        (appBar.leadingActions == null || appBar.leadingActions!.isEmpty) &&
         appBar.automaticallyImplyLeading) {
       // Create a new BaseAppBar instance with drawer menu icon
       appBar = BaseAppBar(
@@ -366,6 +370,27 @@ class BaseScaffold extends BaseStatelessWidget {
         toolbarTextStyle: appBar.toolbarTextStyle,
         titleTextStyle: appBar.titleTextStyle,
         systemOverlayStyle: appBar.systemOverlayStyle,
+        // Preserve the newer BaseAppBar properties too — omitting these silently
+        // dropped the segmented control / leading+trailing actions / glass on any
+        // screen that has a drawer (e.g. the home tabs), while drawer-less
+        // sub-views kept them. Keep this list in sync with BaseAppBar's fields.
+        leadingActions: appBar.leadingActions,
+        trailingActions: appBar.trailingActions,
+        transparent: appBar.transparent,
+        glass: appBar.glass,
+        largeTitle: appBar.largeTitle,
+        tint: appBar.tint,
+        segmentedControlLabels: appBar.segmentedControlLabels,
+        segmentedControlSelectedIndex: appBar.segmentedControlSelectedIndex,
+        onSegmentedControlValueChanged: appBar.onSegmentedControlValueChanged,
+        segmentedControlHeight: appBar.segmentedControlHeight,
+        segmentedControlTint: appBar.segmentedControlTint,
+        segmentedControlLabelSize: appBar.segmentedControlLabelSize,
+        segmentedControlSelectedColor: appBar.segmentedControlSelectedColor,
+        segmentedControlLabelColor: appBar.segmentedControlLabelColor,
+        segmentedControlSelectedLabelColor:
+            appBar.segmentedControlSelectedLabelColor,
+        tabController: appBar.tabController,
         baseParam: appBar.baseParam,
       );
     }

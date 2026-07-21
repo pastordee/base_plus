@@ -1,5 +1,7 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/cupertino.dart'
     hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
 import 'package:flutter/material.dart' hide AppBar;
@@ -83,7 +85,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.leadingActions,
     this.trailingActions,
     this.transparent = false,
-    this.glass = false,
+    this.glass = true,
     this.largeTitle = false,
     this.tint,
     this.segmentedControlLabels,
@@ -92,6 +94,9 @@ class BaseAppBar extends BaseStatelessWidget
     this.segmentedControlHeight,
     this.segmentedControlTint,
     this.segmentedControlLabelSize,
+    this.segmentedControlSelectedColor,
+    this.segmentedControlLabelColor,
+    this.segmentedControlSelectedLabelColor,
     this.tabController,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
@@ -274,13 +279,13 @@ class BaseAppBar extends BaseStatelessWidget
   /// When true, the navigation bar will have a transparent background
   final bool transparent;
 
-  /// Frosted "glass" app bar for the **Material (Android)** build.
+  /// Frosted "glass" app bar (cross-platform, single [BaseAppBar] API).
   ///
-  /// iOS already renders a glass nav bar (the Cupertino paths blur when
-  /// transparent), so this flag only affects Android: when true, the [AppBar]
-  /// is made transparent (elevation 0) and backed by a [BackdropFilter] blur
-  /// with a translucent fill — matching the iOS glass look through the single
-  /// [BaseAppBar] API instead of a flat opaque bar. No-op on iOS.
+  /// When true:
+  /// - **Android (material):** the [AppBar] is transparent (elevation 0) and
+  ///   backed by a [BackdropFilter] blur with a translucent fill.
+  /// - **iOS (cupertino / native):** forces a transparent background so the
+  ///   nav bar's backdrop blur shows — the native glass look.
   ///
   /// The content behind the bar must be able to scroll under it — pair with
   /// `BaseScaffold(extendBodyBehindAppBar: true)` (auto-enabled when the bar's
@@ -325,6 +330,26 @@ class BaseAppBar extends BaseStatelessWidget
   /// Controls the font size of segment labels
   final double? segmentedControlLabelSize;
 
+  /// Background color of the *selected* segment (the sliding "thumb"/bubble).
+  ///
+  /// - **Android (Material):** sets the `thumbColor` of the sliding control.
+  /// - **iOS (native):** sets `selectedSegmentTintColor`.
+  ///
+  /// If null, falls back to [segmentedControlTint] then the platform default
+  /// (which is why a white bubble on a white surface could make the selected
+  /// label vanish — set this to give the selected tab a distinct background).
+  final Color? segmentedControlSelectedColor;
+
+  /// Text color for *unselected* segment labels.
+  /// If null, uses the platform default label color.
+  final Color? segmentedControlLabelColor;
+
+  /// Text color for the *selected* segment label.
+  /// If null, falls back to [segmentedControlLabelColor] then the platform
+  /// default. Set this so the selected label stays readable against
+  /// [segmentedControlSelectedColor].
+  final Color? segmentedControlSelectedLabelColor;
+
   /// Optional [TabController] for the segmented control (Material/Android).
   ///
   /// When provided, the Android segmented control (rendered from
@@ -336,6 +361,22 @@ class BaseAppBar extends BaseStatelessWidget
   final TabController? tabController;
 
   /// *** native iOS properties end ***
+
+  /// Auto-enable native iOS rendering on Apple platforms when the caller hasn't
+  /// provided a [baseParam] — so screens no longer need to pass
+  /// `BaseParam(nativeIOS: Platform.isIOS || Platform.isMacOS)` themselves.
+  /// An explicitly-provided [baseParam] is always respected as-is.
+  @override
+  Widget build(BuildContext context) {
+    if (baseParam == null) {
+      final bool _apple = defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+      if (_apple) {
+        return commonBuild(context, BaseParam(nativeIOS: true));
+      }
+    }
+    return commonBuild(context, baseParam);
+  }
 
   @override
   Widget buildByCupertino(BuildContext context) {
@@ -357,8 +398,12 @@ class BaseAppBar extends BaseStatelessWidget
     }
     final BaseThemeData baseTheme = BaseTheme.of(context);
     final Widget? _title = valueOf('middle', middle) ?? valueOf('title', title);
+    // `glass` → transparent background so the nav bar's backdrop blur shows.
+    final bool _glass = valueOf('glass', glass);
     // If no backgroundColor, use CupertinoTheme's barBackgroundColor, or use the default
-    final Color? _backgroundColor = valueOf('backgroundColor', backgroundColor);
+    final Color? _backgroundColor = _glass
+        ? const Color(0x00000000)
+        : valueOf('backgroundColor', backgroundColor);
     final double _toolbarOpacity = valueOf('toolbarOpacity', toolbarOpacity);
 
     // Enhanced backdrop filter logic
@@ -453,7 +498,9 @@ class BaseAppBar extends BaseStatelessWidget
 
     final Color? _tint = valueOf('tint', tint);
     final double? _height = valueOf('height', height);
-    final bool _transparent = valueOf('transparent', transparent);
+    // `glass` implies a transparent (blurred) native nav bar on iOS.
+    final bool _transparent =
+        valueOf('transparent', transparent) || valueOf('glass', glass);
     final bool _largeTitle = valueOf('largeTitle', largeTitle);
 
     final BaseThemeData baseTheme = BaseTheme.of(context);
@@ -486,6 +533,13 @@ class BaseAppBar extends BaseStatelessWidget
             valueOf('segmentedControlTint', segmentedControlTint),
         segmentedControlLabelSize:
             valueOf('segmentedControlLabelSize', segmentedControlLabelSize),
+        segmentedControlSelectedColor: valueOf(
+            'segmentedControlSelectedColor', segmentedControlSelectedColor),
+        segmentedControlLabelColor: valueOf(
+            'segmentedControlLabelColor', segmentedControlLabelColor),
+        segmentedControlSelectedLabelColor: valueOf(
+            'segmentedControlSelectedLabelColor',
+            segmentedControlSelectedLabelColor),
         baseParam: BaseParam(nativeIOS: true),
       ).build(context),
     );
@@ -593,7 +647,7 @@ class BaseAppBar extends BaseStatelessWidget
               18.0;
       final Color _tint =
           baseTheme.valueOf('appBarGlassColor', baseTheme.appBarGlassColor) ??
-              colorScheme.surface.withValues(alpha: 0.6);
+              colorScheme.surface.withValues(alpha: 0.4);
       _flexibleSpace = ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: _blur, sigmaY: _blur),
@@ -615,13 +669,6 @@ class BaseAppBar extends BaseStatelessWidget
             _buildMaterialSegmentedControl(context, colorScheme, _segLabels);
       }
     }
-
-    // ignore: avoid_print
-    print('PIP_DEBUG appbar.material: glass=$_glass '
-        'leading=${_leading != null} title=${_materialTitle?.runtimeType} '
-        'actions=${_actions?.length} height=$_height '
-        'segLabels=${valueOf('segmentedControlLabels', segmentedControlLabels)} '
-        'toolbarOpacity=${valueOf('toolbarOpacity', toolbarOpacity)}');
 
     return AppBar(
       leading: _leading,
@@ -668,6 +715,17 @@ class BaseAppBar extends BaseStatelessWidget
     final double labelSize =
         valueOf('segmentedControlLabelSize', segmentedControlLabelSize) ?? 13.0;
     final Color? bg = valueOf('segmentedControlTint', segmentedControlTint);
+    // Selected-segment ("thumb") background, and per-state label colors.
+    final Color thumb =
+        valueOf('segmentedControlSelectedColor', segmentedControlSelectedColor) ??
+            colorScheme.surface;
+    final Color? labelColor =
+        valueOf('segmentedControlLabelColor', segmentedControlLabelColor);
+    final Color? selectedLabelColor = valueOf(
+          'segmentedControlSelectedLabelColor',
+          segmentedControlSelectedLabelColor,
+        ) ??
+        labelColor;
     final ValueChanged<int>? onChanged = valueOf(
       'onSegmentedControlValueChanged',
       onSegmentedControlValueChanged,
@@ -675,23 +733,31 @@ class BaseAppBar extends BaseStatelessWidget
     final TabController? _tabController =
         valueOf('tabController', tabController);
 
-    final Map<int, Widget> children = <int, Widget>{
-      for (int i = 0; i < labels.length; i++)
-        i: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Text(
-            labels[i],
-            style: TextStyle(fontSize: labelSize, fontWeight: FontWeight.w500),
-          ),
-        ),
-    };
+    // CupertinoSlidingSegmentedControl renders the same child regardless of
+    // selection, so per-state text color has to be applied by rebuilding the
+    // children against the current selection.
+    Map<int, Widget> buildChildren(int selected) => <int, Widget>{
+          for (int i = 0; i < labels.length; i++)
+            i: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Text(
+                labels[i],
+                style: TextStyle(
+                  fontSize: labelSize,
+                  fontWeight: FontWeight.w500,
+                  color: i == selected ? selectedLabelColor : labelColor,
+                ),
+              ),
+            ),
+        };
 
     Widget buildControl(int selected) {
+      final int clamped = selected.clamp(0, labels.length - 1);
       final Widget control = CupertinoSlidingSegmentedControl<int>(
-        groupValue: selected.clamp(0, labels.length - 1),
+        groupValue: clamped,
         backgroundColor: bg ?? CupertinoColors.tertiarySystemFill,
-        thumbColor: colorScheme.surface,
-        children: children,
+        thumbColor: thumb,
+        children: buildChildren(clamped),
         onValueChanged: (int? v) {
           if (v == null) {
             return;
