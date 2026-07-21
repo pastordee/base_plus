@@ -72,6 +72,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.textTheme,
     this.primary = true,
     this.centerTitle,
+    this.titleAlignment,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.excludeHeaderSemantics = false,
     this.toolbarOpacity = 1.0,
@@ -242,6 +243,17 @@ class BaseAppBar extends BaseStatelessWidget
 
   /// [AppBar.titleSpacing]
   final double? titleSpacing;
+
+  /// Alignment of a **custom widget** title/middle on the native iOS bar.
+  ///
+  /// Only applies when the title/middle is a non-[Text] widget (which the native
+  /// `CNNavigationBar` can't render, so base_plus overlays it). Defaults to
+  /// [Alignment.centerLeft] (matches a chat-header / Android layout). Set to
+  /// [Alignment.center] for a centered title; when centered, the leading/trailing
+  /// insets are balanced so the widget stays visually centered in the bar.
+  ///
+  /// Has no effect on plain [Text] titles (rendered natively) or on Material.
+  final Alignment? titleAlignment;
 
   /// [AppBar.excludeHeaderSemantics]
   final bool excludeHeaderSemantics;
@@ -508,6 +520,17 @@ class BaseAppBar extends BaseStatelessWidget
         baseTheme.valueOf('appBarHeight', baseTheme.appBarHeight) ??
         44.0;
 
+    // The native CNNavigationBar renders its title as a native UILabel, so only
+    // a plain `Text` title survives (extracted to `_title` above). When the
+    // caller passes any other widget as the title/middle (e.g. a chat header
+    // with an avatar + name), it would silently vanish on iOS. Detect that case
+    // so we can overlay the Flutter widget on top of the native bar below.
+    final List<String>? _segLabels =
+        valueOf('segmentedControlLabels', segmentedControlLabels);
+    final bool _hasCustomTitleWidget = _titleWidget != null &&
+        _titleWidget is! Text &&
+        (_segLabels == null || _segLabels.isEmpty);
+
     // BaseNavigationBar.build() returns CNNavigationBar which doesn't implement PreferredSizeWidget
     // Wrap it in PreferredSize to make it compatible with ObstructingPreferredSizeWidget
     final Widget navBar = SafeArea(
@@ -544,9 +567,57 @@ class BaseAppBar extends BaseStatelessWidget
       ).build(context),
     );
 
+    // Overlay the custom Flutter title widget on top of the native bar. The
+    // native bar still supplies the background/blur, the leading (back button),
+    // and any trailing actions; we just paint the widget the native title can't
+    // render into the middle. Flutter widgets draw above platform views, so this
+    // stays tappable.
+    Widget child = navBar;
+    if (_hasCustomTitleWidget) {
+      final Alignment _align =
+          valueOf('titleAlignment', titleAlignment) ?? Alignment.centerLeft;
+
+      // Reserve horizontal room for the native leading/trailing so the overlay
+      // doesn't sit under the back button or trailing actions. iOS bar buttons
+      // are ~44pt wide.
+      double _startInset =
+          (_leadingActions != null && _leadingActions.isNotEmpty) ? 44.0 : 8.0;
+      double _endInset = ((_trailingActions?.length ?? 0) * 44.0) + 8.0;
+
+      // For a horizontally-centered title, balance the insets to the larger side
+      // so the widget stays centered in the bar rather than being pushed off by
+      // an asymmetric leading/trailing.
+      if (_align.x == 0.0) {
+        final double _max = _startInset > _endInset ? _startInset : _endInset;
+        _startInset = _max;
+        _endInset = _max;
+      }
+
+      child = Stack(
+        children: <Widget>[
+          navBar,
+          Positioned.fill(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: _startInset,
+                  end: _endInset,
+                ),
+                child: Align(
+                  alignment: _align,
+                  child: _titleWidget,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return PreferredSize(
       preferredSize: Size.fromHeight(effectiveHeight),
-      child: navBar,
+      child: child,
     );
   }
 
