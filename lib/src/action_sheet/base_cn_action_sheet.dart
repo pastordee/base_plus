@@ -272,6 +272,7 @@ class BaseActionSheet {
   }) async {
     final result = await showModalBottomSheet<int>(
       context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (BuildContext context) {
         return SafeArea(
           child: Column(
@@ -298,6 +299,10 @@ class BaseActionSheet {
                           title,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            // Explicit so the title is legible regardless of the
+                            // ambient (overlay) text colour — was invisible in
+                            // light mode when shown over Get.overlayContext.
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       if (title != null && message != null)
@@ -306,7 +311,9 @@ class BaseActionSheet {
                         Text(
                           message,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                         ),
                     ],
@@ -370,7 +377,9 @@ class BaseActionSheet {
       case BaseActionSheetActionStyle.destructive:
         return theme.colorScheme.error;
       case BaseActionSheetActionStyle.defaultStyle:
-        return null;
+        // Explicit so default actions stay legible over the sheet surface in
+        // both themes (returning null inherited an invisible ambient colour).
+        return theme.colorScheme.onSurface;
     }
   }
 

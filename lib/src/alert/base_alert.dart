@@ -237,9 +237,23 @@ class BaseAlert {
     final result = await showDialog<int>(
       context: context,
       builder: (BuildContext context) {
+        final ColorScheme colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
-          title: Text(title),
-          content: message != null ? Text(message) : null,
+          // Explicit surface + text colours so the dialog stays legible over
+          // any ambient theme (e.g. shown via Get.overlayContext) — otherwise
+          // the title/content inherited a colour that was invisible in light
+          // mode against the dialog background.
+          backgroundColor: colorScheme.surface,
+          title: Text(
+            title,
+            style: TextStyle(color: colorScheme.onSurface),
+          ),
+          content: message != null
+              ? Text(
+                  message,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                )
+              : null,
           actions: actions.asMap().entries.map((entry) {
             final index = entry.key;
             final action = entry.value;
@@ -278,7 +292,9 @@ class BaseAlert {
       case BaseAlertActionStyle.destructive:
         return theme.colorScheme.error;
       case BaseAlertActionStyle.defaultStyle:
-        return null;
+        // Explicit so default buttons stay legible on the dialog surface in
+        // both themes (null inherited an invisible ambient colour).
+        return theme.colorScheme.primary;
     }
   }
 
