@@ -49,7 +49,10 @@ class BasePopupButton extends BaseStatelessWidget {
     this.selectedIndex = 0,
     required this.onSelected,
     this.tint,
-    this.height = 32.0,
+    // 44 = iOS minimum control/tap-target height. At 32 the Cupertino path
+    // pins the native CNPopupButton to exactly 32 (minHeight == maxHeight),
+    // which vertically clipped the selected label (e.g. "John" cut in half).
+    this.height = 44.0,
     this.width,
     this.buttonStyle = CNButtonStyle.plain,
     this.prefix,
@@ -89,7 +92,7 @@ class BasePopupButton extends BaseStatelessWidget {
     // Wrap CNPopupButton with constraints to ensure proper width in Expanded/Flexible layouts
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: valueOf('width', width) ?? 120, // Ensure minimum width for proper text display
+        minWidth: valueOf('width', width) ?? 160, // Wider minimum so longer labels (e.g. "1 Thessalonians") don't wrap onto multiple lines
         maxWidth: valueOf('width', width) ?? double.infinity, // Allow expansion if in Expanded widget
         minHeight: valueOf('height', height),
         maxHeight: valueOf('height', height),
@@ -137,13 +140,15 @@ class BasePopupButton extends BaseStatelessWidget {
         return items;
       },
       onSelected: valueOf('onSelected', onSelected),
-      child: InkWell(
-        onTap: () {}, // Empty tap handler to ensure ink response
-        child: Container(
+      // NOTE: no InkWell here. PopupMenuButton already wraps `child` in its own
+      // InkWell(onTap: showButtonMenu); an inner InkWell with a tap handler
+      // wins the gesture arena and swallows the tap, so the menu never opened
+      // on Android. The Container is the child directly.
+      child: Container(
           height: h,
           constraints: w != null 
               ? BoxConstraints(minWidth: w, maxWidth: w)
-              : const BoxConstraints(minWidth: 120), // Increased minimum width
+              : const BoxConstraints(minWidth: 180), // Wider minimum so longer labels don't wrap
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: _getBackgroundColor(theme, btnStyle),
@@ -191,7 +196,6 @@ class BasePopupButton extends BaseStatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
