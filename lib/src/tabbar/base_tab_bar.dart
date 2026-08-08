@@ -592,6 +592,8 @@ class BaseTabBar extends BaseStatelessWidget {
             label: label,
             image: AssetImage(imageKey.imageForIOS),
             imageSize: imageKey.imageSize,
+            badgeValue: imageKey.badgeValue,
+            badgeColor: imageKey.badgeColor,
           );
         } else if (keyedIcon.key is BaseNativeTabBarItemKey) {
           // SF Symbol specified
@@ -610,6 +612,8 @@ class BaseTabBar extends BaseStatelessWidget {
             label: label,
             image: AssetImage(imageKey.imageForIOS),
             imageSize: imageKey.imageSize,
+            badgeValue: imageKey.badgeValue,
+            badgeColor: imageKey.badgeColor,
           );
         }
         // If no metadata, try to extract image from the widget

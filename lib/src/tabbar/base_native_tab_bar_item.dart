@@ -59,24 +59,35 @@ class BaseCustomImageKey extends ValueKey<String> {
     this.imageSize = 28.0,
     this.width = 24.0,
     this.height = 24.0,
+    this.badgeValue,
+    this.badgeColor,
   }) : super(materialImage);
-  
+
   /// The image asset path for Material design (Android)
   final String materialImage;
-  
+
   /// The image asset path for iOS (optional, uses materialImage if not provided)
   final String? iosImage;
-  
+
   /// Size of the image in points for iOS CNTabBar (default: 28.0)
   /// This is used with CNTabBarItem's imageSize property
   final double imageSize;
-  
+
   /// Width of the image in the tab bar for Material design (default: 24.0)
   final double width;
-  
+
   /// Height of the image in the tab bar for Material design (default: 24.0)
   final double height;
-  
+
+  /// Optional badge text shown on the tab (iOS native tab bar). Null/empty
+  /// hides the badge. Because [BottomNavigationBarItem] has nowhere to store a
+  /// badge, it rides along on this key and [BaseTabBar] forwards it to the
+  /// native [CNTabBarItem]. Rebuild the item with a new value to update it.
+  final String? badgeValue;
+
+  /// Optional badge background colour (defaults to the system red on iOS).
+  final Color? badgeColor;
+
   /// Get the appropriate image for the current platform
   String get imageForIOS => iosImage ?? materialImage;
   String get imageForMaterial => materialImage;
@@ -131,6 +142,8 @@ extension BottomNavigationBarItemNativeExtension on BottomNavigationBarItem {
     Widget? activeIcon,
     String? tooltip,
     Color? backgroundColor,
+    String? badgeValue,
+    Color? badgeColor,
   }) {
     // Create the icon with BaseCustomImageKey metadata
     final Widget icon = Image.asset(
@@ -141,6 +154,8 @@ extension BottomNavigationBarItemNativeExtension on BottomNavigationBarItem {
         imageSize: imageSize,
         width: width,
         height: height,
+        badgeValue: badgeValue,
+        badgeColor: badgeColor,
       ),
       width: width,
       height: height,
