@@ -21,8 +21,8 @@ class BaseNavigationBarAction {
     this.tint,
     this.padding,
     this.labelSize = 15,
-    // Null → BaseAppBar applies a per-platform default at render time
-    // (Android/Material 25, iOS/Cupertino 20). Set explicitly to override.
+    // Null → a per-platform default is applied at render time
+    // (iOS/Cupertino 15, Android/Material 25). Set explicitly to override.
     this.iconSize,
     this.badgeValue,
     this.badgeColor,
@@ -401,11 +401,30 @@ class BaseNavigationBarAction {
       tint: tint,
       padding: padding,
       labelSize: labelSize,
-      iconSize: iconSize,
+      iconSize: iconSize ?? _iosIconSize,
       badgeValue: badgeValue,
       badgeColor: badgeColor,
     );
   }
+
+  /// iOS icon point size for a plain SF-Symbol action when [iconSize] is null.
+  ///
+  /// Without this the size falls through to [CNSymbol.size], which is
+  /// non-nullable and defaults to 24 — far larger than a native iOS toolbar
+  /// button. `CNSymbol.size` therefore can't say "unsized", so a symbol left at
+  /// that 24 default is treated as unsized and gets [_kIosIconSize], while a
+  /// caller that sized the symbol itself (`CNSymbol('x', size: 18)`) keeps it.
+  double get _iosIconSize {
+    final double? symbolSize = icon?.size;
+    if (symbolSize != null && symbolSize != 24.0) {
+      return symbolSize;
+    }
+    return _kIosIconSize;
+  }
+
+  /// iOS/Cupertino nav-bar icon default. Android/Material uses 25
+  /// (see [toMaterialWidget]).
+  static const double _kIosIconSize = 17;
 
   /// Map Material icon to SF Symbol name
   String? _mapIconToSFSymbol(IconData? iconData) {
@@ -455,7 +474,8 @@ class BaseNavigationBarAction {
     }
 
     final Color? color = tint;
-    // Android/Material app-bar icon default. iOS uses 20 (see toCNNavigationBarAction).
+    // Android/Material app-bar icon default. iOS uses 15
+    // (see _kIosIconSize in toCNNavigationBarAction).
     final double size = iconSize ?? 25;
 
     // Popup menu action
@@ -498,6 +518,21 @@ class BaseNavigationBarAction {
     // Set the tint directly on the Icon (authoritative) so the AppBar's own
     // foregroundColor / actionsIconTheme can't override it.
     if (icon != null) {
+      Widget iconWidget = Icon(
+        _sfSymbolToMaterialIcon(icon!.name) ?? Icons.circle_outlined,
+        color: color,
+      );
+      // Badge parity with iOS: iOS renders badgeValue natively on the nav-bar
+      // action; on Material we wrap the icon in a Badge. A whitespace-only value
+      // shows a plain dot (no number); anything else shows the text.
+      if (badgeValue != null && badgeValue!.isNotEmpty) {
+        final bool dotOnly = badgeValue!.trim().isEmpty;
+        iconWidget = Badge(
+          label: dotOnly ? null : Text(badgeValue!),
+          backgroundColor: badgeColor ?? const Color(0xFFFF3B30),
+          child: iconWidget,
+        );
+      }
       return IconButton(
         onPressed: onPressed,
         padding: EdgeInsets.zero,
@@ -505,10 +540,7 @@ class BaseNavigationBarAction {
         color: color,
         iconSize: size,
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-        icon: Icon(
-          _sfSymbolToMaterialIcon(icon!.name) ?? Icons.circle_outlined,
-          color: color,
-        ),
+        icon: iconWidget,
       );
     }
 
@@ -555,7 +587,7 @@ class BaseNavigationBarAction {
       'doc.on.doc': Icons.copy,
       'doc.on.clipboard': Icons.paste,
       'square.and.arrow.up': Icons.share,
-      'square.and.arrow.down': Icons.download,
+      'square.and.arrow.down': Icons.download, 
       'gear': Icons.settings,
       'gearshape': Icons.settings,
       'heart': Icons.favorite,
@@ -583,6 +615,8 @@ class BaseNavigationBarAction {
       'photo': Icons.photo,
       'play.fill': Icons.play_arrow,
       'pause.fill': Icons.pause,
+      'pip.enter':Icons.picture_in_picture_alt,
+      'rectangle.expand.vertical':Icons.expand_rounded
     };
     return map[name];
   }
