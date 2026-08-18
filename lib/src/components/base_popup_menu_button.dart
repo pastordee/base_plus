@@ -267,6 +267,7 @@ class BasePopupMenuItem {
     this.iosIcon,
     this.iconSize,
     this.enabled = true,
+    this.children,
   }) : isDivider = false;
 
   /// Creates a divider item
@@ -276,6 +277,7 @@ class BasePopupMenuItem {
         iosIcon = null,
         iconSize = null,
         enabled = true,
+        children = null,
         isDivider = true;
 
   /// Label text for the menu item
@@ -295,4 +297,12 @@ class BasePopupMenuItem {
 
   /// Whether this item is a divider
   final bool isDivider;
+
+  /// When non-null, this item is a SUBMENU: tapping it opens a child menu
+  /// (native chevron row) built from these entries. Honoured by the nav-bar
+  /// popup/pull-down actions on iOS.
+  final List<BasePopupMenuItem>? children;
+
+  /// Whether this item opens a submenu.
+  bool get hasChildren => children != null && children!.isNotEmpty;
 }

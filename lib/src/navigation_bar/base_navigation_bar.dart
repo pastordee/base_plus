@@ -327,29 +327,8 @@ class BaseNavigationBarAction {
     }
     // Handle popup menu actions - convert BasePopupMenuItem to CNPopupMenuItem
     if (popupMenuItems != null && onPopupMenuSelected != null) {
-      // Convert BasePopupMenuItem to CN format
-      final cnItems = popupMenuItems!.map((item) {
-        if (item.isDivider) {
-          return const CNPopupMenuDivider();
-        }
-
-        CNSymbol? itemIcon;
-        if (item.iosIcon != null) {
-          itemIcon = CNSymbol(item.iosIcon!, size: item.iconSize ?? 18);
-        } else if (item.iconData != null) {
-          // Try to map Material icon to SF Symbol
-          final sfSymbol = _mapIconToSFSymbol(item.iconData);
-          if (sfSymbol != null) {
-            itemIcon = CNSymbol(sfSymbol, size: item.iconSize ?? 18);
-          }
-        }
-
-        return CNPopupMenuItem(
-          label: item.label,
-          icon: itemIcon,
-          enabled: item.enabled,
-        );
-      }).toList();
+      // Convert BasePopupMenuItem to CN format (recursively, for submenus).
+      final cnItems = popupMenuItems!.map(_cnEntryFromBase).toList();
 
       if (_usePopupMenuButton) {
         return CNNavigationBarAction.popupMenuButton(
@@ -425,6 +404,33 @@ class BaseNavigationBarAction {
   /// iOS/Cupertino nav-bar icon default. Android/Material uses 25
   /// (see [toMaterialWidget]).
   static const double _kIosIconSize = 17;
+
+  /// Converts a [BasePopupMenuItem] to a CN popup entry, recursing into
+  /// [BasePopupMenuItem.children] to build native submenus.
+  CNPopupMenuEntry _cnEntryFromBase(BasePopupMenuItem item) {
+    if (item.isDivider) return const CNPopupMenuDivider();
+    CNSymbol? itemIcon;
+    if (item.iosIcon != null) {
+      itemIcon = CNSymbol(item.iosIcon!, size: item.iconSize ?? 18);
+    } else if (item.iconData != null) {
+      final sfSymbol = _mapIconToSFSymbol(item.iconData);
+      if (sfSymbol != null) {
+        itemIcon = CNSymbol(sfSymbol, size: item.iconSize ?? 18);
+      }
+    }
+    if (item.hasChildren) {
+      return CNPopupMenuSubmenu(
+        title: item.label,
+        icon: itemIcon,
+        children: item.children!.map(_cnEntryFromBase).toList(),
+      );
+    }
+    return CNPopupMenuItem(
+      label: item.label,
+      icon: itemIcon,
+      enabled: item.enabled,
+    );
+  }
 
   /// Map Material icon to SF Symbol name
   String? _mapIconToSFSymbol(IconData? iconData) {
@@ -587,7 +593,9 @@ class BaseNavigationBarAction {
       'doc.on.doc': Icons.copy,
       'doc.on.clipboard': Icons.paste,
       'square.and.arrow.up': Icons.share,
-      'square.and.arrow.down': Icons.download, 
+      'square.and.arrow.down': Icons.download,
+      'tray.and.arrow.down': Icons.drafts,
+      'tray.and.arrow.up': Icons.upload,
       'gear': Icons.settings,
       'gearshape': Icons.settings,
       'heart': Icons.favorite,
