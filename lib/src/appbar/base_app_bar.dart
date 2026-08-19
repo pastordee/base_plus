@@ -16,6 +16,7 @@ import '../mode/base_mode.dart';
 import '../navigation_bar/base_navigation_bar.dart';
 import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
+import 'base_large_title.dart';
 
 /// BaseAppBar
 ///
@@ -88,6 +89,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.transparent = false,
     this.glass = true,
     this.largeTitle = false,
+    this.largeTitleController,
     this.tint,
     this.segmentedControlLabels,
     this.segmentedControlSelectedIndex,
@@ -311,6 +313,52 @@ class BaseAppBar extends BaseStatelessWidget
   /// When true, displays a large title in the navigation bar
   final bool largeTitle;
 
+  /// Cross-fades this bar's [title]/[middle] with a [BaseLargeTitle] in the
+  /// scroll body, iOS-style: the large title in the body fades out as the
+  /// compact title here fades in.
+  ///
+  /// Hand the *same* [BaseLargeTitleController] to the body's [BaseLargeTitle]
+  /// and to the scroll view's `controller`:
+  ///
+  /// ```dart
+  /// BaseAppBar(
+  ///   glass: true,
+  ///   title: Text(event.title),
+  ///   largeTitleController: _handoff,
+  /// )
+  /// ```
+  ///
+  /// Unlike [largeTitle] — which asks the *native* iOS nav bar for its own
+  /// large-title treatment — this works identically on iOS and Android, because
+  /// both titles are Flutter widgets. Note the title is wrapped in an [Opacity],
+  /// so on native iOS it is painted as an overlay rather than by the native
+  /// `UILabel`; [titleAlignment] then defaults to [Alignment.center] instead of
+  /// [Alignment.centerLeft], matching the iOS compact-title convention.
+  ///
+  /// Pairs with `BaseScaffold(extendBodyBehindAppBar: true)` and [glass].
+  final BaseLargeTitleController? largeTitleController;
+
+  /// Wraps a title/middle widget in the hand-off fade when
+  /// [largeTitleController] is set. Returns [child] untouched otherwise, so
+  /// bars that don't opt in keep their existing (native) title rendering.
+  Widget? _applyLargeTitleHandoff(Widget? child) {
+    final BaseLargeTitleController? controller =
+        valueOf('largeTitleController', largeTitleController);
+    if (controller == null || child == null) {
+      return child;
+    }
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? child) {
+        return Opacity(
+          opacity: controller.appBarOpacity,
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
   /// Tint color for the navigation bar (native iOS mode)
   /// Used for text and icons in the navigation bar
   final Color? tint;
@@ -409,7 +457,9 @@ class BaseAppBar extends BaseStatelessWidget
       }
     }
     final BaseThemeData baseTheme = BaseTheme.of(context);
-    final Widget? _title = valueOf('middle', middle) ?? valueOf('title', title);
+    final Widget? _title = _applyLargeTitleHandoff(
+      valueOf('middle', middle) ?? valueOf('title', title),
+    );
     // `glass` → transparent background so the nav bar's backdrop blur shows.
     final bool _glass = valueOf('glass', glass);
     // If no backgroundColor, use CupertinoTheme's barBackgroundColor, or use the default
@@ -493,8 +543,12 @@ class BaseAppBar extends BaseStatelessWidget
   Widget buildByCupertinoNative(BuildContext context) {
     // Native iOS implementation using BaseNavigationBar which handles CNNavigationBar internally
     // Liquid Glass effects are not applicable here as CNNavigationBar handles its own native rendering
-    final Widget? _titleWidget =
-        valueOf('middle', middle) ?? valueOf('title', title);
+    // A hand-off title is wrapped in an Opacity, so it is no longer a plain
+    // `Text` — it falls through to the custom-title overlay path below, which
+    // is what lets the fade actually render over the native bar.
+    final Widget? _titleWidget = _applyLargeTitleHandoff(
+      valueOf('middle', middle) ?? valueOf('title', title),
+    );
 
     // Extract title text if it's a Text widget
     String? _title;
@@ -574,8 +628,12 @@ class BaseAppBar extends BaseStatelessWidget
     // stays tappable.
     Widget child = navBar;
     if (_hasCustomTitleWidget) {
-      final Alignment _align =
-          valueOf('titleAlignment', titleAlignment) ?? Alignment.centerLeft;
+      // A hand-off title is the screen's *compact* title, which iOS centers —
+      // so default to centre there rather than to the chat-header start-align.
+      final Alignment _align = valueOf('titleAlignment', titleAlignment) ??
+          (valueOf('largeTitleController', largeTitleController) != null
+              ? Alignment.center
+              : Alignment.centerLeft);
 
       // Reserve horizontal room for the native leading/trailing so the overlay
       // doesn't sit under the back button or trailing actions. iOS bar buttons
@@ -623,7 +681,9 @@ class BaseAppBar extends BaseStatelessWidget
 
   @override
   Widget buildByMaterial(BuildContext context) {
-    final Widget? _title = valueOf('title', title) ?? valueOf('middle', middle);
+    final Widget? _title = _applyLargeTitleHandoff(
+      valueOf('title', title) ?? valueOf('middle', middle),
+    );
     Widget? _leading = valueOf('leading', leading);
     // Reuse leadingActions as the Material leading when no explicit `leading`
     // was given, so callers configure the bar's buttons ONCE for both platforms
