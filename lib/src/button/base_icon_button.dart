@@ -6,6 +6,7 @@ import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
+import '../icon/sf_symbol_material_icons.dart';
 
 /// BaseIconButton
 ///
@@ -291,11 +292,14 @@ class BaseIconButton extends BaseStatelessWidget {
     if (_icon != null) {
       // Use provided icon
       iconData = _icon;
-    } else if (_symbol != null && _fallbackIcon != null) {
-      // Use fallback icon when symbol is provided on Android
+    } else if (_fallbackIcon != null) {
+      // Use the explicit fallback icon on Android
       iconData = _fallbackIcon;
-    } else if (_icon == null && _fallbackIcon == null) {
-      // If symbol is provided but no fallback, use a default icon
+    } else if (_symbol != null) {
+      // Symbol given but no explicit fallback: resolve the SF Symbol via the
+      // shared map instead of showing a generic dot.
+      iconData = sfSymbolToMaterialIcon(_symbol, fallback: Icons.circle_outlined);
+    } else {
       iconData = Icons.circle_outlined;
     }
 

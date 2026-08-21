@@ -8,9 +8,79 @@ import 'package:flutter/services.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
+import '../icon/sf_symbol_material_icons.dart';
+
+/// A platform-adaptive list item for [BaseNativeSheet].
+///
+/// Unlike the raw [CNSheetItem] (which only carries an SF Symbol name that has
+/// no meaning on Android), a [BaseSheetItem] carries BOTH an iOS SF Symbol
+/// ([iosIcon]) and a Material [materialIcon]. The sheet renders the SF Symbol
+/// natively on iOS and the real Material icon on Android — so the item looks
+/// correct on both platforms instead of falling back to a generic dot.
+///
+/// Example:
+/// ```dart
+/// BaseSheetItem(
+///   title: 'studyResources'.tr,
+///   iosIcon: 'book.closed',
+///   materialIcon: Icons.menu_book,
+/// )
+/// ```
+class BaseSheetItem {
+  const BaseSheetItem({
+    required this.title,
+    this.iosIcon,
+    this.materialIcon,
+    this.dismissOnTap = true,
+    this.backgroundColor,
+    this.textColor,
+    this.iconColor,
+    this.height,
+    this.fontSize,
+    this.iconSize,
+    this.fontWeight,
+    this.iconLabelSpacing,
+  });
+
+  /// The text to display.
+  final String? title;
+
+  /// SF Symbol name used on iOS/macOS (e.g. `'book.closed'`).
+  final String? iosIcon;
+
+  /// Material icon used on Android and other platforms (e.g. `Icons.menu_book`).
+  final IconData? materialIcon;
+
+  /// Whether tapping this item dismisses the sheet.
+  final bool dismissOnTap;
+
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? iconColor;
+  final double? height;
+  final double? fontSize;
+  final double? iconSize;
+  final FontWeight? fontWeight;
+  final double? iconLabelSpacing;
+
+  /// Converts to the iOS-native [CNSheetItem] (uses [iosIcon]).
+  CNSheetItem toCNSheetItem() => CNSheetItem(
+        title: title,
+        icon: iosIcon,
+        dismissOnTap: dismissOnTap,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+        iconColor: iconColor,
+        height: height,
+        fontSize: fontSize,
+        iconSize: iconSize,
+        fontWeight: fontWeight,
+        iconLabelSpacing: iconLabelSpacing,
+      );
+}
 
 /// BaseNativeSheet - Cross-platform native sheet with iOS UISheetPresentationController support
-/// 
+///
 /// Uses native iOS UISheetPresentationController for true native sheet presentation
 /// with built-in liquid glass effects and native rendering.
 /// Uses Material Design bottom sheets for Android and other platforms.
@@ -255,7 +325,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
     double? subtitleSize,
     Color? subtitleColor,
     String? message,
-    List<CNSheetItem> items = const [],
+    List<BaseSheetItem> items = const [],
     List<CNSheetItemRow> itemRows = const [],
     List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
@@ -302,7 +372,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         subtitleSize: subtitleSize,
         subtitleColor: subtitleColor,
         message: message,
-        items: items,
+        items: items.map((i) => i.toCNSheetItem()).toList(),
         itemRows: itemRows,
         inlineActions: inlineActions,
         detents: detents,
@@ -502,7 +572,7 @@ class _NativeSheetMaterial {
     double? subtitleSize,
     Color? subtitleColor,
     String? message,
-    List<CNSheetItem> items = const [],
+    List<BaseSheetItem> items = const [],
     List<CNSheetItemRow> itemRows = const [],
     List<CNSheetInlineActions> inlineActions = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
@@ -703,19 +773,28 @@ class _NativeSheetMaterial {
                       color: itemTextColor ?? theme.colorScheme.onSurface,
                     ),
                   ),
-                  leading: item.icon != null
+                  leading: (item.materialIcon != null || item.iosIcon != null)
                     ? Icon(
-                        _MaterialSheetHelper._getIconData(item.icon!),
-                        color: itemTintColor ?? theme.colorScheme.primary,
+                        // Prefer the real Material icon; fall back to mapping the
+                        // SF Symbol name if only an iOS icon was supplied.
+                        item.materialIcon ??
+                            _MaterialSheetHelper._getIconData(item.iosIcon!),
+                        color: item.iconColor ??
+                            itemTintColor ??
+                            theme.colorScheme.primary,
                       )
                     : null,
-                  tileColor: itemBackgroundColor,
+                  tileColor: item.backgroundColor ?? itemBackgroundColor,
                   onTap: () {
                     selectedIndex = index;
-                    onItemSelected?.call(index);
+                    // Dismiss the sheet BEFORE running the action. If the action
+                    // pushes a route/dialog, popping afterwards would remove that
+                    // just-opened page instead of the sheet (Android tap did
+                    // nothing). Mirrors the iOS native behaviour.
                     if (item.dismissOnTap) {
                       Navigator.of(context).pop();
                     }
+                    onItemSelected?.call(index);
                   },
                 );
               }).toList(),
@@ -745,10 +824,11 @@ class _NativeSheetMaterial {
                         tileColor: itemBackgroundColor,
                         onTap: () {
                           selectedIndex = rowIndex;
-                          onItemRowSelected?.call(rowIndex, itemIndex);
+                          // Dismiss before acting (see items onTap above).
                           if (item.dismissOnTap) {
                             Navigator.of(context).pop();
                           }
+                          onItemRowSelected?.call(rowIndex, itemIndex);
                         },
                       ),
                     );
@@ -862,9 +942,32 @@ class _MaterialSheetHelper {
         return Icons.text_fields;
       case 'paintpalette':
         return Icons.palette;
-      
+      case 'xmark':
+      case 'xmark.circle':
+        return Icons.close;
+      case 'checkmark':
+        return Icons.check;
+      case 'checkmark.circle':
+        return Icons.check_circle;
+      case 'arrow.counterclockwise':
+      case 'arrow.clockwise':
+        return Icons.refresh;
+      case 'info.circle':
+        return Icons.info_outline;
+      case 'chart.bar':
+      case 'chart.bar.fill':
+        return Icons.bar_chart;
+      case 'book':
+      case 'book.closed':
+        return Icons.menu_book;
+      case 'paintbrush':
+      case 'paintbrush.fill':
+        return Icons.brush;
+
       default:
-        return Icons.circle;
+        // Anything not special-cased above delegates to the shared, more
+        // complete SF Symbol → Material map so unknown symbols still resolve.
+        return sfSymbolToMaterialIcon(iconName, fallback: Icons.circle);
     }
   }
 }

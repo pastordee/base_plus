@@ -5,6 +5,7 @@ import 'package:cupertino_native_extra/cupertino_native.dart';
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../components/base_popup_menu_button.dart';
+import '../icon/sf_symbol_material_icons.dart';
 
 /// Toolbar middle alignment options
 enum BaseToolbarAlignment {
@@ -1050,6 +1051,8 @@ class BaseToolbar extends BaseStatelessWidget {
       'moon.fill': Icons.brightness_2,
     };
 
-    return iconMap[sfSymbol];
+    // Fall through to the shared base_plus map for symbols not in this
+    // toolbar-local table (still nullable so callers can supply their own).
+    return iconMap[sfSymbol] ?? kSfSymbolMaterialIcons[sfSymbol];
   }
 }
