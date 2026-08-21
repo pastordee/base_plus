@@ -184,7 +184,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
     required BuildContext context,
     String? title,
     String? message,
-    List<CNSheetItem> items = const [],
+    List<BaseSheetItem> items = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
@@ -209,7 +209,7 @@ class BaseNativeSheet extends BaseStatelessWidget {
         context: context,
         title: title,
         message: message,
-        items: items,
+        items: items.map((i) => i.toCNSheetItem()).toList(),
         detents: detents,
         prefersGrabberVisible: prefersGrabberVisible,
         isModal: isModal,
@@ -460,7 +460,7 @@ class _NativeSheetMaterial {
     required BuildContext context,
     String? title,
     String? message,
-    List<CNSheetItem> items = const [],
+    List<BaseSheetItem> items = const [],
     List<CNSheetDetent> detents = const [CNSheetDetent.large],
     bool prefersGrabberVisible = true,
     bool isModal = true,
@@ -538,20 +538,25 @@ class _NativeSheetMaterial {
                     color: itemTextColor ?? theme.colorScheme.onSurface,
                   ),
                 ),
-                leading: item.icon != null
+                leading: (item.materialIcon != null || item.iosIcon != null)
                   ? Icon(
-                      _MaterialSheetHelper._getIconData(item.icon!),
-                      color: itemTintColor ?? theme.colorScheme.primary,
+                      item.materialIcon ??
+                          _MaterialSheetHelper._getIconData(item.iosIcon!),
+                      color: item.iconColor ??
+                          itemTintColor ??
+                          theme.colorScheme.primary,
                     )
                   : null,
                 onTap: () {
                   selectedIndex = index;
-                  onItemSelected?.call(index);
+                  // Dismiss before running the action so a pushed route/dialog
+                  // isn't immediately popped.
                   if (item.dismissOnTap) {
                     Navigator.of(context).pop();
                   }
+                  onItemSelected?.call(index);
                 },
-                tileColor: itemBackgroundColor,
+                tileColor: item.backgroundColor ?? itemBackgroundColor,
               );
             }).toList(),
             

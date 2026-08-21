@@ -988,9 +988,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       title: 'Settings',
       message: 'Configure your app preferences',
       items: [
-        const CNSheetItem(title: 'Brightness', icon: 'sun.max'),
-        const CNSheetItem(title: 'Appearance', icon: 'moon'),
-        const CNSheetItem(title: 'Notifications', icon: 'bell'),
+        const BaseSheetItem(title: 'Brightness', iosIcon: 'sun.max'),
+        const BaseSheetItem(title: 'Appearance', iosIcon: 'moon'),
+        const BaseSheetItem(title: 'Notifications', iosIcon: 'bell'),
       ],
       onItemSelected: (index) {
         print('onItemSelected callback fired with index: $index');
@@ -1006,9 +1006,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       context: context,
       title: 'Format',
       items: [
-        const CNSheetItem(title: 'Bold', icon: 'bold', dismissOnTap: false),
-        const CNSheetItem(title: 'Italic', icon: 'italic', dismissOnTap: false),
-        const CNSheetItem(title: 'Underline', icon: 'underline'),
+        const BaseSheetItem(title: 'Bold', iosIcon: 'bold', dismissOnTap: false),
+        const BaseSheetItem(title: 'Italic', iosIcon: 'italic', dismissOnTap: false),
+        const BaseSheetItem(title: 'Underline', iosIcon: 'underline'),
       ],
       detents: [CNSheetDetent.custom(280)],
       isModal: false, // Nonmodal - allows background interaction
@@ -1034,9 +1034,9 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
       headerTitleWeight: FontWeight.w600,
       headerHeight: 56,
       items: [
-        const CNSheetItem(title: 'Option 1', icon: 'star'),
-        const CNSheetItem(title: 'Option 2', icon: 'heart'),
-        const CNSheetItem(title: 'Option 3', icon: 'bookmark'),
+        const BaseSheetItem(title: 'Option 1', iosIcon: 'star'),
+        const BaseSheetItem(title: 'Option 2', iosIcon: 'heart'),
+        const BaseSheetItem(title: 'Option 3', iosIcon: 'bookmark'),
       ],
       onItemSelected: (index) {
         _set('Custom header option ${index + 1} selected');
@@ -1114,19 +1114,19 @@ class _CupertinoNativeDemoState extends State<CupertinoNativeDemo> {
 
       // Regular list items
       items: const [
-        CNSheetItem(
+        BaseSheetItem(
           title: 'Font Size',
-          icon: 'textformat.size',
+          iosIcon: 'textformat.size',
           dismissOnTap: false,
         ),
-        CNSheetItem(
+        BaseSheetItem(
           title: 'Text Color',
-          icon: 'paintpalette',
+          iosIcon: 'paintpalette',
           dismissOnTap: false,
         ),
-        CNSheetItem(
+        BaseSheetItem(
           title: 'Background Color',
-          icon: 'paintbrush.fill',
+          iosIcon: 'paintbrush.fill',
           dismissOnTap: false,
         ),
       ],
