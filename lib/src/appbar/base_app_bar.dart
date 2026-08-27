@@ -2,9 +2,9 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
-import 'package:flutter/cupertino.dart'
+import 'package:cupertino_ui/cupertino_ui.dart'
     hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
-import 'package:flutter/material.dart' hide AppBar;
+import 'package:material_ui/material_ui.dart' hide AppBar;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter/widgets.dart';
 

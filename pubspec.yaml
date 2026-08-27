@@ -7,12 +7,15 @@ issue_tracker: https://github.com/pastordee/base_plus/issues
 
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.10.0'
+  sdk: '>=3.12.0 <4.0.0'
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  # Material and Cupertino now ship outside the SDK as their own packages.
+  material_ui: ^1.1.0
+  cupertino_ui: ^1.0.1
   vector_math: ^2.0.8
   get: ^4.6.6
   # Requires the segmented-control color params (selected bg + label colors)
@@ -31,7 +34,7 @@ dev_dependencies:
 # Remove once a version bump is published.
 dependency_overrides:
   cupertino_native_extra:
-    path: /Users/prayercircle/Development/cupertino_native_extra
+    path: /Volumes/Macintosh HD/Users/prayercircle/Development/cupertino_native_extra
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

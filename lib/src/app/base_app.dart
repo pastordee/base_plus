@@ -1,5 +1,8 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
+// GetMaterialApp builds the SDK's MaterialApp, so the few values handed to it
+// have to be the SDK's Material types rather than material_ui's.
+import 'package:flutter/material.dart' as legacy_material;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:get/get.dart';
 
@@ -481,10 +484,17 @@ class BaseApp extends BaseStatelessWidget {
   }
 
   /// Build GetMaterialApp for GetX functionality
+  ///
+  /// `get` still builds its inner app from package:flutter/material.dart, so
+  /// the Material types it accepts (ThemeData, ThemeMode,
+  /// ScaffoldMessengerState) are not the ones from package:material_ui that
+  /// the rest of this package uses. GetMaterialApp is therefore kept as a
+  /// routing and state shell only: the theme, the scaffold messenger and the
+  /// caller's builder are installed below it by [_buildGetXChrome], so the
+  /// widget tree sees the material_ui versions of all three.
   Widget _buildGetMaterialApp(BaseThemeData baseTheme) {
     return GetMaterialApp(
       navigatorKey: valueOf('navigatorKey', navigatorKey),
-      scaffoldMessengerKey: scaffoldMessengerKey,
       home: valueOf('home', home),
       routes: valueOf('routes', routes),
       getPages: valueOf('getPages', getPages),
@@ -499,15 +509,20 @@ class BaseApp extends BaseStatelessWidget {
       ),
       routingCallback: valueOf('routingCallback', routingCallback),
       defaultTransition: valueOf('defaultTransition', defaultTransition),
-      builder: valueOf('builder', builder),
+      builder: (BuildContext context, Widget? child) =>
+          _buildGetXChrome(context, child, baseTheme),
       title: valueOf('title', title),
       onGenerateTitle: valueOf('onGenerateTitle', onGenerateTitle),
       color: valueOf('color', color),
-      theme: baseTheme.materialTheme,
-      darkTheme: baseTheme.materialDarkTheme,
-      highContrastTheme: baseTheme.materialHighContrastTheme,
-      highContrastDarkTheme: baseTheme.materialHighContrastDarkTheme,
-      themeMode: valueOf('themeMode', themeMode),
+      // The real themes are material_ui values and are applied below by
+      // [_buildGetXChrome]. GetMaterialApp still needs the SDK's own
+      // light/dark pair, though: MaterialApp derives the status bar style from
+      // the brightness of whichever theme it resolves, and left to its own
+      // devices it falls back to a light ThemeData and paints dark status bar
+      // icons over a dark app. Only the brightness matters here.
+      theme: legacy_material.ThemeData(brightness: Brightness.light),
+      darkTheme: legacy_material.ThemeData(brightness: Brightness.dark),
+      themeMode: _legacyThemeMode(valueOf('themeMode', themeMode)),
       locale: valueOf('getxLocale', getxLocale) ?? valueOf('locale', locale),
       fallbackLocale: valueOf('fallbackLocale', fallbackLocale),
       localizationsDelegates: valueOf(
@@ -559,5 +574,69 @@ class BaseApp extends BaseStatelessWidget {
       enableLog: valueOf('enableLog', enableLog),
       logWriterCallback: valueOf('logWriterCallback', logWriterCallback),
     );
+  }
+
+  /// Maps our [ThemeMode] onto the SDK's, for the widgets that still use it.
+  legacy_material.ThemeMode _legacyThemeMode(ThemeMode? mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return legacy_material.ThemeMode.light;
+      case ThemeMode.dark:
+        return legacy_material.ThemeMode.dark;
+      case ThemeMode.system:
+      case null:
+        return legacy_material.ThemeMode.system;
+    }
+  }
+
+  /// Install the material_ui chrome that [GetMaterialApp] cannot carry itself.
+  ///
+  /// Mirrors the order MaterialApp uses: the theme sits above the scaffold
+  /// messenger, which sits above the caller's builder and the navigator.
+  Widget _buildGetXChrome(
+    BuildContext context,
+    Widget? child,
+    BaseThemeData baseTheme,
+  ) {
+    final TransitionBuilder? _builder = valueOf('builder', builder);
+    final Widget content = child ?? const SizedBox.shrink();
+    return Theme(
+      data: _resolveMaterialThemeFor(context, baseTheme),
+      child: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        // The builder runs inside a Builder so its context sits below the
+        // theme and the scaffold messenger, as it would under MaterialApp.
+        child: _builder == null
+            ? content
+            : Builder(
+                builder: (BuildContext context) => _builder(context, content),
+              ),
+      ),
+    );
+  }
+
+  /// Pick the light/dark/high-contrast theme the way MaterialApp would.
+  ThemeData _resolveMaterialThemeFor(
+    BuildContext context,
+    BaseThemeData baseTheme,
+  ) {
+    final MediaQueryData? media = MediaQuery.maybeOf(context);
+    final ThemeMode mode = valueOf('themeMode', themeMode) ?? ThemeMode.system;
+    final bool useDark = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system &&
+            (media?.platformBrightness ?? Brightness.light) == Brightness.dark);
+    final bool highContrast = media?.highContrast ?? false;
+
+    ThemeData? theme;
+    if (useDark) {
+      if (highContrast) {
+        theme = baseTheme.materialHighContrastDarkTheme;
+      }
+      theme ??= baseTheme.materialDarkTheme;
+    } else if (highContrast) {
+      theme = baseTheme.materialHighContrastTheme;
+    }
+    theme ??= baseTheme.materialTheme;
+    return theme ?? ThemeData.fallback();
   }
 }

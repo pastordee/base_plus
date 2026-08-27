@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/cupertino.dart' show CupertinoButton, ShapeBorder, CupertinoColors;
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoButton, ShapeBorder, CupertinoColors;
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:cupertino_native_extra/cupertino_native.dart';

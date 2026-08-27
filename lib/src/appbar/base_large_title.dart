@@ -1,5 +1,5 @@
 // Created: 2026-08-16
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Drives the iOS-style hand-off between a large title sitting in the scroll
 /// body and the compact title in the app bar.

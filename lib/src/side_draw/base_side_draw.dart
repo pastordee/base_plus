@@ -1,7 +1,7 @@
 // Created: 2026-08-18
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../mode/base_mode.dart';
 

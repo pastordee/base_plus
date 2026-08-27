@@ -10,7 +10,7 @@
 ///
 /// lastest modify: 2021.06.24
 
-import 'package:flutter/cupertino.dart'
+import 'package:cupertino_ui/cupertino_ui.dart'
     show CupertinoTheme, CupertinoDynamicColor;
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';

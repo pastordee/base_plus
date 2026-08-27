@@ -1,5 +1,5 @@
 // Created: 2026-08-21
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A single, comprehensive SF Symbol → Material [IconData] mapping shared by
 /// every base_plus component that renders an iOS SF Symbol on Android

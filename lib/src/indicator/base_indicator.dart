@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
-import 'package:flutter/material.dart' show Animation, BuildContext, CircularProgressIndicator, Color, Key, LinearProgressIndicator, Widget;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoActivityIndicator;
+import 'package:material_ui/material_ui.dart' show Animation, BuildContext, CircularProgressIndicator, Color, Key, LinearProgressIndicator, Widget;
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';

@@ -1,7 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/cupertino.dart' hide CupertinoTabScaffold, CupertinoTabBar, CupertinoTabController;
+import 'package:cupertino_ui/cupertino_ui.dart' hide CupertinoTabScaffold, CupertinoTabBar, CupertinoTabController;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // iOS 26 Liquid Glass Dynamic Material Native Implementation
 // import 'package:cupertino_native_extra/cupertino_native.dart';

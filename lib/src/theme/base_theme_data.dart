@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart' show CupertinoApp, CupertinoThemeData;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoApp, CupertinoThemeData;
 import 'package:flutter/foundation.dart' show Diagnosticable, immutable;
-import 'package:flutter/material.dart' show Brightness, Color, Colors, ColorScheme, MaterialApp, TextDecoration, ThemeData;
+import 'package:material_ui/material_ui.dart' show Brightness, Color, Colors, ColorScheme, MaterialApp, TextDecoration, ThemeData;
 
 import '../app/base_app.dart';
 import '../appbar/base_app_bar.dart';

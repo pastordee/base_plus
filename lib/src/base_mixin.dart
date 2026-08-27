@@ -1,6 +1,6 @@
 import 'package:base_plus/base.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
-import 'package:flutter/material.dart' show BuildContext, Container, Theme;
+import 'package:material_ui/material_ui.dart' show BuildContext, Container, Theme;
 
 import 'components/base_material_widget.dart';
 import 'config/base_config.dart';

@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
-import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoDynamicColor, CupertinoTextField, OverlayVisibilityMode;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoColors, CupertinoDynamicColor, CupertinoTextField, OverlayVisibilityMode;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart' hide SmartDashesType, SmartQuotesType;
+import 'package:material_ui/material_ui.dart' hide SmartDashesType, SmartQuotesType;
 import 'package:flutter/rendering.dart' show MouseCursor;
 import 'package:flutter/services.dart' show MaxLengthEnforcement, TextInputFormatter, SmartDashesType, SmartQuotesType;
 

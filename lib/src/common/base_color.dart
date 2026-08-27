@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart' show CupertinoColors, CupertinoDynamicColor, CupertinoTheme;
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoColors, CupertinoDynamicColor, CupertinoTheme;
+import 'package:material_ui/material_ui.dart';
 
 import '../base_class.dart';
 import '../base_param.dart';

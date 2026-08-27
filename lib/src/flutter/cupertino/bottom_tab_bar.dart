@@ -12,9 +12,9 @@
 
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/cupertino.dart'
+import 'package:cupertino_ui/cupertino_ui.dart'
     show CupertinoColors, CupertinoDynamicColor, CupertinoLocalizations, CupertinoTheme;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/painting.dart';
 
 // Standard iOS 10 tab bar height.
