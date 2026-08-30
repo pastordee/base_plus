@@ -74,6 +74,7 @@ export 'src/icon/base_icon.dart';
 export 'src/indicator/base_indicator.dart';
 export 'src/mode/base_mode.dart';
 export 'src/native_sheet/base_native_sheet.dart';
+export 'src/sheet/base_non_modal_sheet.dart';
 export 'src/navigation_bar/base_navigation_bar.dart';
 export 'src/popup_button/base_popup_button.dart';
 export 'src/pull_down_button/base_pull_down_button.dart';
