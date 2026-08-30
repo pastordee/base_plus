@@ -267,6 +267,8 @@ class BasePopupMenuItem {
     this.iosIcon,
     this.iconSize,
     this.enabled = true,
+    this.selected = false,
+    this.subtitle,
     this.children,
   }) : isDivider = false;
 
@@ -277,6 +279,8 @@ class BasePopupMenuItem {
         iosIcon = null,
         iconSize = null,
         enabled = true,
+        selected = false,
+        subtitle = null,
         children = null,
         isDivider = true;
 
@@ -294,6 +298,19 @@ class BasePopupMenuItem {
 
   /// Whether the item is enabled
   final bool enabled;
+
+  /// Whether this item is the choice currently in effect.
+  ///
+  /// Shown as a checkmark on iOS. Use it in a menu of alternatives — text
+  /// size, reading layout — so the menu says which one is already on rather
+  /// than offering them all as if none were.
+  final bool selected;
+
+  /// A quieter second line under the label, saying what the item does.
+  ///
+  /// Shown natively on iOS 15+. Where a row cannot carry one it is ignored,
+  /// so the label has to stand on its own either way.
+  final String? subtitle;
 
   /// Whether this item is a divider
   final bool isDivider;

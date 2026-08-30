@@ -430,6 +430,8 @@ class BaseNavigationBarAction {
       label: item.label,
       icon: itemIcon,
       enabled: item.enabled,
+      selected: item.selected,
+      subtitle: item.subtitle,
     );
   }
 

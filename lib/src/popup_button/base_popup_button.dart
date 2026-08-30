@@ -66,6 +66,21 @@ class BasePopupButton extends BaseStatelessWidget {
   /// Currently selected index
   final int selectedIndex;
 
+  /// [selectedIndex], forced inside the options.
+  ///
+  /// Callers commonly derive it from `options.indexOf(currentValue)`, which is
+  /// -1 whenever the stored value isn't one of the options any more — a
+  /// setting saved by an older build, or in another language. That -1 reached
+  /// the platform list and took the whole screen down with a RangeError, which
+  /// is a hard failure for what is really just a stale preference. Falling
+  /// back to the first option shows something usable instead.
+  int _safeIndex(List<String> options) {
+    final index = valueOf('selectedIndex', selectedIndex) as int;
+    if (options.isEmpty) return 0;
+    if (index < 0 || index >= options.length) return 0;
+    return index;
+  }
+
   /// Called when an option is selected
   final void Function(int) onSelected;
 
@@ -99,7 +114,7 @@ class BasePopupButton extends BaseStatelessWidget {
       ),
       child: CNPopupButton(
         options: valueOf('options', options),
-        selectedIndex: valueOf('selectedIndex', selectedIndex),
+        selectedIndex: _safeIndex(valueOf('options', options)),
         onSelected: valueOf('onSelected', onSelected),
         tint: valueOf('tint', tint),
         height: valueOf('height', height),
@@ -115,7 +130,7 @@ class BasePopupButton extends BaseStatelessWidget {
   Widget buildByMaterial(BuildContext context) {
     final theme = Theme.of(context);
     final opts = valueOf('options', options);
-    final selIdx = valueOf('selectedIndex', selectedIndex);
+    final selIdx = _safeIndex(opts);
     final divIndices = valueOf('dividerIndices', dividerIndices);
     final w = valueOf('width', width);
     final h = valueOf('height', height);
