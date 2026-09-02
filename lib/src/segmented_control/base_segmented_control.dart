@@ -66,13 +66,30 @@ class BaseSegmentedControl extends BaseStatelessWidget {
   Widget buildByMaterial(BuildContext context) {
     final selectedIdx = valueOf('selectedIndex', selectedIndex);
     final labelsList = valueOf('labels', labels);
+    // labelSize was honoured on iOS and silently dropped here, so a caller that
+    // shrank its labels to make them fit got no effect on Android at all.
+    final double? size = valueOf('labelSize', labelSize);
 
     return SegmentedButton<int>(
+      // Material 3 puts a checkmark in the selected segment and reserves the
+      // room for it in every segment, so a four-tab control gives up real width
+      // to an icon that only repeats what the filled background already says.
+      // Off, the labels get that width back — which is the difference between
+      // fitting and not on a narrow phone.
+      showSelectedIcon: false,
       segments: List.generate(
         labelsList.length,
         (index) => ButtonSegment<int>(
           value: index,
-          label: Text(labelsList[index]),
+          // One line, always. A bare Text wraps, and a segment is nowhere near
+          // tall enough for two: "Books" came out as "Boo" over "ks".
+          label: Text(
+            labelsList[index],
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: size == null ? null : TextStyle(fontSize: size),
+          ),
         ),
       ),
       selected: {selectedIdx},
