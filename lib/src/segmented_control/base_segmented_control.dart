@@ -127,6 +127,11 @@ class BaseSegmentedControl extends BaseStatelessWidget {
         ),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
+        // shrinkWrap drops Material's 48dp tap target, which is most of what
+        // was padding these labels apart — but it leaves the segments only as
+        // tall as their text. A floor keeps them comfortably tappable, and it
+        // is the track's height too, since the track wraps them.
+        minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
       ),
       // Material 3 puts a checkmark in the selected segment and reserves the
       // room for it in every segment, so a four-tab control gives up real width
