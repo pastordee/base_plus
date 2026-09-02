@@ -477,6 +477,13 @@ class _NativeSheetMaterial {
     
     await showModalBottomSheet<int>(
       context: context,
+      // Above everything, which is what the iOS side of this class does: UIKit
+      // presents the native sheet at window level. Without it Flutter picks the
+      // NEAREST navigator, and in an app with a navigator per tab that is the
+      // tab's — below whatever modal is already open. A sheet raised from
+      // inside the Bible book drawer opened underneath the drawer and could
+      // only be seen once the drawer was dismissed.
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
@@ -610,6 +617,9 @@ class _NativeSheetMaterial {
     
     await showModalBottomSheet<int>(
       context: context,
+      // See show() above: the nearest navigator is the wrong one in an app
+      // with a navigator per tab, and this sheet is raised from inside another.
+      useRootNavigator: true,
       isScrollControlled: true,
       isDismissible: !isModal,
       backgroundColor: Colors.transparent,
