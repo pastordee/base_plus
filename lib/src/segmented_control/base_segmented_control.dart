@@ -94,12 +94,16 @@ class BaseSegmentedControl extends BaseStatelessWidget {
         color: scheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(22),
       ),
-      padding: const EdgeInsets.all(3),
+      // No inset. An inset track leaves a band of itself above and below the
+      // selected segment, so the selection reads as a small pill floating in a
+      // taller bar rather than as the tab itself being on.
       child: SegmentedButton<int>(
       style: ButtonStyle(
         side: const WidgetStatePropertyAll(BorderSide.none),
+        // Same radius as the track, so a selected end segment sits flush into
+        // the corner instead of cutting across it.
         shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         ),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
