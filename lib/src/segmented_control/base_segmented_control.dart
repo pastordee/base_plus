@@ -79,32 +79,49 @@ class BaseSegmentedControl extends BaseStatelessWidget {
     //
     // What's left needs something to sit in or the tabs stop looking tappable,
     // so the control gets the soft rounded track iOS gives it, with the
-    // selected segment raised out of it rather than boxed in.
+    // selected segment picked out inside it.
+    //
+    // The tints are taken from onSurface and primary rather than the surface
+    // roles, because a surface-on-surface pill is only visible if the theme
+    // happens to separate those two colours — the first attempt used
+    // surfaceContainerHighest for the track and surface for the selected
+    // segment, and on this app's light sheet both resolved to white, leaving
+    // four labels floating with no control around them at all. A tint of the
+    // accent can't disappear that way in either theme, and it matches the
+    // stepper sitting next to this control, which already uses primary at 12%.
     return Container(
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(24),
+        color: scheme.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(22),
       ),
       padding: const EdgeInsets.all(3),
       child: SegmentedButton<int>(
       style: ButtonStyle(
         side: const WidgetStatePropertyAll(BorderSide.none),
         shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
         ),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? scheme.surface
+              ? scheme.primary.withValues(alpha: 0.12)
               : Colors.transparent,
         ),
         foregroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? scheme.onSurface
+              ? scheme.primary
               : scheme.onSurface.withValues(alpha: 0.7),
         ),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 8),
+        overlayColor: WidgetStatePropertyAll(
+          scheme.primary.withValues(alpha: 0.08),
         ),
+        // Material's default tap target adds 48dp of height and a wide
+        // horizontal inset to every segment. That is what was still holding
+        // the labels apart after the outline came off, and on a four-tab
+        // control it is also width the longest label needs.
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 4),
+        ),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
       ),
       // Material 3 puts a checkmark in the selected segment and reserves the
