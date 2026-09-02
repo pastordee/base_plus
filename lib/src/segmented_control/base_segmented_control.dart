@@ -48,8 +48,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
   /// Called when a segment is selected
   final ValueChanged<int> onValueChanged;
 
-  /// Size of the segment labels (iOS only)
-  /// Applies to CNSegmentedControl on iOS
+  /// Size of the segment labels. Applies on both platforms.
   final double? labelSize;
 
   @override
@@ -70,7 +69,44 @@ class BaseSegmentedControl extends BaseStatelessWidget {
     // shrank its labels to make them fit got no effect on Android at all.
     final double? size = valueOf('labelSize', labelSize);
 
-    return SegmentedButton<int>(
+    final scheme = Theme.of(context).colorScheme;
+
+    // Material draws a hard outline around the whole control AND a divider
+    // between every segment, which next to the rest of this app — and next to
+    // the same control on iOS, where CNSegmentedControl has neither — reads as
+    // a cage around the words. Taking the outline off takes the dividers with
+    // it, since SegmentedButton paints them from the same BorderSide.
+    //
+    // What's left needs something to sit in or the tabs stop looking tappable,
+    // so the control gets the soft rounded track iOS gives it, with the
+    // selected segment raised out of it rather than boxed in.
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.all(3),
+      child: SegmentedButton<int>(
+      style: ButtonStyle(
+        side: const WidgetStatePropertyAll(BorderSide.none),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.surface
+              : Colors.transparent,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.onSurface
+              : scheme.onSurface.withValues(alpha: 0.7),
+        ),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 8),
+        ),
+        visualDensity: VisualDensity.compact,
+      ),
       // Material 3 puts a checkmark in the selected segment and reserves the
       // room for it in every segment, so a four-tab control gives up real width
       // to an icon that only repeats what the filled background already says.
@@ -98,6 +134,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
           valueOf('onValueChanged', onValueChanged)?.call(newSelection.first);
         }
       },
+      ),
     );
   }
 }
