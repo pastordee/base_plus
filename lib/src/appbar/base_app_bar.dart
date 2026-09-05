@@ -57,6 +57,7 @@ class BaseAppBar extends BaseStatelessWidget
       ),
     ),
     this.padding,
+    this.contentMaxWidth,
     this.transitionBetweenRoutes,
     this.heroTag,
     this.backdropFilter,
@@ -183,6 +184,16 @@ class BaseAppBar extends BaseStatelessWidget
 
   /// [CupertinoNavigationBar.padding]
   final EdgeInsetsDirectional? padding;
+
+  /// Widest the bar is allowed to draw, centred in the space it is given.
+  ///
+  /// Null (the default) keeps the bar edge-to-edge, which is what a phone
+  /// wants. On a tablet a full-width bar strands the leading and trailing
+  /// actions in opposite corners with a lake of empty space between them; give
+  /// it the same max width as the content column beneath and the bar reads as
+  /// belonging to that column. Only bites when the available width actually
+  /// exceeds it, so passing it on a phone is a no-op.
+  final double? contentMaxWidth;
 
   /// [CupertinoNavigationBar.transitionBetweenRoutes]
   final bool? transitionBetweenRoutes;
@@ -428,14 +439,58 @@ class BaseAppBar extends BaseStatelessWidget
   /// An explicitly-provided [baseParam] is always respected as-is.
   @override
   Widget build(BuildContext context) {
-    if (baseParam == null) {
-      final bool _apple = defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.macOS;
-      if (_apple) {
-        return commonBuild(context, BaseParam(nativeIOS: true));
-      }
+    Widget _bar;
+    if (baseParam == null &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
+      _bar = commonBuild(context, BaseParam(nativeIOS: true));
+    } else {
+      _bar = commonBuild(context, baseParam);
     }
-    return commonBuild(context, baseParam);
+
+    // Applied here rather than in each of the three platform build methods, so
+    // the native iOS bar, the Cupertino bar and the Material AppBar all honour
+    // it. [preferredSize] is untouched: the bar keeps its full height and only
+    // gives up horizontal room.
+    final BaseThemeData _baseTheme = BaseTheme.of(context);
+    final double? _maxWidth = valueOf('contentMaxWidth', contentMaxWidth) ??
+        _baseTheme.valueOf(
+            'appBarContentMaxWidth', _baseTheme.appBarContentMaxWidth);
+    if (_maxWidth != null) {
+      // What build() returns is cast by its callers — BaseScaffold's Material
+      // path casts to PreferredSizeWidget, and its Cupertino path checks for
+      // ObstructingPreferredSizeWidget (falling back to a Material Scaffold
+      // when the bar isn't one). A bare Align threw "type 'Align' is not a
+      // subtype of type 'PreferredSizeWidget'" and, had it not, would have
+      // silently pushed Cupertino bars onto the Material path. So the
+      // constraint travels inside a wrapper that keeps both contracts.
+      //
+      // Which wrapper matters: BaseScaffold's Cupertino path routes a bar that
+      // ISN'T obstructing to the Material scaffold instead, and the native iOS
+      // bar (a plain PreferredSize) has always taken that fallback. Wrapping it
+      // in something obstructing would silently move those screens onto
+      // CupertinoPageScaffold, so mirror what the built bar already was.
+      _bar = _bar is ObstructingPreferredSizeWidget
+          ? _ConstrainedAppBar(
+              preferredSize: preferredSize,
+              maxWidth: _maxWidth,
+              fullyObstructs:
+                  (_bar as ObstructingPreferredSizeWidget)
+                      .shouldFullyObstruct(context),
+              child: _bar,
+            )
+          : PreferredSize(
+              preferredSize: preferredSize,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: _maxWidth),
+                  child: _bar,
+                ),
+              ),
+            );
+    }
+    return _bar;
   }
 
   @override
@@ -948,5 +1003,42 @@ class BaseAppBar extends BaseStatelessWidget
       _height += bottom!.preferredSize.height;
     }
     return Size.fromHeight(_height);
+  }
+}
+
+/// Centres an already-built app bar within [maxWidth] while still presenting as
+/// the [ObstructingPreferredSizeWidget] the scaffolds expect. See
+/// [BaseAppBar.contentMaxWidth].
+class _ConstrainedAppBar extends StatelessWidget
+    implements ObstructingPreferredSizeWidget {
+  const _ConstrainedAppBar({
+    required this.child,
+    required this.preferredSize,
+    required this.maxWidth,
+    required this.fullyObstructs,
+  });
+
+  final Widget child;
+  final double maxWidth;
+
+  /// Carried over from the bar this wraps, so scaffolds keep laying the body
+  /// out exactly as they did before the constraint was applied.
+  final bool fullyObstructs;
+
+  @override
+  final Size preferredSize;
+
+  @override
+  bool shouldFullyObstruct(BuildContext context) => fullyObstructs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
+      ),
+    );
   }
 }

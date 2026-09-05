@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../theme/base_theme.dart';
+import '../theme/base_theme_data.dart';
+
 /// A resting height for a [BaseNonModalSheet].
 ///
 /// Either a fraction of the screen height or a fixed number of logical pixels.
@@ -138,6 +141,7 @@ class BaseNonModalSheet extends StatefulWidget {
     this.backgroundColor,
     this.cornerRadius = 16.0,
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
+    this.maxWidth,
     this.onDismiss,
     this.onResult,
     this.hostContext,
@@ -164,6 +168,12 @@ class BaseNonModalSheet extends StatefulWidget {
   final Color? backgroundColor;
   final double cornerRadius;
   final EdgeInsets margin;
+
+  /// Widest the sheet draws, centred in the space it is given. Null (the
+  /// default) leaves it edge-to-edge, which is right on a phone. On a tablet a
+  /// full-width sheet strands its controls across a very long row; falls back
+  /// to [BaseThemeData.sheetMaxWidth] when not given.
+  final double? maxWidth;
 
   /// Called when the sheet is dragged shut. Not called by
   /// [BaseNonModalSheetController.close].
@@ -195,6 +205,7 @@ class BaseNonModalSheet extends StatefulWidget {
     Color? backgroundColor,
     double cornerRadius = 16.0,
     EdgeInsets margin = const EdgeInsets.symmetric(horizontal: 8.0),
+    double? maxWidth,
     VoidCallback? onDismiss,
     void Function(Object? result)? onResult,
     OverlayState? overlay,
@@ -221,6 +232,7 @@ class BaseNonModalSheet extends StatefulWidget {
           backgroundColor: backgroundColor,
           cornerRadius: cornerRadius,
           margin: margin,
+          maxWidth: maxWidth,
           hostContext: context,
           onResult: (Object? result) {
             controller.close();
@@ -345,7 +357,11 @@ class _BaseNonModalSheetState extends State<BaseNonModalSheet>
       ),
       child: Padding(
         padding: widget.margin,
-        child: AnimatedContainer(
+        // Centre + width-limit on a tablet. Only bites when the space is wider
+        // than the limit, so a phone is a transparent pass-through.
+        child: _constrain(
+          context,
+          AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
           height: _height,
@@ -409,7 +425,25 @@ class _BaseNonModalSheetState extends State<BaseNonModalSheet>
               ],
             ),
           ),
+          ),
         ),
+      ),
+    );
+  }
+
+  /// Centres [child] within [BaseNonModalSheet.maxWidth] (or the theme's
+  /// [BaseThemeData.sheetMaxWidth]) when one is set. Bottom-aligned so the
+  /// sheet still sits against the bottom edge.
+  Widget _constrain(BuildContext context, Widget child) {
+    final BaseThemeData baseTheme = BaseTheme.of(context);
+    final double? maxWidth = widget.maxWidth ??
+        baseTheme.valueOf('sheetMaxWidth', baseTheme.sheetMaxWidth);
+    if (maxWidth == null) return child;
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
       ),
     );
   }

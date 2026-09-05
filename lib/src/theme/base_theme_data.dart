@@ -16,6 +16,8 @@ class BaseThemeData with Diagnosticable {
   factory BaseThemeData({
     Brightness? brightness,
     double? appBarHeight,
+    double? appBarContentMaxWidth,
+    double? sheetMaxWidth,
     bool appBarBackdropFilter = true,
     bool appBarTransitionBetweenRoutes = true,
     double appBarGlassBlur = 18.0,
@@ -83,6 +85,8 @@ class BaseThemeData with Diagnosticable {
     return BaseThemeData.raw(
       brightness: brightness,
       appBarHeight: appBarHeight,
+      appBarContentMaxWidth: appBarContentMaxWidth,
+      sheetMaxWidth: sheetMaxWidth,
       appBarBackdropFilter: appBarBackdropFilter,
       appBarTransitionBetweenRoutes: appBarTransitionBetweenRoutes,
       appBarGlassBlur: appBarGlassBlur,
@@ -104,6 +108,8 @@ class BaseThemeData with Diagnosticable {
   const BaseThemeData.raw({
     this.brightness,
     this.appBarHeight,
+    this.appBarContentMaxWidth,
+    this.sheetMaxWidth,
     this.appBarBackdropFilter,
     this.appBarTransitionBetweenRoutes,
     this.appBarGlassBlur = 18.0,
@@ -126,6 +132,18 @@ class BaseThemeData with Diagnosticable {
 
   /// [BaseAppBar.height]
   final double? appBarHeight;
+
+  /// App-wide default for [BaseAppBar.contentMaxWidth] — the widest every app
+  /// bar draws, centred in the space it is given. Null (the default) leaves
+  /// bars edge-to-edge. Set it once for tablet-class devices and every bar in
+  /// the app lines up with its content column; an individual bar can still pass
+  /// its own [BaseAppBar.contentMaxWidth] to override this.
+  final double? appBarContentMaxWidth;
+
+  /// App-wide default for [BaseNonModalSheet.maxWidth] — the widest a sheet
+  /// draws, centred. Null leaves sheets edge-to-edge. Set it for tablet-class
+  /// devices so a sheet doesn't stretch its controls across the whole window.
+  final double? sheetMaxWidth;
 
   /// [BaseAppBar.appBarBackdropFilter]
   final bool? appBarBackdropFilter;
@@ -208,6 +226,8 @@ class BaseThemeData with Diagnosticable {
   BaseThemeData copyWith({
     Brightness? brightness,
     double? appBarHeight,
+    double? appBarContentMaxWidth,
+    double? sheetMaxWidth,
     bool? appBarBackdropFilter,
     bool? appBarTransitionBetweenRoutes,
     double? appBarGlassBlur,
@@ -227,6 +247,9 @@ class BaseThemeData with Diagnosticable {
     return BaseThemeData.raw(
       brightness: brightness ?? this.brightness,
       appBarHeight: appBarHeight ?? this.appBarHeight,
+      appBarContentMaxWidth:
+          appBarContentMaxWidth ?? this.appBarContentMaxWidth,
+      sheetMaxWidth: sheetMaxWidth ?? this.sheetMaxWidth,
       appBarBackdropFilter: appBarBackdropFilter ?? this.appBarBackdropFilter,
       appBarTransitionBetweenRoutes: appBarTransitionBetweenRoutes ?? this.appBarTransitionBetweenRoutes,
       appBarGlassBlur: appBarGlassBlur ?? this.appBarGlassBlur,
