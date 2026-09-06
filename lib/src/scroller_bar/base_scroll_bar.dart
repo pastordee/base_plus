@@ -91,12 +91,51 @@ class BaseScrollBar extends BaseStatelessWidget {
 
   /// *** material properties end ***
 
+  /// The controller the scrollbar should actually track.
+  ///
+  /// Falls back to the child's own when the child is a scroll view that was
+  /// given one. `BaseScrollBar(child: CustomScrollView(controller: x))` is the
+  /// shape nearly every caller writes, and left to itself the scrollbar reaches
+  /// for the [PrimaryScrollController] instead — which on mobile belongs to
+  /// whichever scroll view claimed it, usually not this one. Nothing complains
+  /// until the thumb first fades in, at which point every scroll throws "The
+  /// Scrollbar's ScrollController has no ScrollPosition attached." Reading the
+  /// controller off the child means the pairing can't be got wrong by omission.
+  ScrollController? _resolveController(BuildContext context) {
+    final ScrollController? explicit = valueOf('controller', controller);
+    if (explicit != null) {
+      return explicit;
+    }
+    final Widget? _child = valueOf('child', child);
+    // SingleChildScrollView is not a ScrollView, so it needs its own case.
+    if (_child is ScrollView) {
+      return _child.controller;
+    }
+    if (_child is SingleChildScrollView) {
+      return _child.controller;
+    }
+    return null;
+  }
+
+  /// Whether a scrollbar can be painted at all.
+  ///
+  /// With no controller of our own and no [PrimaryScrollController] above us
+  /// there is no position to track, and a scrollbar without one does not
+  /// degrade — it throws. Hand back the bare child instead: a missing thumb is
+  /// a far smaller problem than an exception on every scroll.
+  bool _canPaintScrollbar(BuildContext context, ScrollController? resolved) =>
+      resolved != null || PrimaryScrollController.maybeOf(context) != null;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     final Widget _child = valueOf('child', child);
     assert(_child != null, 'child can\'t be null');
+    final ScrollController? _controller = _resolveController(context);
+    if (!_canPaintScrollbar(context, _controller)) {
+      return _buildWidget(context, _child);
+    }
     final Widget _scrollbar = CupertinoScrollbar(
-      controller: valueOf('controller', controller),
+      controller: _controller,
       child: _child,
       // isAlwaysShown: valueOf('isAlwaysShown', isAlwaysShown),
       thickness: valueOf('thickness', thickness) ?? 3.0,
@@ -111,9 +150,13 @@ class BaseScrollBar extends BaseStatelessWidget {
   @override
   Widget buildByMaterial(BuildContext context) {
     final Widget? _child = valueOf('child', child);
+    final ScrollController? _controller = _resolveController(context);
+    if (!_canPaintScrollbar(context, _controller)) {
+      return _buildWidget(context, _child!);
+    }
     final Widget _scrollbar = Scrollbar(
       child: _child!,
-      controller: valueOf('controller', controller),
+      controller: _controller,
       // isAlwaysShown: valueOf('isAlwaysShown', isAlwaysShown),
       // showTrackOnHover: valueOf('showTrackOnHover', showTrackOnHover),
       // hoverThickness: valueOf('hoverThickness', hoverThickness),
