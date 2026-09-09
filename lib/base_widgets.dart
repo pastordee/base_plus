@@ -64,6 +64,7 @@ export 'src/components/base_cn_pull_down_button.dart';
 export 'src/components/base_cn_search_bar.dart';
 export 'src/components/base_cn_toolbar.dart';
 export 'src/components/base_cupertino_interactive_keyboard.dart';
+export 'src/components/base_glass_surface.dart';
 export 'src/components/base_popup_menu_button.dart';
 export 'src/components/height_observer.dart';
 export 'src/config/base_config.dart';
