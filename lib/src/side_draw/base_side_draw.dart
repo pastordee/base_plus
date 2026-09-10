@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../components/base_glass_surface.dart';
 import '../mode/base_mode.dart';
 
 /// A platform-adaptive "side draw" presenter.
@@ -45,6 +46,12 @@ class BaseSideDraw {
   /// * [materialWidth] is the panel width for the Material left-drawer.
   /// * [cupertinoWidth] is the panel width for the iOS frosted drawer.
   /// * [cupertinoBlurSigma] controls how strong the iOS frost is (0 = opaque).
+  /// * [cupertinoGlass] draws the panel on [BaseGlassSurface] — the system's
+  ///   Liquid Glass on iOS 26, a blur clipped to the same rounded rectangle
+  ///   everywhere else — instead of the blur-and-tint card. Use it when the
+  ///   app's other surfaces are already glass, so the drawer reads as the same
+  ///   material rather than as a card of its own. The hosted content must be
+  ///   transparent, as it already must be for the tint.
   /// * [barrierColor] overrides the scrim colour on both platforms.
   /// * [useRootNavigator] presents above everything (bottom nav bars, etc.).
   /// * [forceMaterial] forces the Android presentation even on iOS (escape hatch
@@ -61,6 +68,10 @@ class BaseSideDraw {
     // ~0.7 for a glassier, more see-through panel.
     double cupertinoTint = 0.95,
     double cupertinoCornerRadius = 30,
+    // Opt in to the system's Liquid Glass material instead of the
+    // blur-and-tint stand-in. Off by default: it changes what the panel is
+    // made of, and every existing caller was tuned against the tint.
+    bool cupertinoGlass = false,
     Color? barrierColor,
     bool useRootNavigator = true,
     bool forceMaterial = false,
@@ -79,6 +90,7 @@ class BaseSideDraw {
           blurSigma: cupertinoBlurSigma,
           tint: cupertinoTint,
           cornerRadius: cupertinoCornerRadius,
+          glass: cupertinoGlass,
           scrim: barrierColor ?? Colors.black.withValues(alpha: 0.2),
           builder: builder,
         ),
@@ -108,6 +120,7 @@ class _CupertinoDrawerRoute<T> extends PopupRoute<T> {
     required this.blurSigma,
     required this.tint,
     required this.cornerRadius,
+    required this.glass,
     required this.scrim,
     required this.builder,
   });
@@ -117,6 +130,9 @@ class _CupertinoDrawerRoute<T> extends PopupRoute<T> {
   final double blurSigma;
   final double tint;
   final double cornerRadius;
+
+  /// Draw the panel on the system glass material rather than blur-and-tint.
+  final bool glass;
   final Color scrim;
   final WidgetBuilder builder;
 
@@ -151,6 +167,16 @@ class _CupertinoDrawerRoute<T> extends PopupRoute<T> {
     final bottomGap = media.padding.bottom + 18;
     const sideGap = 8.0;
 
+    // The card already sits inside the safe area (top/bottom gaps), so strip
+    // the content's own status-bar / home-indicator padding to avoid a double
+    // gap.
+    final Widget content = MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      child: Builder(builder: builder),
+    );
+
     return Padding(
       padding: EdgeInsets.only(
         top: topGap,
@@ -174,34 +200,38 @@ class _CupertinoDrawerRoute<T> extends PopupRoute<T> {
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: corners,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-                child: Container(
-                  // Translucent tint over the blur — the frosted-glass look, with
-                  // a faint light edge for the iOS "material" rim. The hosted
-                  // content should be transparent for this to show through.
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface.withValues(alpha: tint),
+            child: glass
+                ? _GlassPanel(
+                    cornerRadius: cornerRadius,
+                    // Only the fallback uses this; on iOS 26 the material
+                    // carries its own tint.
+                    fallbackColor:
+                        theme.colorScheme.surface.withValues(alpha: tint),
+                    fallbackBlur: blurSigma,
+                    child: content,
+                  )
+                : ClipRRect(
                     borderRadius: corners,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      width: 0.8,
+                    child: BackdropFilter(
+                      filter:
+                          ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                      child: Container(
+                        // Translucent tint over the blur — the frosted-glass
+                        // look, with a faint light edge for the iOS "material"
+                        // rim. The hosted content should be transparent for
+                        // this to show through.
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface.withValues(alpha: tint),
+                          borderRadius: corners,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: content,
+                      ),
                     ),
                   ),
-                  // The card already sits inside the safe area (top/bottom gaps),
-                  // so strip the content's own status-bar / home-indicator
-                  // padding to avoid a double gap.
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    removeBottom: true,
-                    child: Builder(builder: builder),
-                  ),
-                ),
-              ),
-            ),
           ),
         ),
       ),
@@ -225,6 +255,66 @@ class _CupertinoDrawerRoute<T> extends PopupRoute<T> {
         ),
       ),
       child: child,
+    );
+  }
+}
+
+/// The Cupertino panel drawn on [BaseGlassSurface] rather than on a blur with
+/// a tint over it.
+///
+/// The glass is a backdrop: it paints no content and takes no touches, so it
+/// goes at the bottom of a [Stack] with the real panel laid over it. That is
+/// also why the fill has to come off the content — a surface colour painted on
+/// top of glass hides the glass exactly as it would hide a photograph.
+class _GlassPanel extends StatelessWidget {
+  const _GlassPanel({
+    required this.cornerRadius,
+    required this.fallbackColor,
+    required this.fallbackBlur,
+    required this.child,
+  });
+
+  final double cornerRadius;
+  final Color fallbackColor;
+  final double fallbackBlur;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Size size = constraints.biggest;
+        if (!size.isFinite || size.isEmpty) {
+          return child;
+        }
+        // The package clamps a corner past half the shorter side, since a
+        // continuous corner cannot close on itself. Clamp the clip to the same
+        // value so the content's edge follows the glass rather than the number
+        // that was asked for.
+        final double radius = cornerRadius.clamp(0.0, size.shortestSide / 2);
+        final BorderRadius corners = BorderRadius.circular(radius);
+        return Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: BaseGlassSurface(
+                shapes: <BaseGlassShape>[
+                  BaseGlassShape(
+                    // Relative to the surface, which starts at the panel's own
+                    // top-left rather than at the screen's.
+                    rect: Offset.zero & size,
+                    cornerRadius: radius,
+                  ),
+                ],
+                fallbackColor: fallbackColor,
+                fallbackBlur: fallbackBlur,
+              ),
+            ),
+            Positioned.fill(
+              child: ClipRRect(borderRadius: corners, child: child),
+            ),
+          ],
+        );
+      },
     );
   }
 }
