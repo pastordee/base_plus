@@ -1,9 +1,11 @@
 // Created: 2026-09-19
 import 'package:cupertino_native_extra/cupertino_native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../components/base_glass_surface.dart';
+import '../components/base_popup_menu_button.dart';
 import '../navigation_bar/base_navigation_bar.dart';
 
 /// Where [BaseAppBar] sends its buttons when the screen wants them down the
@@ -245,6 +247,9 @@ class BaseSideToolbar extends StatelessWidget {
       builder: (BuildContext context, Widget? _) {
         final List<List<BaseNavigationBarAction>> groups = controller.groups;
         final BaseNavigationBarAction? primary = controller.primary;
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          return _nativeColumn(context, groups, primary);
+        }
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -260,6 +265,88 @@ class BaseSideToolbar extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  /// The column in native Liquid Glass ([CNVerticalBar]). Runs of groups go
+  /// into one native bar; a group holding a short text button (a Bible
+  /// version) is drawn as before, since the native bar shows symbols only.
+  Widget _nativeColumn(
+    BuildContext context,
+    List<List<BaseNavigationBarAction>> groups,
+    BaseNavigationBarAction? primary,
+  ) {
+    final List<Widget> children = <Widget>[];
+    List<CNVerticalBarGroup> run = <CNVerticalBarGroup>[];
+    Color? tint = primary?.tint;
+    for (final List<BaseNavigationBarAction> g in groups) {
+      for (final BaseNavigationBarAction a in g) {
+        tint ??= a.tint;
+      }
+    }
+    void flush() {
+      if (run.isEmpty) {
+        return;
+      }
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(height: _groupGap));
+      }
+      children.add(
+        CNVerticalBar(
+          groups: run,
+          // The screen's own tint: the column sits outside the app's theme.
+          tint: tint,
+          itemSize: buttonSize,
+          groupSpacing: _groupGap,
+          inset: 0,
+        ),
+      );
+      run = <CNVerticalBarGroup>[];
+    }
+
+    for (final List<BaseNavigationBarAction> g in groups) {
+      if (g.any(_isShortLabel)) {
+        flush();
+        if (children.isNotEmpty) {
+          children.add(const SizedBox(height: _groupGap));
+        }
+        children.add(_group(context, g));
+      } else {
+        run.add(CNVerticalBarGroup(<CNVerticalBarItem>[
+          for (final BaseNavigationBarAction a in g) _nativeItem(a),
+        ]));
+      }
+    }
+    if (primary != null) {
+      run.add(CNVerticalBarGroup(
+        <CNVerticalBarItem>[_nativeItem(primary)],
+        prominent: true,
+      ));
+    }
+    flush();
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
+  }
+
+  CNVerticalBarItem _nativeItem(BaseNavigationBarAction a) {
+    final List<BasePopupMenuItem>? menu = a.popupMenuItems;
+    return CNVerticalBarItem(
+      symbol: a.icon?.name,
+      image: a.iosImageAsset != null ? AssetImage(a.iosImageAsset!) : null,
+      label: a.label ?? '',
+      badge: a.badgeValue,
+      onPressed: a.onPressed,
+      menu: menu == null
+          ? null
+          : <CNVerticalBarMenuItem>[
+              for (final BasePopupMenuItem m in menu)
+                m.isDivider
+                    ? const CNVerticalBarMenuItem.divider()
+                    : CNVerticalBarMenuItem(
+                        title: m.label,
+                        symbol: m.iosIcon,
+                      ),
+            ],
+      onMenuSelected: a.onPopupMenuSelected,
     );
   }
 
