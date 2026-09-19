@@ -135,7 +135,7 @@ class _SideToolbarEntry {
         group = <BaseNavigationBarAction>[];
       } else if (a.isFixedSpace) {
         continue;
-      } else if (a.icon != null || a.isImageAction) {
+      } else if (a.icon != null || a.isImageAction || _isShortLabel(a)) {
         group.add(a);
       } else {
         kept.add(a);
@@ -151,6 +151,18 @@ class _SideToolbarEntry {
   final List<BaseNavigationBarAction> keptTrailing = take(trailing);
   return (groups: groups, leading: keptLeading, trailing: keptTrailing);
 }
+
+/// A text-only action short enough to sit in a round button — a Bible
+/// version such as ESV or NKJV. Apple keeps labelled controls horizontal, but a
+/// few letters read as a symbol would, and leaving them in the bar kept a whole
+/// bar across the top for one button (owner, 2026-09-19).
+///
+/// Abbreviations only (all capitals, up to five): words such as Done, Next or
+/// Edit stay in the bar, as Apple asks.
+bool _isShortLabel(BaseNavigationBarAction a) =>
+    a.icon == null &&
+    !a.isImageAction &&
+    RegExp(r'^[A-Z0-9]{2,5}$').hasMatch(a.label?.trim() ?? '');
 
 /// Puts [groups] in the column while the screen it sits in is the one showing.
 ///
@@ -315,7 +327,47 @@ class BaseSideToolbar extends StatelessWidget {
 
     final Widget control;
     final List<CNPopupMenuEntry>? entries = a.cnPopupMenuEntries;
-    if (entries != null && a.onPopupMenuSelected != null) {
+    if (_isShortLabel(a)) {
+      // Drawn rather than native: a native text button pads its title and
+      // truncates four letters in a 44pt circle.
+      control = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: a.onPressed,
+        child: Stack(
+          children: <Widget>[
+            if (alone)
+              Positioned.fill(
+                child: BaseGlassSurface(
+                  shapes: <BaseGlassShape>[
+                    BaseGlassShape(
+                      rect: const Offset(0, 0) & const Size(buttonSize, buttonSize),
+                      cornerRadius: buttonSize / 2,
+                    ),
+                  ],
+                  fallbackColor: Theme.of(context).colorScheme.surface
+                      .withValues(alpha: 0.92),
+                ),
+              ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    a.label!.trim(),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: tint,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (entries != null && a.onPopupMenuSelected != null) {
       control = CNPopupMenuButton.icon(
         buttonIcon: symbol(a.icon ?? const CNSymbol('ellipsis')),
         items: entries,
