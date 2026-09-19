@@ -5,6 +5,7 @@ import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../components/base_popup_menu_button.dart';
 import '../icon/sf_symbol_material_icons.dart';
+import '../appbar/base_side_toolbar.dart';
 
 /// Cross-platform navigation bar action
 ///
@@ -317,6 +318,16 @@ class BaseNavigationBarAction {
 
   /// Get the space width (for fixed space actions)
   double? get spaceWidth => _spaceWidth;
+
+  /// The asset an image action shows on iOS, or null for any other action.
+  String? get iosImageAsset =>
+      _isImageAction ? (_iosImage ?? _materialImage) : null;
+
+  /// A popup action's items in the native menu's form, or null for any other
+  /// action. For hosts that build the native control themselves — the vertical
+  /// toolbar ([BaseSideToolbar]) among them.
+  List<CNPopupMenuEntry>? get cnPopupMenuEntries =>
+      popupMenuItems?.map(_cnEntryFromBase).toList();
 
   /// Convert to CNNavigationBarAction for iOS implementation
   CNNavigationBarAction toCNNavigationBarAction() {
@@ -867,8 +878,41 @@ class BaseNavigationBar extends BaseStatelessWidget {
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
-    final leadingActions = valueOf('leading', leading);
-    final trailingActions = valueOf('trailing', trailing);
+    List<BaseNavigationBarAction>? leadingActions = valueOf('leading', leading);
+    List<BaseNavigationBarAction>? trailingActions =
+        valueOf('trailing', trailing);
+
+    // A side column (iPhone Duo's cover screen): the icon buttons go down the
+    // side and the title, segments and text-only buttons stay here. Done here
+    // rather than in BaseAppBar so bars built straight from this widget — the
+    // Bible reader's among them — follow too. See [BaseSideToolbarScope].
+    List<List<BaseNavigationBarAction>>? sideGroups;
+    if (BaseSideToolbarScope.maybeOf(context) != null) {
+      final ({
+        List<List<BaseNavigationBarAction>> groups,
+        List<BaseNavigationBarAction> leading,
+        List<BaseNavigationBarAction> trailing
+      }) split = splitForSideToolbar(leadingActions, trailingActions);
+      sideGroups = split.groups;
+      leadingActions = split.leading.isEmpty ? null : split.leading;
+      trailingActions = split.trailing.isEmpty ? null : split.trailing;
+    }
+    final Widget bar = _buildCupertinoBar(leadingActions, trailingActions);
+    if (sideGroups == null) {
+      return bar;
+    }
+    return Stack(
+      children: <Widget>[
+        bar,
+        BaseSideToolbarPublisher(groups: sideGroups),
+      ],
+    );
+  }
+
+  Widget _buildCupertinoBar(
+    List<BaseNavigationBarAction>? leadingActions,
+    List<BaseNavigationBarAction>? trailingActions,
+  ) {
 
     List<CNNavigationBarAction>? cnLeading;
     List<CNNavigationBarAction>? cnTrailing;

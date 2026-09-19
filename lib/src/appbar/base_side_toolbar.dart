@@ -1,0 +1,375 @@
+// Created: 2026-09-19
+import 'package:cupertino_native_extra/cupertino_native.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:material_ui/material_ui.dart';
+
+import '../components/base_glass_surface.dart';
+import '../navigation_bar/base_navigation_bar.dart';
+
+/// Where [BaseAppBar] sends its buttons when the screen wants them down the
+/// side rather than across the top.
+///
+/// iPhone Duo's cover screen is wider and shorter than any other iPhone, and
+/// Apple moves navigation bars and toolbars into a column down its trailing
+/// edge, under the status bar ("Designing for iPhone Duo" → Vertical
+/// controls). UIKit does that for its own bars; the native bar here sits in a
+/// platform view and never learns about it, so the app has to ask.
+///
+/// Put one of these above the app, [active] while the side column is showing,
+/// and show [BaseSideToolbar] in that column. Every [BaseAppBar] below then
+/// keeps its title and any text-only buttons across the top — Apple keeps
+/// those horizontal — and hands its icon buttons to the column instead.
+class BaseSideToolbarScope extends InheritedWidget {
+  const BaseSideToolbarScope({
+    super.key,
+    required this.controller,
+    required this.active,
+    required super.child,
+  });
+
+  final BaseSideToolbarController controller;
+
+  /// Whether the column is on screen. False leaves every bar as it was.
+  final bool active;
+
+  /// The scope, or null when there is none or it is not [active].
+  static BaseSideToolbarScope? maybeOf(BuildContext context) {
+    final BaseSideToolbarScope? scope =
+        context.dependOnInheritedWidgetOfExactType<BaseSideToolbarScope>();
+    return (scope == null || !scope.active) ? null : scope;
+  }
+
+  @override
+  bool updateShouldNotify(BaseSideToolbarScope oldWidget) =>
+      active != oldWidget.active || controller != oldWidget.controller;
+}
+
+/// Which screen's buttons the column is showing.
+///
+/// A stack, because screens cover one another: the screen that came into view
+/// last is the one on top, and when it goes the one beneath it comes back.
+class BaseSideToolbarController extends ChangeNotifier {
+  final List<_SideToolbarEntry> _stack = <_SideToolbarEntry>[];
+
+  /// The groups to show, top to bottom, or empty when no screen has any.
+  List<List<BaseNavigationBarAction>> get groups =>
+      _stack.isEmpty
+          ? const <List<BaseNavigationBarAction>>[]
+          : _stack.last.groups;
+
+  void _publish(Object owner, List<List<BaseNavigationBarAction>> groups,
+      {required bool toTop}) {
+    final int i =
+        _stack.indexWhere((_SideToolbarEntry e) => identical(e.owner, owner));
+    if (i >= 0 && !toTop) {
+      _stack[i] = _SideToolbarEntry(owner, groups);
+    } else {
+      if (i >= 0) {
+        _stack.removeAt(i);
+      }
+      _stack.add(_SideToolbarEntry(owner, groups));
+    }
+    notifyListeners();
+  }
+
+  void _withdraw(Object owner) {
+    final int before = _stack.length;
+    _stack.removeWhere((_SideToolbarEntry e) => identical(e.owner, owner));
+    if (_stack.length != before) {
+      notifyListeners();
+    }
+  }
+}
+
+class _SideToolbarEntry {
+  const _SideToolbarEntry(this.owner, this.groups);
+  final Object owner;
+  final List<List<BaseNavigationBarAction>> groups;
+}
+
+/// Splits a bar's actions into what the column takes and what stays across the
+/// top.
+///
+/// The column takes anything with an icon or an image; text-only buttons stay,
+/// since Apple keeps labelled controls horizontal. Leading and trailing are
+/// separate groups, and a flexible space splits a group the way it splits the
+/// native bar's glass.
+({List<List<BaseNavigationBarAction>> groups,
+    List<BaseNavigationBarAction> leading,
+    List<BaseNavigationBarAction> trailing}) splitForSideToolbar(
+  List<BaseNavigationBarAction>? leading,
+  List<BaseNavigationBarAction>? trailing,
+) {
+  final List<List<BaseNavigationBarAction>> groups =
+      <List<BaseNavigationBarAction>>[];
+  List<BaseNavigationBarAction> take(List<BaseNavigationBarAction>? actions) {
+    final List<BaseNavigationBarAction> kept = <BaseNavigationBarAction>[];
+    List<BaseNavigationBarAction> group = <BaseNavigationBarAction>[];
+    for (final BaseNavigationBarAction a
+        in actions ?? const <BaseNavigationBarAction>[]) {
+      if (a.isFlexibleSpace) {
+        if (group.isNotEmpty) {
+          groups.add(group);
+        }
+        group = <BaseNavigationBarAction>[];
+      } else if (a.isFixedSpace) {
+        continue;
+      } else if (a.icon != null || a.isImageAction) {
+        group.add(a);
+      } else {
+        kept.add(a);
+      }
+    }
+    if (group.isNotEmpty) {
+      groups.add(group);
+    }
+    return kept;
+  }
+
+  final List<BaseNavigationBarAction> keptLeading = take(leading);
+  final List<BaseNavigationBarAction> keptTrailing = take(trailing);
+  return (groups: groups, leading: keptLeading, trailing: keptTrailing);
+}
+
+/// Puts [groups] in the column while the screen it sits in is the one showing.
+///
+/// "Showing" is [TickerMode]: a tab the home screen has hidden, and a route
+/// covered by another, both have their tickers switched off — so a screen out
+/// of sight gives the column up without having to know why.
+class BaseSideToolbarPublisher extends StatefulWidget {
+  const BaseSideToolbarPublisher({super.key, required this.groups});
+
+  final List<List<BaseNavigationBarAction>> groups;
+
+  @override
+  State<BaseSideToolbarPublisher> createState() =>
+      _BaseSideToolbarPublisherState();
+}
+
+class _BaseSideToolbarPublisherState extends State<BaseSideToolbarPublisher> {
+  BaseSideToolbarController? _controller;
+  bool _shown = false;
+
+  /// The column is rebuilt from above the app, which may not be told to
+  /// change while this subtree builds — so changes wait for the end of the
+  /// frame, and ask for one, since a post-frame callback schedules nothing.
+  void _later(VoidCallback fn) {
+    SchedulerBinding.instance.addPostFrameCallback((_) => fn());
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final BaseSideToolbarController? controller =
+        BaseSideToolbarScope.maybeOf(context)?.controller;
+    final bool show =
+        controller != null && TickerMode.valuesOf(context).enabled;
+    final BaseSideToolbarController? previous = _controller;
+    if (previous != null && previous != controller) {
+      _later(() => previous._withdraw(this));
+    }
+    _controller = controller;
+    if (show) {
+      final bool toTop = !_shown;
+      final List<List<BaseNavigationBarAction>> groups = widget.groups;
+      _later(() => controller._publish(this, groups, toTop: toTop));
+    } else if (_shown && controller != null) {
+      _later(() => controller._withdraw(this));
+    }
+    _shown = show;
+    return const SizedBox.shrink();
+  }
+
+  @override
+  void dispose() {
+    final BaseSideToolbarController? controller = _controller;
+    if (controller != null) {
+      _later(() => controller._withdraw(this));
+    }
+    super.dispose();
+  }
+}
+
+/// The column's toolbar: the showing screen's buttons, top to bottom.
+///
+/// A group of one is a round glass button. Two or more share one capsule of
+/// glass, the way Mail keeps trash, move and reply together — related actions
+/// read as one control.
+class BaseSideToolbar extends StatelessWidget {
+  const BaseSideToolbar({super.key, required this.controller});
+
+  final BaseSideToolbarController controller;
+
+  /// Diameter of a button, and the width of a group's capsule.
+  static const double buttonSize = 44;
+
+  static const double _groupGap = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? _) {
+        final List<List<BaseNavigationBarAction>> groups = controller.groups;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (int i = 0; i < groups.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(height: _groupGap),
+              _group(context, groups[i]),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _group(BuildContext context, List<BaseNavigationBarAction> group) {
+    if (group.length == 1) {
+      return _button(context, group.single, alone: true);
+    }
+    final double height = buttonSize * group.length;
+    return SizedBox(
+      width: buttonSize,
+      height: height,
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: BaseGlassSurface(
+              shapes: <BaseGlassShape>[
+                BaseGlassShape(
+                  rect: Offset.zero & Size(buttonSize, height),
+                  cornerRadius: buttonSize / 2,
+                ),
+              ],
+              fallbackColor: Theme.of(context).colorScheme.surface
+                  .withValues(alpha: 0.92),
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              for (final BaseNavigationBarAction a in group)
+                _button(context, a, alone: false),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// One action as a native button: glass of its own when [alone], plain on
+  /// its group's capsule otherwise.
+  Widget _button(
+    BuildContext context,
+    BaseNavigationBarAction a, {
+    required bool alone,
+  }) {
+    final CNButtonStyle style = alone ? CNButtonStyle.glass : CNButtonStyle.plain;
+    final Color? tint = a.tint;
+    // The bar's icons are sized for a 44pt strip, some of them very small;
+    // in a column of full-size buttons they want the standard symbol size.
+    // Coloured on the symbol itself: native glass keeps its own foreground
+    // and ignores the button's tint, which left a red icon drawn in black.
+    CNSymbol symbol(CNSymbol s) => CNSymbol(
+          s.name,
+          size: 18,
+          color: s.color ?? tint,
+          mode: s.mode,
+          paletteColors: s.paletteColors,
+          gradient: s.gradient,
+        );
+
+    final Widget control;
+    final List<CNPopupMenuEntry>? entries = a.cnPopupMenuEntries;
+    if (entries != null && a.onPopupMenuSelected != null) {
+      control = CNPopupMenuButton.icon(
+        buttonIcon: symbol(a.icon ?? const CNSymbol('ellipsis')),
+        items: entries,
+        onSelected: a.onPopupMenuSelected!,
+        tint: tint,
+        size: buttonSize,
+        buttonStyle: style,
+      );
+    } else if (a.iosImageAsset != null) {
+      control = CNButton.image(
+        image: AssetImage(a.iosImageAsset!),
+        imageSize: 22,
+        onPressed: a.onPressed,
+        tint: tint,
+        size: buttonSize,
+        style: style,
+      );
+    } else {
+      control = CNButton.icon(
+        icon: symbol(a.icon!),
+        onPressed: a.onPressed,
+        tint: tint,
+        size: buttonSize,
+        style: style,
+      );
+    }
+
+    final String? badge = a.badgeValue;
+    return Semantics(
+      button: true,
+      label: a.label,
+      child: SizedBox(
+        width: buttonSize,
+        height: buttonSize,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            control,
+            if (badge != null && badge.isNotEmpty)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: IgnorePointer(
+                  child: _Badge(
+                    value: badge.trim(),
+                    color: a.badgeColor ?? const Color(0xFFFF3B30),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A count, or a plain dot when the value is blank — the native bar's rule.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.value, required this.color});
+
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isEmpty) {
+      return Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      );
+    }
+    return Container(
+      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        value,
+        style: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}

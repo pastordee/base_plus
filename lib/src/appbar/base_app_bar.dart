@@ -17,6 +17,7 @@ import '../navigation_bar/base_navigation_bar.dart';
 import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
 import 'base_large_title.dart';
+import 'base_side_toolbar.dart';
 
 /// BaseAppBar
 ///
@@ -617,6 +618,21 @@ class BaseAppBar extends BaseStatelessWidget
     final List<BaseNavigationBarAction>? _trailingActions =
         valueOf('trailingActions', trailingActions);
 
+    // With a side column (iPhone Duo's cover screen) BaseNavigationBar sends
+    // the icon buttons down the side; only what stays here needs room left
+    // for it around a custom title. See [BaseSideToolbarScope].
+    List<BaseNavigationBarAction>? _leadingInBar = _leadingActions;
+    List<BaseNavigationBarAction>? _trailingInBar = _trailingActions;
+    if (BaseSideToolbarScope.maybeOf(context) != null) {
+      final ({
+        List<List<BaseNavigationBarAction>> groups,
+        List<BaseNavigationBarAction> leading,
+        List<BaseNavigationBarAction> trailing
+      }) split = splitForSideToolbar(_leadingActions, _trailingActions);
+      _leadingInBar = split.leading;
+      _trailingInBar = split.trailing;
+    }
+
     final Color? _tint = valueOf('tint', tint);
     final double? _height = valueOf('height', height);
     // `glass` implies a transparent (blurred) native nav bar on iOS.
@@ -694,8 +710,8 @@ class BaseAppBar extends BaseStatelessWidget
       // doesn't sit under the back button or trailing actions. iOS bar buttons
       // are ~44pt wide.
       double _startInset =
-          (_leadingActions != null && _leadingActions.isNotEmpty) ? 44.0 : 8.0;
-      double _endInset = ((_trailingActions?.length ?? 0) * 44.0) + 8.0;
+          (_leadingInBar != null && _leadingInBar.isNotEmpty) ? 44.0 : 8.0;
+      double _endInset = ((_trailingInBar?.length ?? 0) * 44.0) + 8.0;
 
       // For a horizontally-centered title, balance the insets to the larger side
       // so the widget stays centered in the bar rather than being pushed off by
