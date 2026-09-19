@@ -744,6 +744,45 @@ class BaseAppBar extends BaseStatelessWidget
       );
     }
 
+    // A see-through bar over content that scrolls beneath it. UIKit's own
+    // scroll-edge effect needs a UIScrollView under the bar, and Flutter's
+    // content isn't one, so nothing hid what passed under the title — text ran
+    // straight through it. This is that effect, drawn here: a light blur that
+    // fades from the page's background at the top to nothing at the bottom.
+    if (_transparent) {
+      final Color edge = CupertinoTheme.of(context).scaffoldBackgroundColor;
+      child = Stack(
+        children: <Widget>[
+          // The fade is in the colour, not a mask: a backdrop filter inside a
+          // ShaderMask blurs the mask's own empty layer and draws nothing.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          edge.withValues(alpha: 0.92),
+                          edge.withValues(alpha: 0.75),
+                          edge.withValues(alpha: 0.0),
+                        ],
+                        stops: const <double>[0.0, 0.7, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      );
+    }
+
     return PreferredSize(
       preferredSize: Size.fromHeight(effectiveHeight),
       child: child,
