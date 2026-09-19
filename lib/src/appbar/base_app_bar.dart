@@ -755,7 +755,18 @@ class BaseAppBar extends BaseStatelessWidget
         children: <Widget>[
           // The fade is in the colour, not a mask: a backdrop filter inside a
           // ShaderMask blurs the mask's own empty layer and draws nothing.
-          Positioned.fill(
+          // On a tablet the bar's box also takes in the tab bar above it, and
+          // a fade over all of it read as a band a quarter of the screen tall
+          // (owner, 2026-09-19). There it stops just under the top inset (the
+          // tab bar); the controls below are glass of their own.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.sizeOf(context).shortestSide >= 600
+                ? MediaQuery.paddingOf(context).top + 12
+                : null,
+            bottom: MediaQuery.sizeOf(context).shortestSide >= 600 ? null : 0,
             child: IgnorePointer(
               child: ClipRect(
                 child: BackdropFilter(
