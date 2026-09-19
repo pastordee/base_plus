@@ -51,11 +51,32 @@ class BaseSideToolbarScope extends InheritedWidget {
 class BaseSideToolbarController extends ChangeNotifier {
   final List<_SideToolbarEntry> _stack = <_SideToolbarEntry>[];
 
+  /// Screens' primary actions (their floating "create" button), by owner.
+  final Map<Object, BaseNavigationBarAction> _primary =
+      <Object, BaseNavigationBarAction>{};
+
   /// The groups to show, top to bottom, or empty when no screen has any.
   List<List<BaseNavigationBarAction>> get groups =>
       _stack.isEmpty
           ? const <List<BaseNavigationBarAction>>[]
           : _stack.last.groups;
+
+  /// The showing screen's primary action, drawn filled after its groups, or
+  /// null. The most recently published wins.
+  BaseNavigationBarAction? get primary =>
+      _primary.isEmpty ? null : _primary.values.last;
+
+  void _publishPrimary(Object owner, BaseNavigationBarAction action) {
+    _primary.remove(owner);
+    _primary[owner] = action;
+    notifyListeners();
+  }
+
+  void _withdrawPrimary(Object owner) {
+    if (_primary.remove(owner) != null) {
+      notifyListeners();
+    }
+  }
 
   void _publish(Object owner, List<List<BaseNavigationBarAction>> groups,
       {required bool toTop}) {
@@ -211,12 +232,18 @@ class BaseSideToolbar extends StatelessWidget {
       listenable: controller,
       builder: (BuildContext context, Widget? _) {
         final List<List<BaseNavigationBarAction>> groups = controller.groups;
+        final BaseNavigationBarAction? primary = controller.primary;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             for (int i = 0; i < groups.length; i++) ...<Widget>[
               if (i > 0) const SizedBox(height: _groupGap),
               _group(context, groups[i]),
+            ],
+            // Apple's order: navigation, then the prominent action.
+            if (primary != null) ...<Widget>[
+              if (groups.isNotEmpty) const SizedBox(height: _groupGap),
+              _button(context, primary, alone: true, prominent: true),
             ],
           ],
         );
@@ -263,17 +290,24 @@ class BaseSideToolbar extends StatelessWidget {
     BuildContext context,
     BaseNavigationBarAction a, {
     required bool alone,
+    bool prominent = false,
   }) {
-    final CNButtonStyle style = alone ? CNButtonStyle.glass : CNButtonStyle.plain;
+    final CNButtonStyle style = prominent
+        ? CNButtonStyle.prominentGlass
+        : alone
+            ? CNButtonStyle.glass
+            : CNButtonStyle.plain;
     final Color? tint = a.tint;
     // The bar's icons are sized for a 44pt strip, some of them very small;
     // in a column of full-size buttons they want the standard symbol size.
     // Coloured on the symbol itself: native glass keeps its own foreground
     // and ignores the button's tint, which left a red icon drawn in black.
+    // Prominent glass is filled with the tint, so its symbol is left for the
+    // button to colour for contrast.
     CNSymbol symbol(CNSymbol s) => CNSymbol(
           s.name,
           size: 18,
-          color: s.color ?? tint,
+          color: prominent ? s.color : (s.color ?? tint),
           mode: s.mode,
           paletteColors: s.paletteColors,
           gradient: s.gradient,
@@ -371,5 +405,58 @@ class _Badge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Puts a screen's primary action — its floating "create" button — in the
+/// side column while that screen is the one showing: its route on top, and its
+/// tickers on (a hidden tab has them off).
+class BaseSideToolbarPrimary extends StatefulWidget {
+  const BaseSideToolbarPrimary({super.key, required this.action});
+
+  final BaseNavigationBarAction action;
+
+  @override
+  State<BaseSideToolbarPrimary> createState() => _BaseSideToolbarPrimaryState();
+}
+
+class _BaseSideToolbarPrimaryState extends State<BaseSideToolbarPrimary> {
+  BaseSideToolbarController? _controller;
+  bool _shown = false;
+
+  void _later(VoidCallback fn) {
+    SchedulerBinding.instance.addPostFrameCallback((_) => fn());
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final BaseSideToolbarController? controller =
+        BaseSideToolbarScope.maybeOf(context)?.controller;
+    final bool show = controller != null &&
+        TickerMode.valuesOf(context).enabled &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
+    final BaseSideToolbarController? previous = _controller;
+    if (previous != null && previous != controller) {
+      _later(() => previous._withdrawPrimary(this));
+    }
+    _controller = controller;
+    if (show) {
+      final BaseNavigationBarAction action = widget.action;
+      _later(() => controller._publishPrimary(this, action));
+    } else if (_shown && controller != null) {
+      _later(() => controller._withdrawPrimary(this));
+    }
+    _shown = show;
+    return const SizedBox.shrink();
+  }
+
+  @override
+  void dispose() {
+    final BaseSideToolbarController? controller = _controller;
+    if (controller != null) {
+      _later(() => controller._withdrawPrimary(this));
+    }
+    super.dispose();
   }
 }
