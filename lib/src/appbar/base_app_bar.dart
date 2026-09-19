@@ -759,18 +759,22 @@ class BaseAppBar extends BaseStatelessWidget
             child: IgnorePointer(
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                  // Light: an edge, not a band. On a tablet the bar's box
+                  // takes in the tab bar too, and a heavy fill over all of it
+                  // read as a quarter of the screen blanked out (owner,
+                  // 2026-09-19).
+                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: <Color>[
-                          edge.withValues(alpha: 0.92),
-                          edge.withValues(alpha: 0.75),
+                          edge.withValues(alpha: 0.55),
+                          edge.withValues(alpha: 0.25),
                           edge.withValues(alpha: 0.0),
                         ],
-                        stops: const <double>[0.0, 0.7, 1.0],
+                        stops: const <double>[0.0, 0.55, 1.0],
                       ),
                     ),
                   ),
