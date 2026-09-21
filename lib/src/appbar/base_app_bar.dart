@@ -709,9 +709,24 @@ class BaseAppBar extends BaseStatelessWidget
       // Reserve horizontal room for the native leading/trailing so the overlay
       // doesn't sit under the back button or trailing actions. iOS bar buttons
       // are ~44pt wide.
+      // A spacer is not a button: counting it as one reserved a whole
+      // bar-button's width for a few points of air, and with the insets
+      // balanced below it took that width off BOTH ends — the title was
+      // squeezed into what was left (owner, 2026-09-21).
+      double _roomFor(List<BaseNavigationBarAction>? actions) {
+        double w = 0;
+        for (final BaseNavigationBarAction a in actions ?? const []) {
+          if (a.isFlexibleSpace) continue;
+          w += a.isFixedSpace ? (a.spaceWidth ?? 8.0) : 44.0;
+        }
+        return w;
+      }
+
       double _startInset =
-          (_leadingInBar != null && _leadingInBar.isNotEmpty) ? 44.0 : 8.0;
-      double _endInset = ((_trailingInBar?.length ?? 0) * 44.0) + 8.0;
+          (_leadingInBar != null && _leadingInBar.isNotEmpty)
+              ? _roomFor(_leadingInBar)
+              : 8.0;
+      double _endInset = _roomFor(_trailingInBar) + 8.0;
 
       // For a horizontally-centered title, balance the insets to the larger side
       // so the widget stays centered in the bar rather than being pushed off by
