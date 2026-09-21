@@ -63,3 +63,44 @@ double baseStatusBandInset(
   final double top = baseStatusBandBarTop(context, barHeight: barHeight);
   return top < 0 ? 0 : top;
 }
+
+/// Puts a scaffold's `appBar` on the status band's line, where the screen has
+/// one.
+///
+/// Wrap the scaffold. A bar in the `appBar` slot is laid out below whatever
+/// top padding the MediaQuery reports, so this reports less of it and the bar
+/// rises into the band beside the clock. The bar stays native: the placement
+/// is Flutter's, and the native path's own SafeArea reads the same padding.
+///
+/// Off the band — an iPad, a phone, or a screen whose status is a side column
+/// (the iPhone Duo in landscape) — this changes nothing at all.
+///
+/// The screen still has to keep its right-hand actions clear of the clock:
+/// put a [SizedBox] of [kBaseStatusCornerWidth] at the end of `actions`,
+/// guarded by [baseStatusBand].
+class BaseStatusBand extends StatelessWidget {
+  const BaseStatusBand({
+    super.key,
+    required this.child,
+    this.barHeight = 56,
+  });
+
+  final Widget child;
+
+  /// The bar's own height, which decides how far up it goes.
+  final double barHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!baseStatusBand(context)) return child;
+    final MediaQueryData mq = MediaQuery.of(context);
+    return MediaQuery(
+      data: mq.copyWith(
+        padding: mq.padding.copyWith(
+          top: baseStatusBandInset(context, barHeight: barHeight),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
