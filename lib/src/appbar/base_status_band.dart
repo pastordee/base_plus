@@ -27,11 +27,20 @@ const double kBaseStatusBandBaseline = 6;
 /// Whether this screen's status bar is a tall band with the clock only in its
 /// corner, so a bar can share the line with it.
 ///
+/// Two tests, and both are needed. A modern iPhone's top inset is 62 — over
+/// the line a foldable's 82 was meant to clear — so on height alone every
+/// screen on an iPhone 18 Pro put its bar up into the status bar, across the
+/// clock and the battery (owner, 2026-09-21). The band belongs to the
+/// foldable's inner display, which is tablet-sized; a phone's is not, however
+/// tall its inset has grown.
+///
 /// viewPadding rather than padding: a SafeArea or a MediaQuery override
 /// further up may already have taken the inset, and the question is about the
 /// hardware, not about what is left of it.
-bool baseStatusBand(BuildContext context) =>
-    MediaQuery.viewPaddingOf(context).top >= 60;
+bool baseStatusBand(BuildContext context) {
+  final MediaQueryData mq = MediaQuery.of(context);
+  return mq.viewPadding.top >= 60 && mq.size.shortestSide >= 600;
+}
 
 /// Where the top of a [barHeight]-tall bar goes so it sits on the clock's
 /// line, measured from the top of the screen.
