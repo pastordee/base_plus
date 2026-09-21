@@ -53,6 +53,7 @@ export 'src/app/base_app.dart';
 export 'src/appbar/base_app_bar.dart';
 export 'src/appbar/base_large_title.dart';
 export 'src/appbar/base_side_toolbar.dart';
+export 'src/appbar/base_status_band.dart';
 export 'src/base_class.dart';
 export 'src/base_param.dart';
 export 'src/base_stateful_widget.dart';
