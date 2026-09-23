@@ -129,6 +129,8 @@ class BasePopupMenuButton extends BaseStatelessWidget {
         label: item.label,
         icon: icon,
         enabled: item.enabled,
+        selected: item.selected,
+        subtitle: item.subtitle,
       );
     }).toList();
 
@@ -180,7 +182,24 @@ class BasePopupMenuButton extends BaseStatelessWidget {
                   ),
                   const SizedBox(width: 12),
                 ],
-                Text(item.label),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(item.label),
+                      if (item.subtitle != null)
+                        Text(
+                          item.subtitle!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                ),
+                if (item.selected) ...[
+                  const SizedBox(width: 12),
+                  Icon(Icons.check, size: item.iconSize ?? 18),
+                ],
               ],
             ),
           ),
