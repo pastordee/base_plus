@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart'
@@ -18,6 +19,7 @@ import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
 import 'base_large_title.dart';
 import 'base_side_toolbar.dart';
+import 'base_scroll_edge.dart';
 
 /// BaseAppBar
 ///
@@ -38,6 +40,10 @@ import 'base_side_toolbar.dart';
 /// CupertinoNavigationBar: 2021.04.01
 /// AppBar: 2021.03.30
 /// modify 2021.06.25 by flutter 2.2.2
+/// How far above the bar's bottom edge the soft scroll edge stops (owner,
+/// 2026-09-26: "a little bit more up").
+const double _kSoftEdgeLift = 20;
+
 class BaseAppBar extends BaseStatelessWidget
     implements ObstructingPreferredSizeWidget {
   const BaseAppBar({
@@ -90,6 +96,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.trailingActions,
     this.transparent = false,
     this.glass = true,
+    this.edgeBlur = true,
     this.largeTitle = false,
     this.largeTitleController,
     this.tint,
@@ -320,6 +327,12 @@ class BaseAppBar extends BaseStatelessWidget
   /// Blur amount / tint come from [BaseThemeData.appBarGlassBlur] /
   /// [BaseThemeData.appBarGlassColor] (sensible defaults otherwise).
   final bool glass;
+
+  /// iOS, see-through bar: draw the soft scroll-edge effect
+  /// ([BaseSoftScrollEdge]) over content passing under the bar. Turn off when
+  /// the screen draws its own edge (a collapsing large title uses the hard
+  /// one).
+  final bool edgeBlur;
 
   /// Whether to use large title style (native iOS mode)
   /// When true, displays a large title in the navigation bar
@@ -602,9 +615,17 @@ class BaseAppBar extends BaseStatelessWidget
     // A hand-off title is wrapped in an Opacity, so it is no longer a plain
     // `Text` — it falls through to the custom-title overlay path below, which
     // is what lets the fade actually render over the native bar.
-    final Widget? _titleWidget = _applyLargeTitleHandoff(
-      valueOf('middle', middle) ?? valueOf('title', title),
-    );
+    // With a large-title controller the native bar draws the collapsing large
+    // title itself (iOS 26 style), so the title goes through as plain text —
+    // not wrapped in the Flutter cross-fade Android uses.
+    final BaseLargeTitleController? _largeTitleController =
+        valueOf('largeTitleController', largeTitleController);
+    final bool _nativeLargeTitle = _largeTitleController != null;
+    final Widget? _titleWidget = _nativeLargeTitle
+        ? valueOf('middle', middle) ?? valueOf('title', title)
+        : _applyLargeTitleHandoff(
+            valueOf('middle', middle) ?? valueOf('title', title),
+          );
 
     // Extract title text if it's a Text widget
     String? _title;
@@ -688,6 +709,7 @@ class BaseAppBar extends BaseStatelessWidget
         segmentedControlSelectedLabelColor: valueOf(
             'segmentedControlSelectedLabelColor',
             segmentedControlSelectedLabelColor),
+        largeTitleScrollController: _largeTitleController?.scrollController,
         baseParam: BaseParam(nativeIOS: true),
       ).build(context),
     );
@@ -697,6 +719,9 @@ class BaseAppBar extends BaseStatelessWidget
     // and any trailing actions; we just paint the widget the native title can't
     // render into the middle. Flutter widgets draw above platform views, so this
     // stays tappable.
+    // Not hidden under sheets for now (owner, 2026-09-26, experimenting).
+    // Options kept: [_HiddenWhileCovered] below, and a snapshot version saved
+    // in Development/backups/bar-snapshot-2026-09-26.
     Widget child = navBar;
     if (_hasCustomTitleWidget) {
       // A hand-off title is the screen's *compact* title, which iOS centers —
@@ -759,54 +784,47 @@ class BaseAppBar extends BaseStatelessWidget
       );
     }
 
-    // A see-through bar over content that scrolls beneath it. UIKit's own
-    // scroll-edge effect needs a UIScrollView under the bar, and Flutter's
-    // content isn't one, so nothing hid what passed under the title — text ran
-    // straight through it. This is that effect, drawn here: a light blur that
-    // fades from the page's background at the top to nothing at the bottom.
-    if (_transparent) {
-      final Color edge = CupertinoTheme.of(context).scaffoldBackgroundColor;
+    // A see-through bar over content that scrolls beneath it gets iOS 26's
+    // soft scroll-edge effect (see BaseSoftScrollEdge): content is sharp where
+    // it comes out from under the bar and blurs and fades towards the top.
+    // It replaces a light even blur (sigma 3) that stopped dead at the bar's
+    // bottom edge — a hard line Apple's bars don't have (owner, 2026-09-26).
+    if (_transparent && _nativeLargeTitle) {
+      // A large title collapsing into the bar gets the HARD edge, as Apple's
+      // do: an even frost with a hairline under the bar, fading in as the
+      // title slides beneath it.
       child = Stack(
         children: <Widget>[
-          // The fade is in the colour, not a mask: a backdrop filter inside a
-          // ShaderMask blurs the mask's own empty layer and draws nothing.
-          // On a tablet the bar's box also takes in the tab bar above it, and
-          // a fade over all of it read as a band a quarter of the screen tall
-          // (owner, 2026-09-19). There it stops just under the top inset (the
-          // tab bar); the controls below are glass of their own.
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.sizeOf(context).shortestSide >= 600
-                ? MediaQuery.paddingOf(context).top + 12
-                : null,
-            bottom: MediaQuery.sizeOf(context).shortestSide >= 600 ? null : 0,
-            child: IgnorePointer(
-              child: ClipRect(
-                child: BackdropFilter(
-                  // Light: an edge, not a band. On a tablet the bar's box
-                  // takes in the tab bar too, and a heavy fill over all of it
-                  // read as a quarter of the screen blanked out (owner,
-                  // 2026-09-19).
-                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[
-                          edge.withValues(alpha: 0.55),
-                          edge.withValues(alpha: 0.25),
-                          edge.withValues(alpha: 0.0),
-                        ],
-                        stops: const <double>[0.0, 0.55, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            height: MediaQuery.paddingOf(context).top + effectiveHeight,
+            child: BaseHardScrollEdge(
+              scrollController: _largeTitleController.scrollController,
+              distance: BaseLargeTitle.nativeArea,
             ),
+          ),
+          child,
+        ],
+      );
+    } else if (_transparent && edgeBlur) {
+      final bool tablet = MediaQuery.sizeOf(context).shortestSide >= 600;
+      child = Stack(
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            // Phone: from the top of the screen to [_kSoftEdgeLift] above the
+            // bar's bottom edge, so content stays sharp through the lower part
+            // of the bar. Tablet: the bar's box also takes in the tab bar, and
+            // an effect over all of it read as a band a quarter of the screen
+            // tall (owner, 2026-09-19) — there it stops just under the top
+            // inset; the controls below are glass of their own.
+            height: tablet ? MediaQuery.paddingOf(context).top + 12 : null,
+            bottom: tablet ? null : _kSoftEdgeLift,
+            child: const BaseSoftScrollEdge(),
           ),
           child,
         ],
@@ -814,7 +832,11 @@ class BaseAppBar extends BaseStatelessWidget
     }
 
     return PreferredSize(
-      preferredSize: Size.fromHeight(effectiveHeight),
+      // Room for the large-title strip under the bar; the native bar shrinks
+      // inside it as the title collapses.
+      preferredSize: Size.fromHeight(
+        effectiveHeight + (_nativeLargeTitle ? BaseLargeTitle.nativeArea : 0),
+      ),
       child: child,
     );
   }
@@ -1124,6 +1146,68 @@ class _ConstrainedAppBar extends StatelessWidget
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,
       ),
+    );
+  }
+}
+
+/// Hides [child] (kept alive, not drawn) while another route — a sheet or a
+/// dialog — covers this page, and shows it again only once that route has
+/// finished leaving: brought back as the sheet started closing, the bar sat
+/// under the still-fading barrier and the grey band flashed (owner,
+/// 2026-09-26). See the use in [BaseAppBar.buildByCupertinoNative].
+///
+/// Why hide at all: a Flutter barrier over the embedded native bar renders
+/// darker there than over the rest of the page — a grey band the bar's size.
+/// Ruled out on device, 2026-09-26: the scroll-edge blurs, the bar's own
+/// background (forced fully clear by every UIKit means), and the sheet's
+/// native glass panel (swapped for a plain Flutter one). What remains is
+/// Flutter's compositing of a translucent layer over a platform view.
+class _HiddenWhileCovered extends StatefulWidget {
+  const _HiddenWhileCovered({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HiddenWhileCovered> createState() => _HiddenWhileCoveredState();
+}
+
+class _HiddenWhileCoveredState extends State<_HiddenWhileCovered> {
+  /// Long enough for a sheet's or dialog's exit and its barrier's fade.
+  static const Duration _kReturnDelay = Duration(milliseconds: 350);
+
+  bool _visible = true;
+  Timer? _return;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bool covered = !(ModalRoute.of(context)?.isCurrent ?? true);
+    _return?.cancel();
+    if (covered) {
+      if (_visible) setState(() => _visible = false);
+    } else if (!_visible) {
+      _return = Timer(_kReturnDelay, () {
+        if (mounted && (ModalRoute.of(context)?.isCurrent ?? true)) {
+          setState(() => _visible = true);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _return?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Visibility(
+      visible: _visible,
+      maintainState: true,
+      maintainSize: true,
+      maintainAnimation: true,
+      child: widget.child,
     );
   }
 }

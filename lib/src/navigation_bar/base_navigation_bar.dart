@@ -594,6 +594,7 @@ class BaseNavigationBarAction {
       'arrow.right': Icons.arrow_forward,
       'arrow.left': Icons.arrow_back,
       'arrowshape.turn.up.left': Icons.reply,
+      'arrow.up.arrow.down.circle': Icons.swap_vert_circle_outlined,
       'ellipsis': Icons.more_vert,
       'tray.and.arrow.down': Icons.drafts,
       'tray.and.arrow.up': Icons.upload,
@@ -776,6 +777,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.segmentedControlSelectedColor,
     this.segmentedControlLabelColor,
     this.segmentedControlSelectedLabelColor,
+    this.largeTitleScrollController,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -878,6 +880,10 @@ class BaseNavigationBar extends BaseStatelessWidget {
   /// Text color for the selected segment label (iOS native).
   final Color? segmentedControlSelectedLabelColor;
 
+  /// iOS: show [title] as a collapsing large title driven by this scroll
+  /// controller (see CNNavigationBar.largeTitleScrollController).
+  final ScrollController? largeTitleScrollController;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     // Convert BaseNavigationBarAction to CNNavigationBarAction for iOS
@@ -979,6 +985,8 @@ class BaseNavigationBar extends BaseStatelessWidget {
       segmentedControlSelectedLabelColor: valueOf(
           'segmentedControlSelectedLabelColor',
           segmentedControlSelectedLabelColor),
+      largeTitleScrollController:
+          valueOf('largeTitleScrollController', largeTitleScrollController),
     );
   }
 

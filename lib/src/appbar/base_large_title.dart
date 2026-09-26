@@ -1,4 +1,5 @@
 // Created: 2026-08-16
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Drives the iOS-style hand-off between a large title sitting in the scroll
@@ -172,6 +173,14 @@ class BaseLargeTitle extends StatelessWidget {
   /// matching the iOS large-title convention.
   final AlignmentGeometry alignment;
 
+  /// Height of the strip under the bar where the iOS native bar draws the
+  /// large title (see [BaseAppBar.largeTitleController]).
+  static const double nativeArea = 52;
+
+  /// iOS: the native bar draws the large title, so this widget draws nothing.
+  static bool get _drawnNatively =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   /// This title wrapped for a [CustomScrollView]'s `slivers` list.
   Widget get sliver => SliverToBoxAdapter(child: this);
 
@@ -183,14 +192,19 @@ class BaseLargeTitle extends StatelessWidget {
   static Widget spacer(BuildContext context, {double? appBarHeight}) {
     return SliverToBoxAdapter(
       child: SizedBox(
+        // iOS: plus the strip under the bar where the native bar draws the
+        // large title, so the page starts below it (owner, 2026-09-26: the
+        // event image sat behind the title).
         height: MediaQuery.of(context).padding.top +
-            (appBarHeight ?? kToolbarHeight),
+            (appBarHeight ?? kToolbarHeight) +
+            (_drawnNatively ? nativeArea : 0),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_drawnNatively) return const SizedBox.shrink();
     return ListenableBuilder(
       listenable: controller,
       builder: (BuildContext context, Widget? child) {

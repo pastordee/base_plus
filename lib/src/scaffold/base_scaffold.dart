@@ -257,8 +257,13 @@ class BaseScaffold extends BaseStatelessWidget {
       cupertinoNavigationBar = navigationBar;
     }
 
-    // Intelligent body wrapping with SafeArea
-    final Widget _child = _wrapBodyWithSafeArea(body, appBar);
+    // Intelligent body wrapping with SafeArea. A see-through Material under
+    // it: CupertinoPageScaffold provides none, so every Text drew with
+    // Flutter's yellow "no Material" underline (owner, 2026-09-26, Creator).
+    final Widget _child = Material(
+      type: MaterialType.transparency,
+      child: _wrapBodyWithSafeArea(body, appBar),
+    );
 
     return CupertinoPageScaffold(
       navigationBar: cupertinoNavigationBar,
