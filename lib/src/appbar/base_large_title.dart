@@ -1,4 +1,6 @@
 // Created: 2026-08-16
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -195,9 +197,18 @@ class BaseLargeTitle extends StatelessWidget {
         // iOS: plus the strip under the bar where the native bar draws the
         // large title, so the page starts below it (owner, 2026-09-26: the
         // event image sat behind the title).
-        height: MediaQuery.of(context).padding.top +
-            (appBarHeight ?? kToolbarHeight) +
-            (_drawnNatively ? nativeArea : 0),
+        // The Cupertino scaffold (body behind a see-through bar) has already
+        // put the bar AND this strip into `padding.top`; the Material one
+        // (a page with a FAB, like the event page) has only the status bar
+        // there. Counting the bar again left a wide gap under the title;
+        // leaving it out put the page under it (owner, 2026-09-26). The
+        // larger of the two is right in both.
+        height: math.max(
+          MediaQuery.paddingOf(context).top,
+          MediaQuery.viewPaddingOf(context).top +
+              (appBarHeight ?? kToolbarHeight) +
+              (_drawnNatively ? nativeArea : 0),
+        ),
       ),
     );
   }
