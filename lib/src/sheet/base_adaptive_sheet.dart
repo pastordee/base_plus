@@ -86,6 +86,9 @@ Future<T?> showBaseSheet<T>({
             Theme.of(context).bottomSheetTheme.modalBackgroundColor ??
             Theme.of(context).bottomSheetTheme.backgroundColor ??
             Theme.of(context).colorScheme.surfaceContainerLow;
+  // One panel at a time: a second one replaces the first rather than stacking
+  // on it (three transition pickers piled up, owner 2026-09-29).
+  BaseFloatingPanelRoute.closeOpen();
   return navigator.push<T>(
     BaseFloatingPanelRoute<T>(
       builder: builder,
@@ -117,6 +120,32 @@ class BaseFloatingPanelRoute<T> extends ModalRoute<T> {
   /// The panel's own fill; null when the sheet paints its own card.
   final Color? panelColor;
   final CapturedThemes? capturedThemes;
+
+  /// The panel on screen, if any — there is only ever one.
+  static BaseFloatingPanelRoute<dynamic>? _current;
+
+  /// Closes the panel on screen (its call returns null), if there is one.
+  static void closeOpen() {
+    final BaseFloatingPanelRoute<dynamic>? open = _current;
+    _current = null;
+    if (open != null && open.isActive) {
+      open.navigator?.removeRoute(open);
+    }
+  }
+
+  @override
+  void install() {
+    super.install();
+    _current = this;
+  }
+
+  @override
+  void dispose() {
+    if (identical(_current, this)) {
+      _current = null;
+    }
+    super.dispose();
+  }
 
   /// Where the last panel's top-left was left, and the width it was given.
   /// Only the width carries over: every sheet is its own height, and one
