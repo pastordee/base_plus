@@ -118,8 +118,11 @@ class BaseFloatingPanelRoute<T> extends ModalRoute<T> {
   final Color? panelColor;
   final CapturedThemes? capturedThemes;
 
-  /// Where the last panel's top-left was left.
+  /// Where the last panel's top-left was left, and the width it was given.
+  /// Only the width carries over: every sheet is its own height, and one
+  /// sheet's height handed to the next could squeeze it.
   static Offset? _lastOffset;
+  static double? _lastWidth;
 
   @override
   bool get opaque => false;
@@ -155,6 +158,8 @@ class BaseFloatingPanelRoute<T> extends ModalRoute<T> {
       panelColor: panelColor,
       initialOffset: _lastOffset,
       onMoved: (Offset o) => _lastOffset = o,
+      initialWidth: _lastWidth,
+      onResized: (double w) => _lastWidth = w,
       onClose: () => Navigator.of(context).maybePop(),
       child: capturedThemes?.wrap(content) ?? content,
     );
@@ -179,7 +184,9 @@ class _BaseFloatingPanel extends StatefulWidget {
     required this.child,
     required this.onClose,
     required this.onMoved,
+    required this.onResized,
     this.initialOffset,
+    this.initialWidth,
     this.maxWidth,
     this.panelColor,
   });
@@ -187,7 +194,11 @@ class _BaseFloatingPanel extends StatefulWidget {
   final Widget child;
   final VoidCallback onClose;
   final ValueChanged<Offset> onMoved;
+  final ValueChanged<double> onResized;
   final Offset? initialOffset;
+
+  /// The width the last panel was left at.
+  final double? initialWidth;
   final double? maxWidth;
   final Color? panelColor;
 
@@ -204,16 +215,53 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
   /// the sheet paints, in whichever theme.
   static const Color _chrome = Color(0xFF8E8E93);
 
+  static const double _minWidth = 320;
+  static const double _minHeight = 160;
+  static const double _handle = 22;
+
   Offset? _offset;
+
+  /// Set by the corner handle.
+  double? _width;
+  double? _height;
+
+  /// The sheet's own height, taken when the handle is first grabbed. Made
+  /// shorter than this, the sheet is NOT squeezed — it keeps this height
+  /// inside a scroll view, so a sheet whose contents can't shrink (the
+  /// account sheet, owner 2026-09-29: "bottom overflowed by 44 pixels")
+  /// scrolls instead of overflowing. Made taller, the height is a ceiling a
+  /// scrolling sheet can grow into.
+  double? _naturalHeight;
+  final GlobalKey _panelKey = GlobalKey();
+  Size? _dragStart;
+  Offset _dragDelta = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _width = widget.initialWidth;
+  }
+
+  bool get _squeezed =>
+      _height != null && _naturalHeight != null && _height! < _naturalHeight!;
+
+  double _widthLimit(Size window) => math.max(_minWidth, window.width * 0.8);
+  double _heightLimit(Size window, EdgeInsets safe) =>
+      math.max(_minHeight, (window.height - safe.vertical) * 0.9);
 
   @override
   Widget build(BuildContext context) {
     final Size window = MediaQuery.sizeOf(context);
     final EdgeInsets safe = MediaQuery.paddingOf(context);
-    final double width = math
-        .min(widget.maxWidth ?? _defaultWidth, _defaultWidth)
-        .clamp(280.0, math.max(280.0, window.width - 32));
-    final double maxHeight = (window.height - safe.vertical) * 0.85;
+    final double width = (_width ??
+            math.min(widget.maxWidth ?? _defaultWidth, _defaultWidth))
+        .clamp(
+          math.min(_minWidth, window.width - 32),
+          math.max(_minWidth, math.min(_widthLimit(window), window.width - 32)),
+        );
+    final double maxHeight = (_height ??
+            (window.height - safe.vertical) * 0.85)
+        .clamp(_minHeight, _heightLimit(window, safe));
     // First time: along the right, a little down — beside what is being
     // worked on rather than over it.
     final Offset start =
@@ -237,6 +285,7 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
               top: at.dy,
               width: width,
               child: ConstrainedBox(
+                key: _panelKey,
                 constraints: BoxConstraints(maxHeight: maxHeight),
                 // Shadow outside, contents inside: a clipped Material would
                 // cut the shadow off.
@@ -262,14 +311,17 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
                         : Clip.antiAlias,
                     child: Stack(
                       children: <Widget>[
-                        // The sheet itself, with room for the grip.
-                        Padding(
-                          padding: const EdgeInsets.only(top: _gripH - 8),
-                          child: MediaQuery.removePadding(
-                            context: context,
-                            removeTop: true,
-                            removeBottom: true,
-                            child: widget.child,
+                        // The sheet itself, with room for the grip — at its
+                        // own height, scrolled, when made shorter than that.
+                        _fit(
+                          Padding(
+                            padding: const EdgeInsets.only(top: _gripH - 8),
+                            child: MediaQuery.removePadding(
+                              context: context,
+                              removeTop: true,
+                              removeBottom: true,
+                              child: widget.child,
+                            ),
                           ),
                         ),
                         // Grip: drag to move.
@@ -329,6 +381,49 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
                             ),
                           ),
                         ),
+                        // Resize: width, and the most height it may take.
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          width: _handle + 8,
+                          height: _handle + 8,
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.resizeUpLeftDownRight,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onPanStart: (_) {
+                                final RenderBox? box =
+                                    _panelKey.currentContext?.findRenderObject()
+                                        as RenderBox?;
+                                _dragStart = box?.size ??
+                                    Size(width, maxHeight);
+                                // The first grab measures the sheet as it
+                                // lays itself out, before any resizing.
+                                _naturalHeight ??= _dragStart!.height;
+                                _dragDelta = Offset.zero;
+                              },
+                              onPanUpdate: (DragUpdateDetails d) =>
+                                  _resizeBy(d.delta, window, safe),
+                              onPanEnd: (_) {
+                                if (_width != null) {
+                                  widget.onResized(_width!);
+                                }
+                              },
+                              child: const Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: EdgeInsets.all(7),
+                                  child: SizedBox.square(
+                                    dimension: 12,
+                                    child: CustomPaint(
+                                      painter: _ResizeGripPainter(_chrome),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -341,9 +436,69 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
     );
   }
 
+  /// The corner handle's drag. It starts from the panel's height as drawn,
+  /// so dragging up shrinks it straight away even when the sheet was shorter
+  /// than its ceiling.
+  void _resizeBy(Offset delta, Size window, EdgeInsets safe) {
+    final Size start = _dragStart ?? const Size(_defaultWidth, 400);
+    _dragDelta += delta;
+    setState(() {
+      _width = (start.width + _dragDelta.dx).clamp(
+        math.min(_minWidth, window.width - 32),
+        math.max(_minWidth, math.min(_widthLimit(window), window.width - 32)),
+      );
+      _height = (start.height + _dragDelta.dy).clamp(
+        _minHeight,
+        _heightLimit(window, safe),
+      );
+    });
+  }
+
+  /// [sheet] as it is — or, made shorter than its own height, at that height
+  /// in a scroll view of the height asked for.
+  Widget _fit(Widget sheet) {
+    if (!_squeezed) {
+      return sheet;
+    }
+    return SizedBox(
+      height: _height,
+      child: SingleChildScrollView(
+        child: SizedBox(height: _naturalHeight, child: sheet),
+      ),
+    );
+  }
+
   /// Keeps the grip on screen, so the panel can always be dragged back.
   Offset _clamp(Offset o, Size window, EdgeInsets safe, double width) => Offset(
     o.dx.clamp(8.0 + safe.left, math.max(8.0, window.width - width - 8)),
     o.dy.clamp(8.0 + safe.top, math.max(8.0, window.height - 80)),
   );
+}
+
+/// Two short diagonals in the corner, the usual sign for "drag to resize".
+class _ResizeGripPainter extends CustomPainter {
+  const _ResizeGripPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color.withValues(alpha: 0.8)
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(size.width, size.height * 0.2),
+      Offset(size.width * 0.2, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width, size.height * 0.62),
+      Offset(size.width * 0.62, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ResizeGripPainter old) => old.color != color;
 }
