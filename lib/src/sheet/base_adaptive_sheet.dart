@@ -386,10 +386,13 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
                             ),
                           ),
                         ),
-                        // Close.
+                        // Close. Set in from the corner so the whole button
+                        // sits inside the panel's rounding (radius 28): at
+                        // 2/6 the curve clipped it (owner, iPhone Duo,
+                        // 2026-10-01).
                         Positioned(
-                          top: 2,
-                          right: 6,
+                          top: 8,
+                          right: 10,
                           child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
@@ -438,10 +441,12 @@ class _BaseFloatingPanelState extends State<_BaseFloatingPanel> {
                                   widget.onResized(_width!);
                                 }
                               },
+                              // In from the corner for the same reason as
+                              // the close button.
                               child: const Align(
                                 alignment: Alignment.bottomRight,
                                 child: Padding(
-                                  padding: EdgeInsets.all(7),
+                                  padding: EdgeInsets.fromLTRB(7, 7, 12, 12),
                                   child: SizedBox.square(
                                     dimension: 12,
                                     child: CustomPaint(
