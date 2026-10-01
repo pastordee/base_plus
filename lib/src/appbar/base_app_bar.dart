@@ -507,6 +507,11 @@ class BaseAppBar extends BaseStatelessWidget
     return _bar;
   }
 
+  /// The title (or middle) to draw: none under a [BaseAppBarTitleScope]
+  /// that says a toolbar above already names the screen.
+  dynamic _shown(BuildContext context, String key, dynamic value) =>
+      BaseAppBarTitleScope.hidesTitle(context) ? null : valueOf(key, value);
+
   @override
   Widget buildByCupertino(BuildContext context) {
     final Widget? _leading = valueOf('leading', leading);
@@ -527,7 +532,7 @@ class BaseAppBar extends BaseStatelessWidget
     }
     final BaseThemeData baseTheme = BaseTheme.of(context);
     final Widget? _title = _applyLargeTitleHandoff(
-      valueOf('middle', middle) ?? valueOf('title', title),
+      _shown(context, 'middle', middle) ?? _shown(context, 'title', title),
     );
     // `glass` → transparent background so the nav bar's backdrop blur shows.
     final bool _glass = valueOf('glass', glass);
@@ -622,9 +627,9 @@ class BaseAppBar extends BaseStatelessWidget
         valueOf('largeTitleController', largeTitleController);
     final bool _nativeLargeTitle = _largeTitleController != null;
     final Widget? _titleWidget = _nativeLargeTitle
-        ? valueOf('middle', middle) ?? valueOf('title', title)
+        ? _shown(context, 'middle', middle) ?? _shown(context, 'title', title)
         : _applyLargeTitleHandoff(
-            valueOf('middle', middle) ?? valueOf('title', title),
+            _shown(context, 'middle', middle) ?? _shown(context, 'title', title),
           );
 
     // Extract title text if it's a Text widget
@@ -844,7 +849,7 @@ class BaseAppBar extends BaseStatelessWidget
   @override
   Widget buildByMaterial(BuildContext context) {
     final Widget? _title = _applyLargeTitleHandoff(
-      valueOf('title', title) ?? valueOf('middle', middle),
+      _shown(context, 'title', title) ?? _shown(context, 'middle', middle),
     );
     Widget? _leading = valueOf('leading', leading);
     // Reuse leadingActions as the Material leading when no explicit `leading`
@@ -1210,4 +1215,28 @@ class _HiddenWhileCoveredState extends State<_HiddenWhileCovered> {
       child: widget.child,
     );
   }
+}
+
+/// Says the screens below are already named by a toolbar above them — the Mac
+/// app's window toolbar names the sidebar section it shows — so their
+/// [BaseAppBar]s leave out their own title and keep only their buttons.
+/// Pages pushed on top are not below it and keep their titles.
+class BaseAppBarTitleScope extends InheritedWidget {
+  const BaseAppBarTitleScope({
+    super.key,
+    this.hideTitle = true,
+    required super.child,
+  });
+
+  final bool hideTitle;
+
+  static bool hidesTitle(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<BaseAppBarTitleScope>()
+          ?.hideTitle ??
+      false;
+
+  @override
+  bool updateShouldNotify(BaseAppBarTitleScope oldWidget) =>
+      oldWidget.hideTitle != hideTitle;
 }
