@@ -27,7 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// One menu item. [key] is the shortcut's character, pressed with ⌘ (and ⇧
-/// when [shift]); [children] makes it a submenu.
+/// when [shift], ⌃ when [control]); [children] makes it a submenu.
 @immutable
 class BaseMenuItem {
   const BaseMenuItem({
@@ -35,6 +35,7 @@ class BaseMenuItem {
     required this.label,
     this.key,
     this.shift = false,
+    this.control = false,
     this.onSelected,
     this.children,
   });
@@ -43,6 +44,7 @@ class BaseMenuItem {
   final String label;
   final String? key;
   final bool shift;
+  final bool control;
   final VoidCallback? onSelected;
   final List<BaseMenuItem>? children;
 
@@ -51,6 +53,7 @@ class BaseMenuItem {
     'label': label,
     if (key != null) 'key': key,
     'shift': shift,
+    'control': control,
     if (children != null)
       'children': <Object?>[for (final BaseMenuItem c in children!) c.toJson()],
   };
@@ -183,7 +186,11 @@ List<PlatformMenuItem> _macMenus(
       return null;
     }
     return PlatformMenu(
-      label: ms.isNotEmpty ? ms.first.label : place.name,
+      // An app with nothing of its own for this menu still gets the
+      // system's (View ▸ Full Screen): titled as macOS titles it.
+      label: ms.isNotEmpty
+          ? ms.first.label
+          : place.name[0].toUpperCase() + place.name.substring(1),
       menus: <PlatformMenuItem>[...groupsOf(ms), ...?tail],
     );
   }
@@ -283,13 +290,19 @@ PlatformMenuItem _macItem(BaseMenuItem i) {
   }
   return PlatformMenuItem(
     label: i.label,
-    shortcut: i.key == null ? null : _activator(i.key!, shift: i.shift),
+    shortcut: i.key == null
+        ? null
+        : _activator(i.key!, shift: i.shift, control: i.control),
     onSelected: i.onSelected,
   );
 }
 
-/// ⌘ + [key] (and ⇧). Letters, digits and "," — what menus use.
-SingleActivator? _activator(String key, {bool shift = false}) {
+/// ⌘ + [key] (and ⇧, ⌃). Letters, digits and "," — what menus use.
+SingleActivator? _activator(
+  String key, {
+  bool shift = false,
+  bool control = false,
+}) {
   final String k = key.toLowerCase();
   LogicalKeyboardKey? logical;
   if (k == ',') {
@@ -305,7 +318,7 @@ SingleActivator? _activator(String key, {bool shift = false}) {
   }
   return logical == null
       ? null
-      : SingleActivator(logical, meta: true, shift: shift);
+      : SingleActivator(logical, meta: true, shift: shift, control: control);
 }
 
 PlatformMenu _macEditMenu(BaseMenuBarLabels labels) {
