@@ -130,10 +130,10 @@ bool baseHasMenuBar(BuildContext context) {
   if (kIsWeb) {
     return false;
   }
-  if (Platform.isMacOS) {
+  if (!kIsWeb && Platform.isMacOS) {
     return true;
   }
-  return Platform.isIOS && MediaQuery.sizeOf(context).shortestSide >= 600;
+  return (!kIsWeb && Platform.isIOS) && MediaQuery.sizeOf(context).shortestSide >= 600;
 }
 
 /// Puts [menus] in the menu bar: PlatformMenuBar on the Mac, the native
@@ -158,7 +158,7 @@ class BaseMenuBar extends StatelessWidget {
     if (!baseHasMenuBar(context)) {
       return child;
     }
-    if (Platform.isMacOS) {
+    if (!kIsWeb && Platform.isMacOS) {
       return PlatformMenuBar(
         menus: _macMenus(appName, menus(), labels),
         child: child,

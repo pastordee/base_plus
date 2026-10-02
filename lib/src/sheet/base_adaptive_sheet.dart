@@ -33,7 +33,7 @@ bool baseUsesFloatingPanels(BuildContext context) {
   if (kIsWeb) {
     return false;
   }
-  if (Platform.isMacOS) {
+  if (!kIsWeb && Platform.isMacOS) {
     return true;
   }
   // Any tablet, held either way (owner, 2026-09-29: "we have to apply it to

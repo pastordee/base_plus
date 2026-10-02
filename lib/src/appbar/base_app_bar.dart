@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, TargetPlatform;
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:cupertino_ui/cupertino_ui.dart'
     hide CupertinoNavigationBar, CupertinoNavigationBarBackButton;
 import 'package:material_ui/material_ui.dart' hide AppBar;
@@ -454,7 +454,10 @@ class BaseAppBar extends BaseStatelessWidget
   @override
   Widget build(BuildContext context) {
     Widget _bar;
+    // Not in a browser: a browser on a Mac or iPhone reports that platform,
+    // and the native bar it would ask for doesn't exist on the web.
     if (baseParam == null &&
+        !kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
       _bar = commonBuild(context, BaseParam(nativeIOS: true));
