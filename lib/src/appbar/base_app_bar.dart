@@ -44,6 +44,10 @@ import 'base_scroll_edge.dart';
 /// 2026-09-26: "a little bit more up").
 const double _kSoftEdgeLift = 20;
 
+/// On the web: whether the page's bars are out of the way while scrolling
+/// down. Set by the app; read by [BaseAppBar].
+final ValueNotifier<bool> webChromeHidden = ValueNotifier<bool>(false);
+
 class BaseAppBar extends BaseStatelessWidget
     implements ObstructingPreferredSizeWidget {
   const BaseAppBar({
@@ -460,6 +464,28 @@ class BaseAppBar extends BaseStatelessWidget
     // vanished, leaving empty bars with no way to the menu (2026-10-02).
     if (kIsWeb) {
       _bar = buildByMaterial(context);
+      // A section's own bar (the first page of its navigator) slides away
+      // while scrolling down and comes back on the way up, as a website's
+      // header does (owner, 2026-10-02). The app sets [webChromeHidden].
+      if (ModalRoute.of(context)?.isFirst ?? false) {
+        final Widget shown = _bar;
+        _bar = ValueListenableBuilder<bool>(
+          valueListenable: webChromeHidden,
+          builder: (_, bool hidden, __) => IgnorePointer(
+            ignoring: hidden,
+            child: AnimatedSlide(
+              offset: hidden ? const Offset(0, -1) : Offset.zero,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: AnimatedOpacity(
+                opacity: hidden ? 0 : 1,
+                duration: const Duration(milliseconds: 180),
+                child: shown,
+              ),
+            ),
+          ),
+        );
+      }
     } else if (baseParam == null &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
@@ -571,7 +597,7 @@ class BaseAppBar extends BaseStatelessWidget
     if (_heroTag != null) {
       cupertinoNavigationBar = CupertinoNavigationBar(
         leading: _leading,
-        automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
+        automaticallyImplyLeading: !kIsWeb && valueOf(
           'automaticallyImplyLeading',
           automaticallyImplyLeading,
         ),
@@ -595,7 +621,7 @@ class BaseAppBar extends BaseStatelessWidget
       cupertinoNavigationBar = CupertinoNavigationBar(
         key: valueOf('key', key),
         leading: _leading,
-        automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
+        automaticallyImplyLeading: !kIsWeb && valueOf(
           'automaticallyImplyLeading',
           automaticallyImplyLeading,
         ),
@@ -852,6 +878,10 @@ class BaseAppBar extends BaseStatelessWidget
     );
   }
 
+  /// (Implied leading is off entirely on the web: besides the back arrow it
+  /// adds a menu button whenever the page has a drawer, which on a wide page
+  /// duplicated the sidebar. Screens that want one say so in leadingActions.)
+  ///
   /// On the web the browser's own Back closes this screen (the app's web
   /// history, prayer_circle lib/web/web_history.dart), so the bar's back
   /// button goes — on screens it can close: any but the first of their
@@ -997,7 +1027,7 @@ class BaseAppBar extends BaseStatelessWidget
 
     return AppBar(
       leading: _leading,
-      automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
+      automaticallyImplyLeading: !kIsWeb && valueOf(
         'automaticallyImplyLeading',
         automaticallyImplyLeading,
       ),
