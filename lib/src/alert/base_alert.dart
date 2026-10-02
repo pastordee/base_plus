@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'package:material_ui/material_ui.dart';
@@ -300,6 +301,8 @@ class BaseAlert {
 
   /// Determines whether to use Cupertino or Material implementation
   static bool _shouldUseCupertino(BuildContext context, BaseParam? cupertino, BaseParam? material) {
+    // Never in a browser: the native alert/sheet doesn't exist on the web.
+    if (kIsWeb) return false;
     // Force Material if specified
     if (cupertino?.forceUseMaterial == true) return false;
     if (material?.forceUseCupertino == true) return true;

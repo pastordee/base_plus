@@ -441,6 +441,8 @@ class BaseNativeSheet extends BaseStatelessWidget {
 
   /// Helper method to determine if Cupertino should be used
   static bool _shouldUseCupertino() {
+    // Never in a browser: the native alert/sheet doesn't exist on the web.
+    if (kIsWeb) return false;
     if (kIsWeb) return false;
     
     switch (defaultTargetPlatform) {
