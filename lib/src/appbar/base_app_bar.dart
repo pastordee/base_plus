@@ -454,10 +454,13 @@ class BaseAppBar extends BaseStatelessWidget
   @override
   Widget build(BuildContext context) {
     Widget _bar;
-    // Not in a browser: a browser on a Mac or iPhone reports that platform,
-    // and the native bar it would ask for doesn't exist on the web.
-    if (baseParam == null &&
-        !kIsWeb &&
+    // In a browser, always the Material bar: on an iPhone or Mac the
+    // Cupertino one would be chosen, and it draws only `leading` — the
+    // leadingActions, trailingActions and segmented control every screen uses
+    // vanished, leaving empty bars with no way to the menu (2026-10-02).
+    if (kIsWeb) {
+      _bar = buildByMaterial(context);
+    } else if (baseParam == null &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
             defaultTargetPlatform == TargetPlatform.macOS)) {
       _bar = commonBuild(context, BaseParam(nativeIOS: true));

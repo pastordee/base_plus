@@ -220,7 +220,14 @@ class BaseScaffold extends BaseStatelessWidget {
     final Widget? fab =
         valueOf('floatingActionButton', this.floatingActionButton);
 
-    if (drawer != null || endDrawer != null || fab != null) {
+    // A bottom bar too: CupertinoPageScaffold has no slot for one and drops
+    // it. On an iPhone the app draws its tab bar natively in the body
+    // instead, but in a browser on an iPhone or Mac (Cupertino mode, no
+    // native views) the bar vanished — and with it the way to the tray
+    // (2026-10-02).
+    final Widget? bottomBar =
+        valueOf('bottomNavigationBar', bottomNavigationBar);
+    if (drawer != null || endDrawer != null || fab != null || bottomBar != null) {
       // Automatically use Material design when drawers or FAB are present
       // This provides the proper Scaffold context for these Material-only features
       return buildByMaterial(context);
