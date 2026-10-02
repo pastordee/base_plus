@@ -568,7 +568,7 @@ class BaseAppBar extends BaseStatelessWidget
     if (_heroTag != null) {
       cupertinoNavigationBar = CupertinoNavigationBar(
         leading: _leading,
-        automaticallyImplyLeading: valueOf(
+        automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
           'automaticallyImplyLeading',
           automaticallyImplyLeading,
         ),
@@ -592,7 +592,7 @@ class BaseAppBar extends BaseStatelessWidget
       cupertinoNavigationBar = CupertinoNavigationBar(
         key: valueOf('key', key),
         leading: _leading,
-        automaticallyImplyLeading: valueOf(
+        automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
           'automaticallyImplyLeading',
           automaticallyImplyLeading,
         ),
@@ -849,6 +849,27 @@ class BaseAppBar extends BaseStatelessWidget
     );
   }
 
+  /// On the web the browser's own Back closes this screen (the app's web
+  /// history, prayer_circle lib/web/web_history.dart), so the bar's back
+  /// button goes — on screens it can close: any but the first of their
+  /// navigator. A close (xmark) stays: it isn't "back" (owner, 2026-10-02).
+  static bool _webBackHidden(BuildContext context) {
+    if (!kIsWeb) return false;
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    return route != null && !route.isFirst;
+  }
+
+  static List<BaseNavigationBarAction>? _withoutWebBack(
+    BuildContext context,
+    List<BaseNavigationBarAction>? actions,
+  ) {
+    if (actions == null || !_webBackHidden(context)) return actions;
+    return actions.where((BaseNavigationBarAction a) {
+      final String? name = a.icon?.name;
+      return name != 'chevron.left' && name != 'chevron.backward';
+    }).toList();
+  }
+
   @override
   Widget buildByMaterial(BuildContext context) {
     final Widget? _title = _applyLargeTitleHandoff(
@@ -860,7 +881,7 @@ class BaseAppBar extends BaseStatelessWidget
     // (leadingActions on iOS, converted to a Material widget here on Android).
     if (_leading == null) {
       final List<BaseNavigationBarAction>? _leadingActions =
-          valueOf('leadingActions', leadingActions);
+          _withoutWebBack(context, valueOf('leadingActions', leadingActions));
       if (_leadingActions != null && _leadingActions.isNotEmpty) {
         final List<Widget> _lw = _leadingActions
             .map((BaseNavigationBarAction a) => a.toMaterialWidget(context))
@@ -973,7 +994,7 @@ class BaseAppBar extends BaseStatelessWidget
 
     return AppBar(
       leading: _leading,
-      automaticallyImplyLeading: valueOf(
+      automaticallyImplyLeading: !_webBackHidden(context) && valueOf(
         'automaticallyImplyLeading',
         automaticallyImplyLeading,
       ),
