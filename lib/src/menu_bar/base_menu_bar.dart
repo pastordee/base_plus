@@ -307,6 +307,8 @@ SingleActivator? _activator(
   LogicalKeyboardKey? logical;
   if (k == ',') {
     logical = LogicalKeyboardKey.comma;
+  } else if (k == '/') {
+    logical = LogicalKeyboardKey.slash;
   } else if (RegExp(r'^[a-z]$').hasMatch(k)) {
     logical = LogicalKeyboardKey(
       LogicalKeyboardKey.keyA.keyId + k.codeUnitAt(0) - 'a'.codeUnitAt(0),
