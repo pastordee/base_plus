@@ -469,7 +469,12 @@ class BaseAppBar extends BaseStatelessWidget
       // header does (owner, 2026-10-02). The app sets [webChromeHidden].
       if (ModalRoute.of(context)?.isFirst ?? false) {
         final Widget shown = _bar;
-        _bar = ValueListenableBuilder<bool>(
+        // Still a PreferredSizeWidget: BaseScaffold casts the built bar.
+        _bar = PreferredSize(
+          preferredSize: shown is PreferredSizeWidget
+              ? shown.preferredSize
+              : preferredSize,
+          child: ValueListenableBuilder<bool>(
           valueListenable: webChromeHidden,
           builder: (_, bool hidden, __) => IgnorePointer(
             ignoring: hidden,
@@ -484,6 +489,7 @@ class BaseAppBar extends BaseStatelessWidget
               ),
             ),
           ),
+        ),
         );
       }
     } else if (baseParam == null &&
