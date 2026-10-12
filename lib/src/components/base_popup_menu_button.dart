@@ -43,6 +43,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
     this.iosIcon,
     this.buttonStyle,
     this.size = 44.0,
+    this.iconSize = 18.0,
     this.enabled = true,
     this.tooltip,
     this.useCNPopupMenuButton = true,
@@ -59,6 +60,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
     this.iosIcon = 'ellipsis',
     this.buttonStyle,
     this.size = 44.0,
+    this.iconSize = 18.0,
     this.enabled = true,
     this.tooltip,
     this.useCNPopupMenuButton = true,
@@ -88,6 +90,10 @@ class BasePopupMenuButton extends BaseStatelessWidget {
 
   /// Size of the button (used for icon button)
   final double size;
+
+  /// Size of the icon itself (icon button). 18 is the default; a smaller one
+  /// matches a row of compact controls, where 18 stood out.
+  final double iconSize;
 
   /// Whether the button is enabled
   final bool enabled;
@@ -138,7 +144,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
       return CNPopupMenuButton.icon(
         buttonIcon: CNSymbol(
           valueOf('iosIcon', iosIcon) ?? 'ellipsis',
-          size: 18,
+          size: valueOf('iconSize', iconSize),
         ),
         size: valueOf('size', size),
         items: cnItems,
@@ -209,7 +215,10 @@ class BasePopupMenuButton extends BaseStatelessWidget {
 
     if (_isIconButton) {
       return PopupMenuButton<int>(
-        icon: Icon(valueOf('materialIcon', materialIcon)),
+        icon: Icon(
+          valueOf('materialIcon', materialIcon),
+          size: valueOf('iconSize', iconSize),
+        ),
         tooltip: valueOf('tooltip', tooltip),
         enabled: valueOf('enabled', enabled),
         itemBuilder: (context) => popupMenuItems,
