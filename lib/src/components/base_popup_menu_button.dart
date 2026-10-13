@@ -49,6 +49,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
     this.useCNPopupMenuButton = true,
     BaseParam? baseParam,
   })  : _isIconButton = false,
+        iconColor = null,
         super(key: key, baseParam: baseParam);
 
   /// Creates an icon-style popup menu button
@@ -64,6 +65,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
     this.enabled = true,
     this.tooltip,
     this.useCNPopupMenuButton = true,
+    this.iconColor,
     BaseParam? baseParam,
   })  : buttonLabel = null,
         _isIconButton = true,
@@ -104,6 +106,12 @@ class BasePopupMenuButton extends BaseStatelessWidget {
   /// Use CNPopupMenuButton on iOS/macOS (default: true)
   /// Set to false to force Material PopupMenuButton on all platforms
   final bool useCNPopupMenuButton;
+
+  /// The icon's colour on Material (the iOS menu is native and ignores it).
+  /// Set it here rather than with an IconTheme around the button: the
+  /// PopupMenuButton draws its icon through an IconButton, which takes its
+  /// colour from the app bar's button theme and ignores the IconTheme above.
+  final Color? iconColor;
 
   /// Internal flag to track if this is an icon button
   final bool _isIconButton;
@@ -219,6 +227,7 @@ class BasePopupMenuButton extends BaseStatelessWidget {
           valueOf('materialIcon', materialIcon),
           size: valueOf('iconSize', iconSize),
         ),
+        iconColor: valueOf('iconColor', iconColor),
         tooltip: valueOf('tooltip', tooltip),
         enabled: valueOf('enabled', enabled),
         itemBuilder: (context) => popupMenuItems,

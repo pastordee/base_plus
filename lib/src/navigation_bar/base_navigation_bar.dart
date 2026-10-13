@@ -506,6 +506,10 @@ class BaseNavigationBarAction {
         materialIcon: _sfSymbolToMaterialIcon(icon?.name) ?? Icons.more_vert,
         iosIcon: icon?.name ?? 'ellipsis',
         tooltip: label,
+        // Directly, not only through the IconTheme below: PopupMenuButton's
+        // IconButton takes the app bar's colour and ignored that, so an
+        // untinted glass bar drew the ⋯ white on white in light mode.
+        iconColor: color,
       );
       // BasePopupMenuButton renders Icon(materialIcon) with no explicit color,
       // so it inherits the ambient IconTheme — apply the action's tint here.
