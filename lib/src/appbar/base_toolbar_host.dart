@@ -58,11 +58,23 @@ class BaseToolbarBar {
 
 /// Keeps track of the bars that have moved into the window toolbar.
 class BaseToolbarHostController extends ChangeNotifier {
-  BaseToolbarHostController({this.bandHeight = 52});
+  BaseToolbarHostController({double bandHeight = 52}) : _bandHeight = bandHeight;
+
+  double _bandHeight;
 
   /// How tall the toolbar is. Bars give the screen at least this much room,
-  /// and only a bar starting in its top half counts as the window's.
-  final double bandHeight;
+  /// and only a bar starting in its top half counts as the window's. It
+  /// changes with the toolbar (taller with labels under the icons): the
+  /// [BaseToolbarHost] above then rebuilds the bars.
+  double get bandHeight => _bandHeight;
+  set bandHeight(double value) {
+    if (value == _bandHeight) return;
+    _bandHeight = value;
+    for (final _HostedBarState s in _states.toList()) {
+      s._hostChanged();
+    }
+    _scheduleCheck();
+  }
 
   bool _enabled = true;
 
@@ -77,6 +89,10 @@ class BaseToolbarHostController extends ChangeNotifier {
     }
     _scheduleCheck();
   }
+
+  /// Painted in the room a bar leaves, so a page scrolling up under the
+  /// toolbar doesn't show through it (owner, 2026-10-14). Null: see-through.
+  Color? background;
 
   double _topInset = 0;
 
@@ -225,20 +241,23 @@ class BaseToolbarHostController extends ChangeNotifier {
 
 /// Puts the screens' bars under it into [controller]'s toolbar.
 class BaseToolbarHost extends InheritedWidget {
-  const BaseToolbarHost({
+  BaseToolbarHost({
     super.key,
     required this.controller,
     required super.child,
-  });
+  }) : _height = controller.bandHeight;
 
   final BaseToolbarHostController controller;
+
+  /// The toolbar's height when this was built: the bars depend on it.
+  final double _height;
 
   static BaseToolbarHostController? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BaseToolbarHost>()?.controller;
 
   @override
   bool updateShouldNotify(BaseToolbarHost oldWidget) =>
-      oldWidget.controller != controller;
+      oldWidget.controller != controller || oldWidget._height != _height;
 }
 
 /// Names the part of the app the bars under it belong to
@@ -339,11 +358,13 @@ class _HostedBarState extends State<BaseHostedAppBar> {
     _last = null;
     widget.controller._scheduleCheck();
     if (!widget.controller.enabled || !_inBand) return widget.bar;
-    return SizedBox(
+    final Color? background = widget.controller.background;
+    final Widget room = SizedBox(
       height: widget.height,
       child: widget.titleWidget == null
           ? null
           : IgnorePointer(child: Center(child: widget.titleWidget)),
     );
+    return background == null ? room : ColoredBox(color: background, child: room);
   }
 }
