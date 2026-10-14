@@ -36,6 +36,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
     required this.selectedIndex,
     required this.onValueChanged,
     this.labelSize,
+    this.color,
     BaseParam? baseParam,
   }) : super(key: key, baseParam: baseParam);
 
@@ -51,6 +52,9 @@ class BaseSegmentedControl extends BaseStatelessWidget {
   /// Size of the segment labels. Applies on both platforms.
   final double? labelSize;
 
+  /// The selected segment's colour; null keeps the platform's accent.
+  final Color? color;
+
   @override
   Widget buildByCupertino(BuildContext context) {
     return CNSegmentedControl(
@@ -58,6 +62,7 @@ class BaseSegmentedControl extends BaseStatelessWidget {
       selectedIndex: valueOf('selectedIndex', selectedIndex),
       onValueChanged: valueOf('onValueChanged', onValueChanged),
       labelSize: valueOf('labelSize', labelSize),
+      color: valueOf('color', color),
     );
   }
 
