@@ -19,6 +19,7 @@ import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
 import 'base_large_title.dart';
 import 'base_side_toolbar.dart';
+import 'base_toolbar_host.dart';
 import 'base_scroll_edge.dart';
 
 /// BaseAppBar
@@ -874,12 +875,46 @@ class BaseAppBar extends BaseStatelessWidget
       );
     }
 
+    final double _barHeight =
+        effectiveHeight + (_nativeLargeTitle ? BaseLargeTitle.nativeArea : 0);
+
+    // Under a window toolbar (the Mac): the bar moves up into it and leaves
+    // the toolbar's height of room here. See [BaseToolbarHost].
+    final BaseToolbarHostController? _host = BaseToolbarHost.maybeOf(context);
+    if (_host != null) {
+      final double room =
+          _barHeight > _host.bandHeight ? _barHeight : _host.bandHeight;
+      return PreferredSize(
+        preferredSize: Size.fromHeight(room),
+        child: BaseHostedAppBar(
+          controller: _host,
+          height: room,
+          titleWidget: _hasCustomTitleWidget ? _titleWidget : null,
+          bar: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(height: _barHeight, child: child),
+          ),
+          offer: (double left, Object? tag) => BaseToolbarBar(
+            left: left,
+            tag: tag,
+            title: _title,
+            leading: _leadingActions ?? const <BaseNavigationBarAction>[],
+            trailing: _trailingActions ?? const <BaseNavigationBarAction>[],
+            segments: _segLabels,
+            selectedSegment: valueOf(
+                'segmentedControlSelectedIndex', segmentedControlSelectedIndex),
+            onSegmentChanged: valueOf(
+                'onSegmentedControlValueChanged',
+                onSegmentedControlValueChanged),
+          ),
+        ),
+      );
+    }
+
     return PreferredSize(
       // Room for the large-title strip under the bar; the native bar shrinks
       // inside it as the title collapses.
-      preferredSize: Size.fromHeight(
-        effectiveHeight + (_nativeLargeTitle ? BaseLargeTitle.nativeArea : 0),
-      ),
+      preferredSize: Size.fromHeight(_barHeight),
       child: child,
     );
   }

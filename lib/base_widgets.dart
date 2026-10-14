@@ -51,6 +51,7 @@ export 'src/action_sheet/base_cn_action_sheet.dart';
 export 'src/alert/base_alert.dart';
 export 'src/app/base_app.dart';
 export 'src/appbar/base_app_bar.dart';
+export 'src/appbar/base_toolbar_host.dart';
 export 'src/appbar/base_large_title.dart';
 export 'src/appbar/base_scroll_edge.dart';
 export 'src/appbar/base_side_toolbar.dart';
