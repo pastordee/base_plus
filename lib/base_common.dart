@@ -6,3 +6,4 @@ library base_common;
 
 export 'src/common/base_color.dart';
 export 'src/icon/sf_symbol_material_icons.dart';
+export 'src/icon/sf_symbol_fluent_icons.dart';

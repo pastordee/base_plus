@@ -5,6 +5,9 @@ import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../components/base_popup_menu_button.dart';
 import '../icon/sf_symbol_material_icons.dart';
+import '../icon/sf_symbol_fluent_icons.dart';
+// Prefixed: fluent_ui re-exports the SDK's material library.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
 import '../appbar/base_side_toolbar.dart';
 
 /// Cross-platform navigation bar action
@@ -577,6 +580,54 @@ class BaseNavigationBarAction {
     }
 
     return const SizedBox.shrink();
+  }
+
+  /// The action as a Windows command-bar item (base_plus fluent mode,
+  /// 2026-10-16): a Segoe Fluent icon ([sfSymbolToFluentIcon]) with the label
+  /// beside it, or in the overflow menu when the bar runs out of room; a badge
+  /// as on Material. Spaces give null — a CommandBar spaces its own items. A
+  /// menu action keeps its popup button inside the bar (it turns Fluent with
+  /// BasePopupMenuButton).
+  fl.CommandBarItem? toFluentCommandBarItem(BuildContext context) {
+    if (_isFixedSpace || _isFlexibleSpace) {
+      return null;
+    }
+    final Color? color = tint;
+    Widget? iconWidget;
+    if (_isImageAction && _materialImage != null) {
+      iconWidget = Image.asset(
+        _materialImage,
+        width: 16,
+        height: 16,
+        color: color,
+      );
+    } else if (icon != null) {
+      iconWidget = Icon(sfSymbolToFluentIcon(icon!.name), size: 16, color: color);
+    }
+    if (iconWidget != null && badgeValue != null && badgeValue!.isNotEmpty) {
+      final bool dotOnly = badgeValue!.trim().isEmpty;
+      iconWidget = Badge(
+        label: dotOnly ? null : Text(badgeValue!),
+        backgroundColor: badgeColor ?? const Color(0xFFC42B1C),
+        child: iconWidget,
+      );
+    }
+    final fl.CommandBarButton button = fl.CommandBarButton(
+      icon: iconWidget,
+      label: label != null
+          ? Text(label!, style: color != null ? TextStyle(color: color) : null)
+          : null,
+      tooltip: label,
+      onPressed: onPressed,
+    );
+    if (popupMenuItems != null && onPopupMenuSelected != null) {
+      return fl.CommandBarBuilderItem(
+        builder: (BuildContext ctx, fl.CommandBarItemDisplayMode _, Widget __) =>
+            toMaterialWidget(ctx),
+        wrappedItem: button,
+      );
+    }
+    return button;
   }
 
   /// Map an SF Symbol name to the nearest Material [IconData] (inverse of

@@ -9,6 +9,9 @@ import 'package:material_ui/material_ui.dart' hide AppBar;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter/widgets.dart';
 
+// Prefixed: fluent_ui re-exports the SDK's material library.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
+
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
 import '../flutter/cupertino/nav_bar.dart';
@@ -1098,6 +1101,117 @@ class BaseAppBar extends BaseStatelessWidget
     );
   }
 
+  /// Windows (base_plus fluent mode, 2026-10-16): a Windows page header — the
+  /// back button, the title in Windows' subtitle type, and the bar's actions
+  /// on the right in a Fluent CommandBar, which folds the ones that don't fit
+  /// into "…". 48 px, Windows' header height. Configured through the same
+  /// leading/trailing actions as every other platform. With no Fluent theme
+  /// above (an app that didn't install one) it stays the material bar.
+  @override
+  Widget buildByFluent(BuildContext context) {
+    final fl.FluentThemeData? fluent = fl.FluentTheme.maybeOf(context);
+    if (fluent == null) {
+      return buildByMaterial(context);
+    }
+    Widget? _title = _applyLargeTitleHandoff(
+      _shown(context, 'title', title) ?? _shown(context, 'middle', middle),
+    );
+    if (_title == null) {
+      final List<String>? _segLabels =
+          valueOf('segmentedControlLabels', segmentedControlLabels);
+      if (_segLabels != null && _segLabels.isNotEmpty) {
+        _title = _buildMaterialSegmentedControl(
+          context,
+          Theme.of(context).colorScheme,
+          _segLabels,
+        );
+      }
+    }
+
+    // Leading: an explicit widget, else the leading actions, else Back.
+    Widget? _leading = valueOf('leading', leading);
+    if (_leading == null) {
+      final List<fl.CommandBarItem> _items = <fl.CommandBarItem>[
+        for (final BaseNavigationBarAction a in _withoutWebBack(
+              context,
+              valueOf('leadingActions', leadingActions),
+            ) ??
+            const <BaseNavigationBarAction>[])
+          if (a.toFluentCommandBarItem(context) case final fl.CommandBarItem i) i,
+      ];
+      if (_items.isNotEmpty) {
+        _leading = fl.CommandBar(
+          primaryItems: _items,
+          overflowBehavior: fl.CommandBarOverflowBehavior.noWrap,
+        );
+      }
+    }
+    final bool _implyLeading = !kIsWeb &&
+        valueOf('automaticallyImplyLeading', automaticallyImplyLeading) == true;
+    if (_leading == null &&
+        _implyLeading &&
+        (ModalRoute.of(context)?.canPop ?? false)) {
+      _leading = fl.IconButton(
+        icon: const Icon(fl.FluentIcons.back, size: 14),
+        onPressed: () => Navigator.of(context).maybePop(),
+      );
+    }
+
+    // Trailing: the actions as command-bar items; explicit widgets after them.
+    final List<fl.CommandBarItem> _commands = <fl.CommandBarItem>[
+      for (final BaseNavigationBarAction a
+          in valueOf('trailingActions', trailingActions) ??
+              const <BaseNavigationBarAction>[])
+        if (a.toFluentCommandBarItem(context) case final fl.CommandBarItem i) i,
+    ];
+    final List<Widget> _widgets = <Widget>[
+      ...?(valueOf('actions', actions) as List<Widget>?),
+      if (valueOf('trailing', trailing) case final Widget t) t,
+    ];
+
+    final double _height = valueOf('height', height) ?? 48.0;
+    final Color _background = valueOf('backgroundColor', backgroundColor) ??
+        Colors.transparent;
+    final Widget header = Container(
+      height: _height,
+      color: _background,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: <Widget>[
+          if (_leading != null) ...<Widget>[_leading, const SizedBox(width: 8)],
+          Expanded(
+            flex: 3,
+            child: _title == null
+                ? const SizedBox.shrink()
+                : DefaultTextStyle.merge(
+                    style: fluent.typography.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: _title,
+                  ),
+          ),
+          if (_commands.isNotEmpty)
+            Flexible(
+              flex: 2,
+              child: fl.CommandBar(
+                primaryItems: _commands,
+                mainAxisAlignment: MainAxisAlignment.end,
+              ),
+            ),
+          ..._widgets,
+        ],
+      ),
+    );
+    final PreferredSizeWidget? _bottom = valueOf('bottom', bottom);
+    if (_bottom == null) {
+      return header;
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[header, _bottom],
+    );
+  }
+
   /// Material rendering of the `segmentedControl*` config (used as the title on
   /// Android so callers don't also pass a separate tab bar). A sliding segmented
   /// control keeps it visually consistent with the native iOS segmented control.
@@ -1206,7 +1320,9 @@ class BaseAppBar extends BaseStatelessWidget
   @override
   Size get preferredSize {
     double _height =
-        height != null ? height! : (isCupertinoMode ? 44.0 : kToolbarHeight);
+        height != null
+            ? height!
+            : (isCupertinoMode ? 44.0 : (isFluentMode ? 48.0 : kToolbarHeight));
     final Widget? middle =
         valueOf('title', title) ?? valueOf('middle', this.middle);
     if (middle != null && bottom != null) {
