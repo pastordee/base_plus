@@ -14,6 +14,10 @@
 //    iPadOS's own menu bar (BaseMenuBarBridge.swift, one copy per app — see
 //    the app's ios/Runner). A choice comes back as the item's id. The
 //    shortcuts also show in the ⌘ keyboard-shortcut overlay.
+//  - Windows (2026-10-16): an in-window Fluent menu bar under the title bar,
+//    laid out the Windows way — File (with Settings… and Exit), Edit, View,
+//    the app's own menus, Help (with About) — and every shortcut on Ctrl
+//    instead of ⌘, working anywhere in the window.
 //  - anything else: nothing — the child as it is.
 //
 // Made for the Creator first and shared so both apps' menus work alike
@@ -21,10 +25,13 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show AppExitType;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+// Prefixed: fluent_ui re-exports the SDK's material library.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
 
 /// One menu item. [key] is the shortcut's character, pressed with ⌘ (and ⇧
 /// when [shift], ⌃ when [control]); [children] makes it a submenu.
@@ -113,6 +120,11 @@ class BaseMenuBarLabels {
     this.paste = 'Paste',
     this.selectAll = 'Select All',
     this.window = 'Window',
+    this.file = 'File',
+    this.view = 'View',
+    this.help = 'Help',
+    this.exit = 'Exit',
+    this.about = 'About',
   });
 
   final String edit;
@@ -123,6 +135,15 @@ class BaseMenuBarLabels {
   final String paste;
   final String selectAll;
   final String window;
+
+  /// Windows: the menus the app may have nothing of its own for.
+  final String file;
+  final String view;
+  final String help;
+
+  /// Windows: File ▸ Exit, and Help ▸ About (followed by the app's name).
+  final String exit;
+  final String about;
 }
 
 /// Whether this device shows a menu bar the app can fill: a Mac, or an iPad.
@@ -130,7 +151,7 @@ bool baseHasMenuBar(BuildContext context) {
   if (kIsWeb) {
     return false;
   }
-  if (!kIsWeb && Platform.isMacOS) {
+  if (!kIsWeb && (Platform.isMacOS || Platform.isWindows)) {
     return true;
   }
   return (!kIsWeb && Platform.isIOS) && MediaQuery.sizeOf(context).shortestSide >= 600;
@@ -161,6 +182,14 @@ class BaseMenuBar extends StatelessWidget {
     if (!kIsWeb && Platform.isMacOS) {
       return PlatformMenuBar(
         menus: _macMenus(appName, menus(), labels),
+        child: child,
+      );
+    }
+    if (!kIsWeb && Platform.isWindows) {
+      return _WindowsMenuBar(
+        appName: appName,
+        menus: menus(),
+        labels: labels,
         child: child,
       );
     }
@@ -383,6 +412,202 @@ PlatformMenu _macEditMenu(BaseMenuBarLabels labels) {
       ),
     ],
   );
+}
+
+// ── Windows ────────────────────────────────────────────────────────────────
+
+/// Ctrl + [key] (and Shift; the Mac's ⌃ becomes Alt).
+SingleActivator? _windowsActivator(
+  String key, {
+  bool shift = false,
+  bool control = false,
+}) {
+  final SingleActivator? mac = _activator(key, shift: shift);
+  return mac == null
+      ? null
+      : SingleActivator(mac.trigger, control: true, shift: shift, alt: control);
+}
+
+/// "Ctrl+Shift+N", as Windows menus write it.
+String _windowsShortcutText(BaseMenuItem i) => <String>[
+  'Ctrl',
+  if (i.shift) 'Shift',
+  if (i.control) 'Alt',
+  i.key!.toUpperCase(),
+].join('+');
+
+class _WindowsMenuBar extends StatelessWidget {
+  const _WindowsMenuBar({
+    required this.appName,
+    required this.menus,
+    required this.labels,
+    required this.child,
+  });
+
+  final String appName;
+  final List<BaseMenu> menus;
+  final BaseMenuBarLabels labels;
+  final Widget child;
+
+  Iterable<BaseMenu> _at(BaseMenuPlace place) =>
+      menus.where((BaseMenu m) => m.place == place);
+
+  /// Every shortcut, bound app-wide (menus can be closed when it's pressed).
+  Map<ShortcutActivator, VoidCallback> _bindings() {
+    final Map<ShortcutActivator, VoidCallback> out =
+        <ShortcutActivator, VoidCallback>{};
+    void add(BaseMenuItem i) {
+      if (i.key != null && i.onSelected != null) {
+        final SingleActivator? a =
+            _windowsActivator(i.key!, shift: i.shift, control: i.control);
+        if (a != null) {
+          out[a] = i.onSelected!;
+        }
+      }
+      for (final BaseMenuItem c in i.children ?? const <BaseMenuItem>[]) {
+        add(c);
+      }
+    }
+    for (final BaseMenu m in menus) {
+      for (final List<BaseMenuItem> g in m.groups) {
+        g.forEach(add);
+      }
+    }
+    return out;
+  }
+
+  fl.MenuFlyoutItemBase _item(BaseMenuItem i) {
+    if (i.children != null) {
+      return fl.MenuFlyoutSubItem(
+        text: Text(i.label),
+        items: (_) => <fl.MenuFlyoutItemBase>[
+          for (final BaseMenuItem c in i.children!) _item(c),
+        ],
+      );
+    }
+    return fl.MenuFlyoutItem(
+      text: Text(i.label),
+      trailing: i.key == null
+          ? null
+          : Opacity(opacity: 0.6, child: Text(_windowsShortcutText(i))),
+      onPressed: i.onSelected,
+    );
+  }
+
+  List<fl.MenuFlyoutItemBase> _groups(Iterable<BaseMenu> ms) {
+    final List<fl.MenuFlyoutItemBase> out = <fl.MenuFlyoutItemBase>[];
+    for (final BaseMenu m in ms) {
+      for (final List<BaseMenuItem> g in m.groups) {
+        if (out.isNotEmpty) {
+          out.add(const fl.MenuFlyoutSeparator());
+        }
+        out.addAll(g.map(_item));
+      }
+    }
+    return out;
+  }
+
+  List<fl.MenuFlyoutItemBase> _editItems() {
+    void edit(Intent intent) {
+      final BuildContext? focused = primaryFocus?.context;
+      if (focused != null) {
+        Actions.maybeInvoke(focused, intent);
+      }
+    }
+    fl.MenuFlyoutItem entry(String label, String keys, VoidCallback run) =>
+        fl.MenuFlyoutItem(
+          text: Text(label),
+          trailing: Opacity(opacity: 0.6, child: Text(keys)),
+          onPressed: run,
+        );
+    return <fl.MenuFlyoutItemBase>[
+      entry(labels.undo, 'Ctrl+Z',
+          () => edit(const UndoTextIntent(SelectionChangedCause.keyboard))),
+      entry(labels.redo, 'Ctrl+Y',
+          () => edit(const RedoTextIntent(SelectionChangedCause.keyboard))),
+      const fl.MenuFlyoutSeparator(),
+      entry(labels.cut, 'Ctrl+X', () => edit(
+            const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+          )),
+      entry(labels.copy, 'Ctrl+C', () => edit(CopySelectionTextIntent.copy)),
+      entry(labels.paste, 'Ctrl+V',
+          () => edit(const PasteTextIntent(SelectionChangedCause.keyboard))),
+      entry(labels.selectAll, 'Ctrl+A',
+          () => edit(const SelectAllTextIntent(SelectionChangedCause.keyboard))),
+    ];
+  }
+
+  Future<void> _about(BuildContext context) => fl.showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext dialogContext) => fl.ContentDialog(
+      title: Text('${labels.about} $appName'),
+      content: Text(appName),
+      actions: <Widget>[
+        fl.FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget shortcuts = CallbackShortcuts(
+      bindings: _bindings(),
+      child: child,
+    );
+    if (fl.FluentTheme.maybeOf(context) == null) {
+      // No Fluent theme above: the shortcuts still work, without a bar.
+      return shortcuts;
+    }
+    final List<fl.MenuFlyoutItemBase> file = <fl.MenuFlyoutItemBase>[
+      ..._groups(_at(BaseMenuPlace.file)),
+      if (_at(BaseMenuPlace.app).isNotEmpty) ...<fl.MenuFlyoutItemBase>[
+        if (_at(BaseMenuPlace.file).isNotEmpty) const fl.MenuFlyoutSeparator(),
+        ..._groups(_at(BaseMenuPlace.app)),
+      ],
+      const fl.MenuFlyoutSeparator(),
+      fl.MenuFlyoutItem(
+        text: Text(labels.exit),
+        trailing: const Opacity(opacity: 0.6, child: Text('Alt+F4')),
+        onPressed: () => ServicesBinding.instance
+            .exitApplication(AppExitType.required),
+      ),
+    ];
+    final List<fl.MenuFlyoutItemBase> view = _groups(_at(BaseMenuPlace.view));
+    final List<fl.MenuFlyoutItemBase> help = <fl.MenuFlyoutItemBase>[
+      ..._groups(_at(BaseMenuPlace.help)),
+      if (_at(BaseMenuPlace.help).isNotEmpty) const fl.MenuFlyoutSeparator(),
+      fl.MenuFlyoutItem(
+        text: Text('${labels.about} $appName'),
+        onPressed: () => _about(context),
+      ),
+    ];
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: fl.MenuBar(
+              items: <fl.MenuBarItem>[
+                fl.MenuBarItem(title: labels.file, items: file),
+                fl.MenuBarItem(title: labels.edit, items: _editItems()),
+                if (view.isNotEmpty)
+                  fl.MenuBarItem(title: labels.view, items: view),
+                for (final BaseMenu m in _at(BaseMenuPlace.custom))
+                  fl.MenuBarItem(title: m.label, items: _groups(<BaseMenu>[m])),
+                fl.MenuBarItem(title: labels.help, items: help),
+              ],
+            ),
+          ),
+        ),
+        Expanded(child: shortcuts),
+      ],
+    );
+  }
 }
 
 // ── iPad ───────────────────────────────────────────────────────────────────
