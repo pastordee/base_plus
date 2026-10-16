@@ -7,6 +7,7 @@ class BaseParam {
   BaseParam({
     this.cupertino,
     this.material,
+    this.fluent,
     this.android,
     this.fuchsia,
     this.iOS,
@@ -36,6 +37,9 @@ class BaseParam {
 
   /// Custom params for material mode
   final Map<String, dynamic>? material;
+
+  /// Custom params for fluent mode (Windows); falls back to [material]
+  final Map<String, dynamic>? fluent;
 
   /// Custom params for android
   final Map<String, dynamic>? android;
@@ -149,6 +153,13 @@ class BaseParam {
           break;
         case BaseMode.material:
           _map ??= forceUseCupertino ? cupertino : material;
+          break;
+        case BaseMode.fluent:
+          _map ??= forceUseCupertino
+              ? cupertino
+              : forceUseMaterial
+                  ? material
+                  : (fluent ?? material);
           break;
       }
     }

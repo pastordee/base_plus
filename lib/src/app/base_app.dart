@@ -5,6 +5,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/material.dart' as legacy_material;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:get/get.dart';
+// Windows' Fluent design, prefixed: it re-exports the SDK's material library,
+// whose names would clash with material_ui's.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
@@ -411,6 +414,32 @@ class BaseApp extends BaseStatelessWidget {
     );
   }
 
+  /// The caller's builder. In Fluent mode (Windows) the app stays a
+  /// (Get)MaterialApp — routing, GetX, localizations and every widget not yet
+  /// drawn in Fluent rely on it — with Windows' Fluent theme laid over it, so
+  /// Fluent controls anywhere below find their theme (2026-10-16).
+  TransitionBuilder? _effectiveBuilder() {
+    final TransitionBuilder? caller = valueOf('builder', builder);
+    if (!isFluentMode) {
+      return caller;
+    }
+    return (BuildContext context, Widget? child) {
+      final Widget inner = caller != null
+          ? caller(context, child)
+          : (child ?? const SizedBox.shrink());
+      final ThemeData material = Theme.of(context);
+      return fl.FluentTheme(
+        data: fl.FluentThemeData(
+          brightness: material.brightness,
+          accentColor: fl.AccentColor.swatch(<String, Color>{
+            'normal': material.colorScheme.primary,
+          }),
+        ),
+        child: inner,
+      );
+    };
+  }
+
   /// Build traditional MaterialApp
   Widget _buildMaterialApp(BaseThemeData baseTheme) {
     return MaterialApp(
@@ -426,7 +455,7 @@ class BaseApp extends BaseStatelessWidget {
         'navigatorObservers',
         navigatorObservers,
       ),
-      builder: valueOf('builder', builder),
+      builder: _effectiveBuilder(),
       title: valueOf('title', title),
       onGenerateTitle: valueOf('onGenerateTitle', onGenerateTitle),
       color: valueOf('color', color),
@@ -598,7 +627,7 @@ class BaseApp extends BaseStatelessWidget {
     Widget? child,
     BaseThemeData baseTheme,
   ) {
-    final TransitionBuilder? _builder = valueOf('builder', builder);
+    final TransitionBuilder? _builder = _effectiveBuilder();
     final Widget content = child ?? const SizedBox.shrink();
     return Theme(
       data: _resolveMaterialThemeFor(context, baseTheme),

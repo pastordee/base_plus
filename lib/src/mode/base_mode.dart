@@ -20,6 +20,10 @@ enum BaseMode {
 
   /// use material's widgets
   material,
+
+  /// use Windows' Fluent design (fluent_ui). Every widget falls back to its
+  /// material build until it has a buildByFluent of its own (2026-10-16).
+  fluent,
 }
 
 /// Widget actual build mode
@@ -29,6 +33,9 @@ enum WidgetBuildMode {
 
   /// Material mode
   material,
+
+  /// Fluent mode (Windows)
+  fluent,
 
   /// Force use Cupertino mode
   forceUseCupertino,
@@ -185,3 +192,6 @@ bool get isCupertinoMode => currentBaseMode == BaseMode.cupertino;
 
 /// build by Material
 bool get isMaterialMode => currentBaseMode == BaseMode.material;
+
+/// build by Fluent (Windows)
+bool get isFluentMode => currentBaseMode == BaseMode.fluent;

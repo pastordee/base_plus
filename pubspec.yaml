@@ -23,6 +23,7 @@ dependencies:
   # dependency_override below.
   cupertino_native_extra: ^0.2.4
   cupertino_interactive_keyboard_plus: ^0.0.5
+  fluent_ui: ^4.16.1
 
 dev_dependencies:
   flutter_test:

@@ -21,6 +21,9 @@ mixin BaseMixin {
   /// Called before buildByCupertinoNative (native iOS implementation)
   void beforeBuildByCupertinoNative(BuildContext context) {}
 
+  /// Called before buildByFluent
+  void beforeBuildByFluent(BuildContext context) {}
+
   /// build on cupertino mode (Flutter implementation)
   dynamic buildByCupertino(BuildContext context);
 
@@ -34,6 +37,11 @@ mixin BaseMixin {
 
   /// build on material mode
   dynamic buildByMaterial(BuildContext context);
+
+  /// build on fluent mode (Windows, fluent_ui). Until a widget has its own,
+  /// it is drawn as material — so everything works on Windows from day one
+  /// and each widget turns native as it gets a Fluent build.
+  dynamic buildByFluent(BuildContext context) => buildByMaterial(context);
 
   dynamic valueOf(String key, dynamic value);
 
@@ -63,6 +71,10 @@ mixin BaseMixin {
       case WidgetBuildMode.material:
         beforeBuildByMaterial(context);
         _dynamic = buildByMaterial(context);
+        break;
+      case WidgetBuildMode.fluent:
+        beforeBuildByFluent(context);
+        _dynamic = buildByFluent(context);
         break;
       case WidgetBuildMode.forceUseMaterial:
         // Default: wrap with an additional Material layer
@@ -104,6 +116,14 @@ mixin BaseMixin {
         } else {
           /// Use Material mode
           _widgetBuildMode = WidgetBuildMode.material;
+        }
+      } else if (isFluentMode) {
+        if (baseParam.forceUseCupertino) {
+          _widgetBuildMode = WidgetBuildMode.forceUseCupertino;
+        } else if (baseParam.forceUseMaterial) {
+          _widgetBuildMode = WidgetBuildMode.material;
+        } else {
+          _widgetBuildMode = WidgetBuildMode.fluent;
         }
       } else {
         assert(true, 'Only support Cupertino mode and Materila mode.');
@@ -165,6 +185,8 @@ mixin BaseMixin {
         _widgetBuildMode = WidgetBuildMode.cupertino;
       } else if (isMaterialMode) {
         _widgetBuildMode = WidgetBuildMode.material;
+      } else if (isFluentMode) {
+        _widgetBuildMode = WidgetBuildMode.fluent;
       } else {
         assert(true, 'Only support Cupertino mode and Materila mode.');
       }
