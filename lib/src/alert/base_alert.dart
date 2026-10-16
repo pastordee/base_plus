@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+// Prefixed: fluent_ui re-exports the SDK's material library.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
 
 import '../base_param.dart';
+import '../mode/base_mode.dart';
 
 /// Action style for alert actions (cross-platform)
 enum BaseAlertActionStyle {
@@ -176,6 +179,18 @@ class BaseAlert {
       throw ArgumentError('preferredActionIndex out of range');
     }
 
+    // Windows (BaseMode.fluent): a ContentDialog, as Windows apps ask.
+    if (!kIsWeb && isFluentMode && cupertino?.forceUseMaterial != true &&
+        material?.forceUseCupertino != true) {
+      return _showFluentAlert(
+        context: context,
+        title: title,
+        message: message,
+        actions: actions,
+        preferredActionIndex: preferredActionIndex,
+      );
+    }
+
     // Determine which platform implementation to use
     final bool useCupertino = _shouldUseCupertino(context, cupertino, material);
 
@@ -282,6 +297,76 @@ class BaseAlert {
     );
 
     return result;
+  }
+
+  /// Windows' red for a destructive command (the "critical" system colour).
+  static const Color _fluentCritical = Color(0xFFC42B1C);
+
+  /// A Fluent ContentDialog (Windows, 2026-10-16). Windows conventions: the
+  /// commit actions first and Cancel last; the preferred action — or the first
+  /// that isn't Cancel — is the accent FilledButton; a destructive one is red.
+  static Future<int?> _showFluentAlert({
+    required BuildContext context,
+    required String title,
+    String? message,
+    required List<BaseAlertAction> actions,
+    int? preferredActionIndex,
+  }) async {
+    final List<int> order = <int>[
+      for (int i = 0; i < actions.length; i++)
+        if (actions[i].style != BaseAlertActionStyle.cancel) i,
+      for (int i = 0; i < actions.length; i++)
+        if (actions[i].style == BaseAlertActionStyle.cancel) i,
+    ];
+    int? primary = preferredActionIndex;
+    if (primary == null) {
+      for (final int i in order) {
+        if (actions[i].style != BaseAlertActionStyle.cancel) {
+          primary = i;
+          break;
+        }
+      }
+    }
+    final int? result = await fl.showDialog<int>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext dialogContext) => fl.ContentDialog(
+        title: Text(title),
+        content: message != null ? Text(message) : null,
+        actions: <Widget>[
+          for (final int i in order)
+            _fluentAction(
+              actions[i],
+              primary: i == primary,
+              onPressed: () => Navigator.of(dialogContext).pop(i),
+            ),
+        ],
+      ),
+    );
+    if (result != null && result >= 0 && result < actions.length) {
+      actions[result].onPressed?.call();
+    }
+    return result;
+  }
+
+  static Widget _fluentAction(
+    BaseAlertAction action, {
+    required bool primary,
+    required VoidCallback onPressed,
+  }) {
+    final Widget label = Text(action.title);
+    if (action.style == BaseAlertActionStyle.destructive) {
+      return fl.FilledButton(
+        style: const fl.ButtonStyle(
+          backgroundColor: fl.WidgetStatePropertyAll<Color?>(_fluentCritical),
+        ),
+        onPressed: onPressed,
+        child: label,
+      );
+    }
+    return primary
+        ? fl.FilledButton(onPressed: onPressed, child: label)
+        : fl.Button(onPressed: onPressed, child: label);
   }
 
   /// Gets the appropriate color for Material button based on action style
