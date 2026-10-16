@@ -3,6 +3,9 @@ import 'package:cupertino_native_extra/cupertino_native.dart';
 
 import '../base_param.dart';
 import '../base_stateless_widget.dart';
+import '../icon/sf_symbol_fluent_icons.dart';
+// Prefixed: fluent_ui re-exports the SDK's material library.
+import 'package:fluent_ui/fluent_ui.dart' as fl;
 
 /// A cross-platform popup menu button that adapts to the platform
 /// 
@@ -172,6 +175,32 @@ class BasePopupMenuButton extends BaseStatelessWidget {
   @override
   Widget buildByMaterial(BuildContext context) {
     return _buildMaterialPopupMenu(context);
+  }
+
+  /// Windows (base_plus fluent mode, 2026-10-16): the button opens a Fluent
+  /// MenuFlyout — Segoe Fluent icons, separators, the current choice ticked,
+  /// disabled items greyed. Without a Fluent theme above it stays material.
+  @override
+  Widget buildByFluent(BuildContext context) {
+    if (fl.FluentTheme.maybeOf(context) == null) {
+      return _buildMaterialPopupMenu(context);
+    }
+    final String? _ios = valueOf('iosIcon', iosIcon);
+    final IconData? _material = valueOf('materialIcon', materialIcon);
+    return _FluentMenuButton(
+      items: items,
+      onSelected: valueOf('onSelected', onSelected),
+      icon: _isIconButton
+          ? (_ios != null
+              ? sfSymbolToFluentIcon(_ios, fallback: _material ?? fl.FluentIcons.more)
+              : (_material ?? fl.FluentIcons.more))
+          : null,
+      iconSize: valueOf('iconSize', iconSize),
+      iconColor: valueOf('iconColor', iconColor),
+      label: _isIconButton ? null : (valueOf('buttonLabel', buttonLabel) ?? 'Menu'),
+      tooltip: valueOf('tooltip', tooltip),
+      enabled: valueOf('enabled', enabled),
+    );
   }
 
   Widget _buildMaterialPopupMenu(BuildContext context) {
@@ -359,4 +388,125 @@ class BasePopupMenuItem {
 
   /// Whether this item opens a submenu.
   bool get hasChildren => children != null && children!.isNotEmpty;
+}
+
+
+/// The Fluent menu button: owns the [fl.FlyoutController] the flyout needs.
+class _FluentMenuButton extends StatefulWidget {
+  const _FluentMenuButton({
+    required this.items,
+    required this.onSelected,
+    required this.icon,
+    required this.iconSize,
+    required this.iconColor,
+    required this.label,
+    required this.tooltip,
+    required this.enabled,
+  });
+
+  final List<BasePopupMenuItem> items;
+  final ValueChanged<int>? onSelected;
+  final IconData? icon;
+  final double? iconSize;
+  final Color? iconColor;
+  final String? label;
+  final String? tooltip;
+  final bool enabled;
+
+  @override
+  State<_FluentMenuButton> createState() => _FluentMenuButtonState();
+}
+
+class _FluentMenuButtonState extends State<_FluentMenuButton> {
+  final fl.FlyoutController _flyout = fl.FlyoutController();
+
+  @override
+  void dispose() {
+    _flyout.dispose();
+    super.dispose();
+  }
+
+  IconData? _itemIcon(BasePopupMenuItem item) {
+    if (item.iosIcon != null) {
+      return sfSymbolToFluentIcon(item.iosIcon!, fallback: item.iconData ?? fl.FluentIcons.more);
+    }
+    return item.iconData;
+  }
+
+  List<fl.MenuFlyoutItemBase> _entries() => <fl.MenuFlyoutItemBase>[
+        for (int i = 0; i < widget.items.length; i++)
+          if (widget.items[i].isDivider)
+            const fl.MenuFlyoutSeparator()
+          else
+            // Submenus (children) are shown as plain items here: nothing on
+            // Windows uses them yet, and their selection has no index of its
+            // own in onSelected.
+            fl.MenuFlyoutItem(
+              leading: _itemIcon(widget.items[i]) != null
+                  ? Icon(_itemIcon(widget.items[i]), size: 16)
+                  : null,
+              text: widget.items[i].subtitle == null
+                  ? Text(widget.items[i].label)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(widget.items[i].label),
+                        Opacity(
+                          opacity: 0.7,
+                          child: Text(
+                            widget.items[i].subtitle!,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+              trailing: widget.items[i].selected
+                  ? const Icon(fl.FluentIcons.check_mark, size: 12)
+                  : null,
+              selected: widget.items[i].selected,
+              onPressed: widget.items[i].enabled
+                  ? () => widget.onSelected?.call(i)
+                  : null,
+            ),
+      ];
+
+  void _open() {
+    _flyout.showFlyout<void>(
+      builder: (BuildContext context) => fl.MenuFlyout(items: _entries()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final VoidCallback? onPressed = widget.enabled ? _open : null;
+    final Widget button = widget.icon != null
+        ? fl.IconButton(
+            icon: Icon(
+              widget.icon,
+              size: widget.iconSize != null
+                  ? (widget.iconSize! < 18 ? widget.iconSize : 16)
+                  : 16,
+              color: widget.iconColor,
+            ),
+            onPressed: onPressed,
+          )
+        : fl.Button(
+            onPressed: onPressed,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(widget.label ?? 'Menu'),
+                const SizedBox(width: 6),
+                const Icon(fl.FluentIcons.chevron_down, size: 10),
+              ],
+            ),
+          );
+    return fl.FlyoutTarget(
+      controller: _flyout,
+      child: widget.tooltip != null
+          ? fl.Tooltip(message: widget.tooltip!, child: button)
+          : button,
+    );
+  }
 }
