@@ -639,7 +639,17 @@ class _WindowsMenuBar extends StatelessWidget {
       children: <Widget>[
         Column(
           children: <Widget>[
-            const SizedBox(height: _kWindowsMenuBarHeight),
+            // The bar's own background, Windows' Mica colour in the app's
+            // light or dark. It painted nothing, so whatever was behind the
+            // app showed through: a light strip in dark mode, white text on
+            // it (2026-10-17).
+            ColoredBox(
+              color: fl.FluentTheme.of(context).micaBackgroundColor,
+              child: const SizedBox(
+                height: _kWindowsMenuBarHeight,
+                width: double.infinity,
+              ),
+            ),
             Expanded(child: shortcuts),
           ],
         ),
