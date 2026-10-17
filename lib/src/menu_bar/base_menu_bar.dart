@@ -503,22 +503,25 @@ class _WindowsMenuBar extends StatelessWidget {
     ),
   );
 
-  fl.MenuFlyoutItemBase _item(BaseMenuItem i) {
+  /// One menu item, or for one with children its label as a small heading
+  /// and the children under it. fluent_ui's sub-menus can't be used from the
+  /// bar: the menu closes on the mouse button going down, before the click
+  /// lands, so a choice in a sub-menu never ran (View → Appearance → Dark,
+  /// owner 2026-10-17; a sub-menu isn't in the bar's tap region).
+  List<fl.MenuFlyoutItemBase> _items(BaseMenuItem i) {
     if (i.children != null) {
-      return fl.MenuFlyoutSubItem(
-        text: Text(i.label),
-        items: (_) => <fl.MenuFlyoutItemBase>[
-          for (final BaseMenuItem c in i.children!) _item(c),
-        ],
-      );
+      return <fl.MenuFlyoutItemBase>[
+        fl.MenuFlyoutItem(text: Text(i.label), onPressed: null),
+        for (final BaseMenuItem c in i.children!) ..._items(c),
+      ];
     }
-    return fl.MenuFlyoutItem(
-      text: Text(i.label),
-      trailing: i.key == null
-          ? null
-          : _shortcut(_windowsShortcutText(i)),
-      onPressed: i.onSelected,
-    );
+    return <fl.MenuFlyoutItemBase>[
+      fl.MenuFlyoutItem(
+        text: Text(i.label),
+        trailing: i.key == null ? null : _shortcut(_windowsShortcutText(i)),
+        onPressed: i.onSelected,
+      ),
+    ];
   }
 
   List<fl.MenuFlyoutItemBase> _groups(Iterable<BaseMenu> ms) {
@@ -528,7 +531,7 @@ class _WindowsMenuBar extends StatelessWidget {
         if (out.isNotEmpty) {
           out.add(const fl.MenuFlyoutSeparator());
         }
-        out.addAll(g.map(_item));
+        out.addAll(g.expand(_items));
       }
     }
     return out;
