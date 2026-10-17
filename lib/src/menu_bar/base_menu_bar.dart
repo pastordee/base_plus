@@ -485,6 +485,14 @@ class _WindowsMenuBar extends StatelessWidget {
     return out;
   }
 
+  /// A shortcut on the right of a menu item, greyed as Windows has it. The
+  /// end padding makes the menu leave room for it: fluent_ui sized the menu
+  /// to the labels and cut the longer shortcuts off (Ctrl+Shift+N).
+  static Widget _shortcut(String keys) => Padding(
+    padding: const EdgeInsetsDirectional.only(start: 24, end: 12),
+    child: Opacity(opacity: 0.7, child: Text(keys)),
+  );
+
   fl.MenuFlyoutItemBase _item(BaseMenuItem i) {
     if (i.children != null) {
       return fl.MenuFlyoutSubItem(
@@ -498,7 +506,7 @@ class _WindowsMenuBar extends StatelessWidget {
       text: Text(i.label),
       trailing: i.key == null
           ? null
-          : Opacity(opacity: 0.6, child: Text(_windowsShortcutText(i))),
+          : _shortcut(_windowsShortcutText(i)),
       onPressed: i.onSelected,
     );
   }
@@ -526,7 +534,7 @@ class _WindowsMenuBar extends StatelessWidget {
     fl.MenuFlyoutItem entry(String label, String keys, VoidCallback run) =>
         fl.MenuFlyoutItem(
           text: Text(label),
-          trailing: Opacity(opacity: 0.6, child: Text(keys)),
+          trailing: _shortcut(keys),
           onPressed: run,
         );
     return <fl.MenuFlyoutItemBase>[
@@ -580,7 +588,7 @@ class _WindowsMenuBar extends StatelessWidget {
       const fl.MenuFlyoutSeparator(),
       fl.MenuFlyoutItem(
         text: Text(labels.exit),
-        trailing: const Opacity(opacity: 0.6, child: Text('Alt+F4')),
+        trailing: _shortcut('Alt+F4'),
         onPressed: () => ServicesBinding.instance
             .exitApplication(AppExitType.required),
       ),
@@ -607,6 +615,11 @@ class _WindowsMenuBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         child: Align(
           alignment: AlignmentDirectional.centerStart,
+          // fluent_ui 4.16.1 reads DisableAcrylic the wrong way round
+          // (MenuFlyout: useAcrylic = DisableAcrylic.of(context) != null), so
+          // its menus were solid. Under DisableAcrylic they get Windows 11's
+          // frosted acrylic. Remove when fluent_ui fixes the check.
+          child: fl.DisableAcrylic(
           child: fl.MenuBar(
             items: <fl.MenuBarItem>[
               fl.MenuBarItem(title: labels.file, items: file),
@@ -617,6 +630,7 @@ class _WindowsMenuBar extends StatelessWidget {
                 fl.MenuBarItem(title: m.label, items: _groups(<BaseMenu>[m])),
               fl.MenuBarItem(title: labels.help, items: help),
             ],
+          ),
           ),
         ),
       ),
