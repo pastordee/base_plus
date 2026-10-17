@@ -167,12 +167,18 @@ class BaseMenuBar extends StatelessWidget {
     required this.menus,
     required this.child,
     this.labels = const BaseMenuBarLabels(),
+    this.navigatorKey,
   });
 
   final String appName;
   final List<BaseMenu> Function() menus;
   final BaseMenuBarLabels labels;
   final Widget child;
+
+  /// Windows: the app's navigator, for dialogs the bar opens itself (About).
+  /// The bar usually sits above the app's Navigator (in the app's builder),
+  /// where there is none to find.
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +196,7 @@ class BaseMenuBar extends StatelessWidget {
         appName: appName,
         menus: menus(),
         labels: labels,
+        navigatorKey: navigatorKey,
         child: child,
       );
     }
@@ -442,12 +449,14 @@ class _WindowsMenuBar extends StatelessWidget {
     required this.menus,
     required this.labels,
     required this.child,
+    this.navigatorKey,
   });
 
   final String appName;
   final List<BaseMenu> menus;
   final BaseMenuBarLabels labels;
   final Widget child;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   Iterable<BaseMenu> _at(BaseMenuPlace place) =>
       menus.where((BaseMenu m) => m.place == place);
@@ -538,7 +547,7 @@ class _WindowsMenuBar extends StatelessWidget {
   }
 
   Future<void> _about(BuildContext context) => fl.showDialog<void>(
-    context: context,
+    context: navigatorKey?.currentContext ?? context,
     barrierDismissible: true,
     builder: (BuildContext dialogContext) => fl.ContentDialog(
       title: Text('${labels.about} $appName'),
@@ -585,7 +594,11 @@ class _WindowsMenuBar extends StatelessWidget {
         onPressed: () => _about(context),
       ),
     ];
-    return Column(
+    // The menus open in an overlay. An app puts its menu bar in its
+    // builder, above the Navigator and so above any Overlay, and opening a
+    // menu threw (a grey screen in release, 2026-10-17): the bar brings one.
+    return Overlay.wrap(
+      child: Column(
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -606,6 +619,7 @@ class _WindowsMenuBar extends StatelessWidget {
         ),
         Expanded(child: shortcuts),
       ],
+      ),
     );
   }
 }
