@@ -594,34 +594,108 @@ class _WindowsMenuBar extends StatelessWidget {
         onPressed: () => _about(context),
       ),
     ];
-    // The menus open in an overlay. An app puts its menu bar in its
-    // builder, above the Navigator and so above any Overlay, and opening a
-    // menu threw (a grey screen in release, 2026-10-17): the bar brings one.
-    return Overlay.wrap(
-      child: Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: fl.MenuBar(
-              items: <fl.MenuBarItem>[
-                fl.MenuBarItem(title: labels.file, items: file),
-                fl.MenuBarItem(title: labels.edit, items: _editItems()),
-                if (view.isNotEmpty)
-                  fl.MenuBarItem(title: labels.view, items: view),
-                for (final BaseMenu m in _at(BaseMenuPlace.custom))
-                  fl.MenuBarItem(title: m.label, items: _groups(<BaseMenu>[m])),
-                fl.MenuBarItem(title: labels.help, items: help),
-              ],
-            ),
+    // Fluent's menus open in an overlay and need a Navigator above them. An
+    // app puts its menu bar in its builder, above its Navigator, and every
+    // menu threw — a grey screen in release (Creator on Windows 11,
+    // 2026-10-17). A Navigator around the whole app would become its root
+    // navigator (showDialog would push onto it, Get.back would close the
+    // wrong route), so the bar gets one of its own, laid over the app
+    // (_MenuBarHost): its menus open there and the app's routes are untouched.
+    final Widget bar = SizedBox(
+      height: _kWindowsMenuBarHeight,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: fl.MenuBar(
+            items: <fl.MenuBarItem>[
+              fl.MenuBarItem(title: labels.file, items: file),
+              fl.MenuBarItem(title: labels.edit, items: _editItems()),
+              if (view.isNotEmpty)
+                fl.MenuBarItem(title: labels.view, items: view),
+              for (final BaseMenu m in _at(BaseMenuPlace.custom))
+                fl.MenuBarItem(title: m.label, items: _groups(<BaseMenu>[m])),
+              fl.MenuBarItem(title: labels.help, items: help),
+            ],
           ),
         ),
-        Expanded(child: shortcuts),
-      ],
       ),
     );
+    return Stack(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            const SizedBox(height: _kWindowsMenuBarHeight),
+            Expanded(child: shortcuts),
+          ],
+        ),
+        Positioned.fill(child: _MenuBarHost(bar: bar)),
+      ],
+    );
   }
+}
+
+const double _kWindowsMenuBarHeight = 40;
+
+/// A Navigator of the menu bar's own, covering the window but drawing (and
+/// taking clicks) only where the bar and its open menus are.
+class _MenuBarHost extends StatefulWidget {
+  const _MenuBarHost({required this.bar});
+
+  final Widget bar;
+
+  @override
+  State<_MenuBarHost> createState() => _MenuBarHostState();
+}
+
+class _MenuBarHostState extends State<_MenuBarHost> {
+  late final ValueNotifier<Widget> _bar = ValueNotifier<Widget>(widget.bar);
+
+  @override
+  void didUpdateWidget(_MenuBarHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _bar.value = widget.bar;
+  }
+
+  @override
+  void dispose() {
+    _bar.dispose();
+    super.dispose();
+  }
+
+  @override
+  // HeroControllerScope.none: the app's MaterialApp hands its
+  // HeroController down to the first Navigator below it, and a controller
+  // can't serve two.
+  Widget build(BuildContext context) => HeroControllerScope.none(
+    child: Navigator(
+      // Never take the keyboard from the app.
+      requestFocus: false,
+      onGenerateInitialRoutes: (NavigatorState _, String _) =>
+          <Route<void>>[_MenuBarRoute(_bar)],
+    ),
+  );
+}
+
+/// The bar itself, as a route with no barrier: the rest of the window lets
+/// clicks through to the app underneath.
+class _MenuBarRoute extends OverlayRoute<void> {
+  _MenuBarRoute(this.bar);
+
+  final ValueListenable<Widget> bar;
+
+  @override
+  Iterable<OverlayEntry> createOverlayEntries() => <OverlayEntry>[
+    OverlayEntry(
+      builder: (BuildContext context) => Align(
+        alignment: AlignmentDirectional.topStart,
+        child: ValueListenableBuilder<Widget>(
+          valueListenable: bar,
+          builder: (BuildContext context, Widget bar, Widget? _) => bar,
+        ),
+      ),
+    ),
+  ];
 }
 
 // ── iPad ───────────────────────────────────────────────────────────────────
