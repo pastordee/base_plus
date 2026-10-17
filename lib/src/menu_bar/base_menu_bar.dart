@@ -485,12 +485,14 @@ class _WindowsMenuBar extends StatelessWidget {
     return out;
   }
 
-  /// A shortcut on the right of a menu item, greyed as Windows has it. The
-  /// end padding makes the menu leave room for it: fluent_ui sized the menu
-  /// to the labels and cut the longer shortcuts off (Ctrl+Shift+N).
+  /// A shortcut on the right of a menu item. fluent_ui already greys a
+  /// menu item's trailing text, as Windows does; fading it again made it
+  /// unreadable (2026-10-17). The end padding makes the menu leave room for
+  /// it: fluent_ui sized the menu to the labels and cut the longer
+  /// shortcuts off (Ctrl+Shift+N).
   static Widget _shortcut(String keys) => Padding(
     padding: const EdgeInsetsDirectional.only(start: 24, end: 12),
-    child: Opacity(opacity: 0.7, child: Text(keys)),
+    child: Text(keys),
   );
 
   fl.MenuFlyoutItemBase _item(BaseMenuItem i) {
