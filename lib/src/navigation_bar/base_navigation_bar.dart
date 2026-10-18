@@ -418,10 +418,10 @@ class BaseNavigationBarAction {
 
   /// iOS/Cupertino nav-bar icon default. Android/Material uses 25
   /// (see [toMaterialWidget]).
-  // 10 pt (was 17): the owner wants phone app-bar icons as small as they
+  // 13 pt (was 17; 10 tried first): the owner wants phone app-bar icons small —
   // read — "the smaller the better, especially on mobile" (2026-10-18).
   // iOS only; Material keeps its own default until it has been seen there.
-  static const double _kIosIconSize = 10;
+  static const double _kIosIconSize = 13;
 
   /// Converts a [BasePopupMenuItem] to a CN popup entry, recursing into
   /// [BasePopupMenuItem.children] to build native submenus.
