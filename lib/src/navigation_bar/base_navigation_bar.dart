@@ -9,6 +9,7 @@ import '../icon/sf_symbol_fluent_icons.dart';
 // Prefixed: fluent_ui re-exports the SDK's material library.
 import 'package:fluent_ui/fluent_ui.dart' as fl;
 import '../appbar/base_side_toolbar.dart';
+import '../components/base_glass_pill.dart';
 
 /// Cross-platform navigation bar action
 ///
@@ -829,6 +830,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
     this.height,
     this.titleSize,
     this.onTitlePressed,
+    this.titleGlass = false,
     this.searchConfig,
     this.segmentedControlLabels,
     this.segmentedControlSelectedIndex,
@@ -910,6 +912,10 @@ class BaseNavigationBar extends BaseStatelessWidget {
 
   /// Callback when title is tapped
   final VoidCallback? onTitlePressed;
+
+  /// Put the title on a glass capsule matching the button items, so it stays
+  /// readable over content scrolling behind a transparent bar.
+  final bool titleGlass;
 
   /// Search configuration for search-enabled navigation bar
   final CNSearchConfig? searchConfig;
@@ -1021,6 +1027,7 @@ class BaseNavigationBar extends BaseStatelessWidget {
     return CNNavigationBar(
       leading: cnLeading,
       title: valueOf('title', title),
+      titleGlass: valueOf('titleGlass', titleGlass),
       trailing: cnTrailing,
       tint: valueOf('tint', tint),
       transparent: valueOf('transparent', transparent),
@@ -1202,6 +1209,11 @@ class BaseNavigationBar extends BaseStatelessWidget {
     );
   }
 
+  Widget _maybeGlassTitle(Widget text) {
+    if (!valueOf('titleGlass', titleGlass)) return text;
+    return Center(child: BaseGlassPill(child: text));
+  }
+
   Widget _buildRegularLayout(Color textColor, Color iconColor) {
     return Row(
       children: [
@@ -1214,14 +1226,18 @@ class BaseNavigationBar extends BaseStatelessWidget {
         // Title
         if (valueOf('title', title) != null)
           Expanded(
-            child: Text(
-              valueOf('title', title)!,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+            child: _maybeGlassTitle(
+              Text(
+                valueOf('title', title)!,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
             ),
           )
         else
