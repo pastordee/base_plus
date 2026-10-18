@@ -351,7 +351,9 @@ class BaseNavigationBarAction {
           tint: tint,
           padding: padding,
           labelSize: labelSize,
-          iconSize: iconSize ?? 20,
+          // Same default as a plain action: the ⋯ stood out at 20 pt beside
+          // 13 pt icons (owner, 2026-10-18).
+          iconSize: iconSize ?? _iosIconSize,
           badgeValue: badgeValue,
           badgeColor: badgeColor,
         );
@@ -364,7 +366,9 @@ class BaseNavigationBarAction {
           tint: tint,
           padding: padding,
           labelSize: labelSize,
-          iconSize: iconSize ?? 20,
+          // Same default as a plain action: the ⋯ stood out at 20 pt beside
+          // 13 pt icons (owner, 2026-10-18).
+          iconSize: iconSize ?? _iosIconSize,
           badgeValue: badgeValue,
           badgeColor: badgeColor,
         );
