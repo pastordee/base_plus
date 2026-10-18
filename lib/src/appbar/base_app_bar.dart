@@ -17,6 +17,7 @@ import '../mode/base_mode.dart';
 import '../navigation_bar/base_navigation_bar.dart';
 import '../theme/base_theme.dart';
 import '../theme/base_theme_data.dart';
+import '../components/base_glass_pill.dart';
 import 'base_large_title.dart';
 import 'base_side_toolbar.dart';
 import 'base_toolbar_host.dart';
@@ -101,6 +102,7 @@ class BaseAppBar extends BaseStatelessWidget
     this.trailingActions,
     this.transparent = false,
     this.glass = true,
+    this.titleGlass = false,
     this.edgeBlur = true,
     this.largeTitle = false,
     this.largeTitleController,
@@ -332,6 +334,12 @@ class BaseAppBar extends BaseStatelessWidget
   /// Blur amount / tint come from [BaseThemeData.appBarGlassBlur] /
   /// [BaseThemeData.appBarGlassColor] (sensible defaults otherwise).
   final bool glass;
+
+  /// Put the title on a glass capsule like the bar's button items, so it
+  /// stays readable when content scrolls behind a see-through bar. A plain
+  /// `Text` title gets the native capsule; any other title widget (a chat
+  /// header's avatar and name) is wrapped in a [BaseGlassPill].
+  final bool titleGlass;
 
   /// iOS, see-through bar: draw the soft scroll-edge effect
   /// ([BaseSoftScrollEdge]) over content passing under the bar. Turn off when
@@ -729,6 +737,7 @@ class BaseAppBar extends BaseStatelessWidget
             'key', key), // Pass through the key for proper rebuild behavior
         leading: _leadingActions,
         title: _title,
+        titleGlass: valueOf('titleGlass', titleGlass),
         trailing: _trailingActions,
         tint: _tint,
         transparent: _transparent,
@@ -819,7 +828,12 @@ class BaseAppBar extends BaseStatelessWidget
                 ),
                 child: Align(
                   alignment: _align,
-                  child: _titleWidget,
+                  child: valueOf('titleGlass', titleGlass)
+                      ? BaseGlassPill(
+                          padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+                          child: _titleWidget!,
+                        )
+                      : _titleWidget,
                 ),
               ),
             ),
@@ -1057,6 +1071,9 @@ class BaseAppBar extends BaseStatelessWidget
     // both platforms (native segmented control on iOS, a segmented control here
     // on Android) instead of also passing a separate title tab bar.
     Widget? _materialTitle = _title;
+    if (_materialTitle != null && valueOf('titleGlass', titleGlass)) {
+      _materialTitle = BaseGlassPill(child: _materialTitle);
+    }
     if (_materialTitle == null) {
       final List<String>? _segLabels =
           valueOf('segmentedControlLabels', segmentedControlLabels);
