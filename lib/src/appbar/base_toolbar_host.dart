@@ -252,12 +252,31 @@ class BaseToolbarHost extends InheritedWidget {
   /// The toolbar's height when this was built: the bars depend on it.
   final double _height;
 
-  static BaseToolbarHostController? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<BaseToolbarHost>()?.controller;
+  /// The toolbar the bars under [context] move into, or null — also null
+  /// inside a [BaseToolbarOptOut].
+  static BaseToolbarHostController? maybeOf(BuildContext context) {
+    if (context.getInheritedWidgetOfExactType<BaseToolbarOptOut>() != null) {
+      return null;
+    }
+    return context
+        .dependOnInheritedWidgetOfExactType<BaseToolbarHost>()
+        ?.controller;
+  }
 
   @override
   bool updateShouldNotify(BaseToolbarHost oldWidget) =>
       oldWidget.controller != controller || oldWidget._height != _height;
+}
+
+/// Keeps the bars under it on their own panel instead of moving them into
+/// the window toolbar: for floating panels such as a note editor, whose bar
+/// (a title field, its own Close and ⋯) belongs to the panel, not the page.
+/// Put it below the [BaseToolbarHost] — above it, it does nothing.
+class BaseToolbarOptOut extends InheritedWidget {
+  const BaseToolbarOptOut({super.key, required super.child});
+
+  @override
+  bool updateShouldNotify(BaseToolbarOptOut oldWidget) => false;
 }
 
 /// Names the part of the app the bars under it belong to
