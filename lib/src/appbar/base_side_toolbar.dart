@@ -231,14 +231,45 @@ class _BaseSideToolbarPublisherState extends State<BaseSideToolbarPublisher> {
 /// glass, the way Mail keeps trash, move and reply together — related actions
 /// read as one control.
 class BaseSideToolbar extends StatelessWidget {
-  const BaseSideToolbar({super.key, required this.controller});
+  const BaseSideToolbar({
+    super.key,
+    required this.controller,
+    this.compact = false,
+  });
 
   final BaseSideToolbarController controller;
+
+  /// Smaller buttons and gaps, for a column that is short of height — the
+  /// iPhone Duo's inner display in landscape, where a screen's toolbar and
+  /// the tab bar otherwise run into each other (owner, 2026-11-10).
+  final bool compact;
 
   /// Diameter of a button, and the width of a group's capsule.
   static const double buttonSize = 44;
 
-  static const double _groupGap = 10;
+  /// [buttonSize] when [compact].
+  static const double compactButtonSize = 36;
+
+  static const double _groupGapFull = 10;
+  static const double _groupGapCompact = 6;
+
+  double get _size => compact ? compactButtonSize : buttonSize;
+  double get _groupGap => compact ? _groupGapCompact : _groupGapFull;
+
+  /// How tall the column's toolbar is for [controller]'s current buttons —
+  /// so the host can tell whether everything fits before choosing [compact].
+  static double heightFor(BaseSideToolbarController controller, {bool compact = false}) {
+    final double size = compact ? compactButtonSize : buttonSize;
+    final double gap = compact ? _groupGapCompact : _groupGapFull;
+    final List<List<BaseNavigationBarAction>> groups = controller.groups;
+    final int buttons = groups.fold<int>(0, (int n, List<BaseNavigationBarAction> g) => n + g.length) +
+        (controller.primary != null ? 1 : 0);
+    final int blocks = groups.length + (controller.primary != null ? 1 : 0);
+    if (blocks == 0) {
+      return 0;
+    }
+    return buttons * size + (blocks - 1) * gap;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -254,12 +285,12 @@ class BaseSideToolbar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             for (int i = 0; i < groups.length; i++) ...<Widget>[
-              if (i > 0) const SizedBox(height: _groupGap),
+              if (i > 0) SizedBox(height: _groupGap),
               _group(context, groups[i]),
             ],
             // Apple's order: navigation, then the prominent action.
             if (primary != null) ...<Widget>[
-              if (groups.isNotEmpty) const SizedBox(height: _groupGap),
+              if (groups.isNotEmpty) SizedBox(height: _groupGap),
               _button(context, primary, alone: true, prominent: true),
             ],
           ],
@@ -289,14 +320,14 @@ class BaseSideToolbar extends StatelessWidget {
         return;
       }
       if (children.isNotEmpty) {
-        children.add(const SizedBox(height: _groupGap));
+        children.add(SizedBox(height: _groupGap));
       }
       children.add(
         CNVerticalBar(
           groups: run,
           // The screen's own tint: the column sits outside the app's theme.
           tint: tint,
-          itemSize: buttonSize,
+          itemSize: _size,
           groupSpacing: _groupGap,
           inset: 0,
         ),
@@ -308,7 +339,7 @@ class BaseSideToolbar extends StatelessWidget {
       if (g.any(_isShortLabel)) {
         flush();
         if (children.isNotEmpty) {
-          children.add(const SizedBox(height: _groupGap));
+          children.add(SizedBox(height: _groupGap));
         }
         children.add(_group(context, g));
       } else {
@@ -354,9 +385,9 @@ class BaseSideToolbar extends StatelessWidget {
     if (group.length == 1) {
       return _button(context, group.single, alone: true);
     }
-    final double height = buttonSize * group.length;
+    final double height = _size * group.length;
     return SizedBox(
-      width: buttonSize,
+      width: _size,
       height: height,
       child: Stack(
         children: <Widget>[
@@ -364,8 +395,8 @@ class BaseSideToolbar extends StatelessWidget {
             child: BaseGlassSurface(
               shapes: <BaseGlassShape>[
                 BaseGlassShape(
-                  rect: Offset.zero & Size(buttonSize, height),
-                  cornerRadius: buttonSize / 2,
+                  rect: Offset.zero & Size(_size, height),
+                  cornerRadius: _size / 2,
                 ),
               ],
               fallbackColor: Theme.of(context).colorScheme.surface
@@ -427,8 +458,8 @@ class BaseSideToolbar extends StatelessWidget {
                 child: BaseGlassSurface(
                   shapes: <BaseGlassShape>[
                     BaseGlassShape(
-                      rect: const Offset(0, 0) & const Size(buttonSize, buttonSize),
-                      cornerRadius: buttonSize / 2,
+                      rect: Offset.zero & Size(_size, _size),
+                      cornerRadius: _size / 2,
                     ),
                   ],
                   fallbackColor: Theme.of(context).colorScheme.surface
@@ -460,7 +491,7 @@ class BaseSideToolbar extends StatelessWidget {
         items: entries,
         onSelected: a.onPopupMenuSelected!,
         tint: tint,
-        size: buttonSize,
+        size: _size,
         buttonStyle: style,
       );
     } else if (a.iosImageAsset != null) {
@@ -469,7 +500,7 @@ class BaseSideToolbar extends StatelessWidget {
         imageSize: 22,
         onPressed: a.onPressed,
         tint: tint,
-        size: buttonSize,
+        size: _size,
         style: style,
       );
     } else {
@@ -477,7 +508,7 @@ class BaseSideToolbar extends StatelessWidget {
         icon: symbol(a.icon!),
         onPressed: a.onPressed,
         tint: tint,
-        size: buttonSize,
+        size: _size,
         style: style,
       );
     }
@@ -487,8 +518,8 @@ class BaseSideToolbar extends StatelessWidget {
       button: true,
       label: a.label,
       child: SizedBox(
-        width: buttonSize,
-        height: buttonSize,
+        width: _size,
+        height: _size,
         child: Stack(
           clipBehavior: Clip.none,
           children: <Widget>[
