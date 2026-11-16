@@ -24,6 +24,7 @@ class BaseSoftScrollEdge extends StatelessWidget {
     super.key,
     this.maxBlur = 14,
     this.strips = 12,
+    this.blur = false,
     this.color,
   });
 
@@ -32,6 +33,13 @@ class BaseSoftScrollEdge extends StatelessWidget {
 
   /// How many bands make up the progressive blur.
   final int strips;
+
+  /// Whether to draw the blur strips at all. Off by default (owner,
+  /// 2026-11-16): under Impeller every backdrop blur — however small its clip
+  /// — blurs the WHOLE screen, and the engine keeps those full-screen textures
+  /// while the page is idle: ~120 MB on an iPhone 17 Pro Max (Instruments Game
+  /// Memory). The colour fade alone stays.
+  final bool blur;
 
   /// The fade's colour; the page background by default.
   final Color? color;
@@ -72,7 +80,8 @@ class BaseSoftScrollEdge extends StatelessWidget {
           final double strip = height / strips;
           return Stack(
             children: <Widget>[
-              for (int i = 0; i < strips; i++)
+              if (blur)
+                for (int i = 0; i < strips; i++)
                 Positioned(
                   top: i * strip,
                   left: 0,
